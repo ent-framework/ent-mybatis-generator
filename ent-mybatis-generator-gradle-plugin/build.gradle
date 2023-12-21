@@ -1,0 +1,21 @@
+plugins {
+	id "java-gradle-plugin"
+	id 'net.entframework.java-conventions'
+}
+
+description = "Mybatis Generator Gradle Plugin"
+
+dependencies {
+	implementation project(':ent-mybatis-generator-core')
+}
+
+gradlePlugin {
+	plugins {
+		MybatisGenerator {
+			id = "net.entframework.MybatisGenerator"
+			displayName = "Mybatis Generator Gradle Plugin"
+			description = "Mybatis Generator Gradle Plugin"
+			implementationClass = "org.mybatis.generator.gradle.plugin.MybatisGeneratorPlugin"
+		}
+	}
+}

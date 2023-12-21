@@ -1,0 +1,120 @@
+package net.entframework.kernel.db.generator.typescript;
+
+import net.entframework.kernel.db.generator.Constants;
+import net.entframework.kernel.db.generator.plugin.generator.GeneratorUtils;
+import net.entframework.kernel.db.generator.typescript.runtime.FullyQualifiedTypescriptType;
+import net.entframework.kernel.db.generator.typescript.runtime.TypescriptTopLevelClass;
+import net.entframework.kernel.db.generator.utils.ClassInfo;
+import net.entframework.kernel.db.generator.utils.WebUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.mybatis.generator.api.*;
+import org.mybatis.generator.api.dom.java.*;
+import org.mybatis.generator.codegen.AbstractJavaGenerator;
+import org.mybatis.generator.internal.ObjectFactory;
+import org.mybatis.generator.internal.util.JavaBeansUtil;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mybatis.generator.internal.util.messages.Messages.getString;
+
+/**
+ * 生成typescript model
+ */
+public class TypescriptModelGenerator extends AbstractJavaGenerator {
+    public TypescriptModelGenerator(String project) {
+        super(project);
+    }
+    private void prepare(){
+
+    }
+
+    @Override
+    public List<CompilationUnit> getCompilationUnits() {
+
+        String projectRootAlias = this.context.getProperty("projectRootAlias");
+        if (StringUtils.isBlank(projectRootAlias)) {
+            projectRootAlias = "";
+        }
+        FullyQualifiedTable table = introspectedTable.getFullyQualifiedTable();
+        progressCallback.startTask(getString("Progress.8", table.toString())); //$NON-NLS-1$
+        Plugin plugins = context.getPlugins();
+        CommentGenerator commentGenerator = context.getCommentGenerator();
+
+        String camelCaseName = JavaBeansUtil.convertCamelCase(table.getDomainObjectName(), "-");
+        String typescriptModelPackage = this.context.getJavaModelGeneratorConfiguration().getTargetPackage();
+        FullyQualifiedTypescriptType tsBaseModelJavaType =  new FullyQualifiedTypescriptType(projectRootAlias,
+                typescriptModelPackage + "." + camelCaseName+"." + table.getDomainObjectName(), true);
+
+        TypescriptTopLevelClass topLevelClass = new TypescriptTopLevelClass(tsBaseModelJavaType);
+        topLevelClass.setVisibility(JavaVisibility.PUBLIC);
+        topLevelClass.setDescription(this.introspectedTable.getRemarks());
+
+        commentGenerator.addJavaFileComment(topLevelClass);
+
+        List<CompilationUnit> answer = new ArrayList<>();
+
+        commentGenerator.addModelClassComment(topLevelClass, introspectedTable);
+
+        List<IntrospectedColumn> introspectedColumns = introspectedTable.getAllColumns();
+
+        JavaTypeResolver typeResolver = ObjectFactory.createJavaTypeResolver(this.context, Collections.emptyList());
+
+        for (IntrospectedColumn introspectedColumn : introspectedColumns) {
+            Field field = WebUtils.getTypescriptField(introspectedColumn, context, introspectedTable,
+                    topLevelClass);
+
+            field.setDescription(introspectedColumn.getRemarks());
+            GeneratorUtils.addComment(field, introspectedColumn.getRemarks());
+
+            FullyQualifiedJavaType actualType = typeResolver.calculateJavaType(null , introspectedColumn);
+            if (!actualType.equals(introspectedColumn.getFullyQualifiedJavaType())) {
+
+                ClassInfo classInfo = ClassInfo.getInstance(introspectedColumn.getFullyQualifiedJavaType().getFullyQualifiedName());
+                if (classInfo != null && classInfo.isEnum()) {
+                    String enumPackage = typescriptModelPackage + ".enum";
+                    TopLevelEnumeration topLevelEnumeration = classInfo.toTopLevelEnumeration(enumPackage, introspectedColumn.getFullyQualifiedJavaType().getShortName(), projectRootAlias);
+                    topLevelEnumeration.setWriteMode(WriteMode.OVER_WRITE);
+                    FullyQualifiedJavaType fqjt = topLevelEnumeration.getType();
+                    field.setType(fqjt);
+                    answer.add(topLevelEnumeration);
+                } else {
+                    field.setType(actualType);
+                }
+            }
+
+            if (StringUtils.equalsIgnoreCase(introspectedColumn.getActualColumnName(),
+                    introspectedTable.getTableConfiguration().getLogicDeleteColumn())) {
+                field.setAttribute(Constants.FIELD_LOGIC_DELETE_ATTR, true);
+            }
+
+            if (StringUtils.equalsIgnoreCase(introspectedColumn.getActualColumnName(),
+                    introspectedTable.getTableConfiguration().getVersionColumn())) {
+                field.setAttribute(Constants.FIELD_VERSION_ATTR, true);
+            }
+
+
+            if (plugins.modelFieldGenerated(field, topLevelClass, introspectedColumn, introspectedTable,
+                    Plugin.ModelClassType.BASE_RECORD)) {
+                topLevelClass.addField(field);
+                topLevelClass.addImportedType(field.getType());
+            }
+        }
+
+
+        if (context.getPlugins().modelBaseRecordClassGenerated(topLevelClass, introspectedTable)) {
+
+            InitializationBlock initializationBlock = new InitializationBlock();
+            initializationBlock.addBodyLine(
+                    String.format("export type %sPageModel = BasicFetchResult<%s>;", table.getDomainObjectName(), table.getDomainObjectName()));
+            topLevelClass
+                    .addImportedType(new FullyQualifiedTypescriptType("", "fe-ent-core.es.logics.types.BasicFetchResult", true));
+            topLevelClass.addInitializationBlock(initializationBlock);
+
+            introspectedTable.setAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS, topLevelClass);
+            answer.add(topLevelClass);
+        }
+        return answer;
+    }
+}
