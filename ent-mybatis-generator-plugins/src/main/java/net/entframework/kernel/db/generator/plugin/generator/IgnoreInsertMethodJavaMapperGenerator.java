@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class IgnoreInsertMethodJavaMapperGenerator extends AbstractJavaMapperMethodGenerator {
 
-    private static final String MYBATIS3_CUSTOM_UTILS = "io.entframework.kernel.db.mybatis.util.MyBatis3CustomUtils";
+    private static final String MYBATIS3_CUSTOM_UTILS = "net.entframework.kernel.db.mybatis.util.MyBatis3CustomUtils";
 
     private final String tableFieldName;
 
@@ -137,7 +137,7 @@ public class IgnoreInsertMethodJavaMapperGenerator extends AbstractJavaMapperMet
         context.getCommentGenerator().addGeneralMethodAnnotation(method, introspectedTable, imports);
         MethodAndImports.Builder builder = MethodAndImports.withMethod(method).withImports(imports);
 
-        builder.withImport(new FullyQualifiedJavaType("io.entframework.kernel.db.mybatis.util.MyBatis3CustomUtils"));
+        builder.withImport(new FullyQualifiedJavaType("net.entframework.kernel.db.mybatis.util.MyBatis3CustomUtils"));
         method.addBodyLine("return MyBatis3CustomUtils.ignoreInsert(this::ignoreInsert, row, " + tableFieldName //$NON-NLS-1$
                 + ", c ->"); //$NON-NLS-1$
 

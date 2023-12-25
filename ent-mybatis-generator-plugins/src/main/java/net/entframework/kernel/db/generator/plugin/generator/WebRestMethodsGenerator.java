@@ -193,7 +193,7 @@ public class WebRestMethodsGenerator {
         method.setOperation("分页查询");
         method.setVisibility(JavaVisibility.PUBLIC);
         FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
-                "io.entframework.kernel.db.api.pojo.page.PageResult");
+                "net.entframework.kernel.db.api.pojo.page.PageResult");
         builder.withImport(pageResultType);
         pageResultType.addTypeArgument(voJavaType);
         method.setReturnType(pageResultType);

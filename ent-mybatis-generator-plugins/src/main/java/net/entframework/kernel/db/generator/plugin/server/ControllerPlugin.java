@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class ControllerPlugin extends AbstractServerPlugin {
 
-    private String responseBodyWrapper = "io.entframework.kernel.core.vo.ResponseData";
+    private String responseBodyWrapper = "net.entframework.kernel.core.vo.ResponseData";
 
     private String responseBodySuccessStaticMethod = "ok";
 
@@ -86,7 +86,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
             baseControllerJavaClass.setWriteMode(WriteMode.OVER_WRITE);
         }
 
-        FullyQualifiedJavaType converterServiceJavaType = new FullyQualifiedJavaType("io.entframework.kernel.converter.support.ConverterService");
+        FullyQualifiedJavaType converterServiceJavaType = new FullyQualifiedJavaType("net.entframework.kernel.converter.support.ConverterService");
         baseControllerJavaClass.addImportedType(converterServiceJavaType);
         String csFieldName = super.lowerCaseFirstChar(converterServiceJavaType.getShortName());
         Field csField = new Field(csFieldName, converterServiceJavaType);
@@ -169,7 +169,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
             if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
                 controllerJavaClass
                         .addAnnotation(String.format("@ApiResource(displayName = \"%s\")", modelClass.getDescription()));
-                controllerJavaClass.addImportedType("io.entframework.kernel.scanner.api.annotation.ApiResource");
+                controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.ApiResource");
             }
 
             // 子类默认只新增，不覆盖
@@ -185,7 +185,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
             if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
                 baseControllerJavaClass
                         .addAnnotation(String.format("@ApiResource(displayName = \"%s\")", modelClass.getDescription()));
-                baseControllerJavaClass.addImportedType("io.entframework.kernel.scanner.api.annotation.ApiResource");
+                baseControllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.ApiResource");
             }
         }
 
@@ -198,7 +198,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
         if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
             method.addAnnotation(String.format("@PostResource(displayName = \"%s-%s\", path = \"%s\")", modelDescription,
                     method.getOperation(), method.getRestPath()));
-            controllerJavaClass.addImportedType("io.entframework.kernel.scanner.api.annotation.PostResource");
+            controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.PostResource");
         }
         else {
             method.addAnnotation(String.format("@PostMapping(\"%s\")", method.getRestPath()));
@@ -210,7 +210,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
         if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
             method.addAnnotation(String.format("@GetResource(displayName = \"%s-%s\", path = \"%s\")", modelDescription,
                     method.getOperation(), method.getRestPath()));
-            controllerJavaClass.addImportedType("io.entframework.kernel.scanner.api.annotation.GetResource");
+            controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.GetResource");
         }
         else {
             method.addAnnotation(String.format("@GetMapping(\"/%s\")", method.getRestPath()));

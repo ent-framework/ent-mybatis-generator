@@ -114,7 +114,7 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
             if (method.getReturnType().isPresent()) {
                 FullyQualifiedJavaType returnType = method.getReturnType().get();
                 if (returnType.getFullyQualifiedNameWithoutTypeParameters()
-                        .equals("io.entframework.kernel.db.api.pojo.page.PageResult")) {
+                        .equals("net.entframework.kernel.db.api.pojo.page.PageResult")) {
                     FullyQualifiedJavaType arg = returnType.getTypeArguments().get(0);
                     String newTypeName = arg.getShortName() + "PageModel";
                     FullyQualifiedJavaType newType = new FullyQualifiedTypescriptType(this.projectRootAlias,

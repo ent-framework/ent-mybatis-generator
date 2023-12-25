@@ -30,7 +30,7 @@ public class ClassInfo {
     static {
         ROOT_CLASS_INFO_MAP = Collections.synchronizedMap(new HashMap<>());
         try {
-            supperEnum = ObjectFactory.externalClassForName("io.entframework.kernel.core.enums.SupperEnum");
+            supperEnum = ObjectFactory.externalClassForName("net.entframework.kernel.core.enums.SupperEnum");
         }
         catch (Exception e) {
             // ignore
@@ -172,9 +172,9 @@ public class ClassInfo {
     }
 
     public static void main(String[] args) {
-        ClassInfo classInfo = ClassInfo.getInstance("io.entframework.kernel.core.enums.StatusEnum");
+        ClassInfo classInfo = ClassInfo.getInstance("net.entframework.kernel.core.enums.StatusEnum");
         TopLevelEnumeration topLevelEnumeration = classInfo.toTopLevelEnumeration("", "", "");
-        ClassInfo classInfo2 = ClassInfo.getInstance("io.entframework.kernel.core.pojo.request.BaseQuery");
+        ClassInfo classInfo2 = ClassInfo.getInstance("net.entframework.kernel.core.pojo.request.BaseQuery");
         classInfo2.toTopLevelClass();
     }
 

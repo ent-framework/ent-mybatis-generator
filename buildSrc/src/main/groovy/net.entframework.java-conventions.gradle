@@ -36,19 +36,3 @@ publishing {
         }
     }
 }
-//为每个子项目加上dependencyManagement的依赖父项
-dependencies {
-    //api(platform(project(':ent-parent')))
-    //api(enforcedPlatform(project(':ent-parent')))
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    // Try to turn them all off automatically
-    options.compilerArgs << '-Xlint:none'
-    options.compilerArgs << '-nowarn' // same as '-Xlint:none'
-}
-
-tasks.withType(Javadoc) {
-    options.encoding = 'UTF-8'
-}

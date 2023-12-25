@@ -75,7 +75,7 @@ public class RepSelectByPrimaryKeyMethodGenerator extends AbstractMethodGenerato
                         pk.getJavaProperty()));
                 getByPrimaryKey.addBodyLine(String.format("Optional<%s> row = this.selectOne(%sQuery);",
                         recordType.getShortName(), StringUtils.uncapitalize(recordType.getShortName())));
-                builder.withImport("io.entframework.kernel.core.util.ReflectionKit");
+                builder.withImport("net.entframework.kernel.core.util.ReflectionKit");
                 addLogicDeletedConvert(getByPrimaryKey, builder, pk);
             }
             else {
@@ -109,10 +109,10 @@ public class RepSelectByPrimaryKeyMethodGenerator extends AbstractMethodGenerato
             getByPrimaryKey.addBodyLine("}");
             getByPrimaryKey.addBodyLine(String.format("throw new DaoException(DaoExceptionEnum.GET_RECORD_ERROR, %s);",
                     pk.getJavaProperty()));
-            builder.withImport(new FullyQualifiedJavaType("io.entframework.kernel.db.api.exception.DaoException"));
+            builder.withImport(new FullyQualifiedJavaType("net.entframework.kernel.db.api.exception.DaoException"));
             builder.withImport(
-                    new FullyQualifiedJavaType("io.entframework.kernel.db.api.exception.enums.DaoExceptionEnum"));
-            builder.withImport(new FullyQualifiedJavaType("io.entframework.kernel.core.enums.YesOrNotEnum"));
+                    new FullyQualifiedJavaType("net.entframework.kernel.db.api.exception.enums.DaoExceptionEnum"));
+            builder.withImport(new FullyQualifiedJavaType("net.entframework.kernel.core.enums.YesOrNotEnum"));
         }
         else {
 

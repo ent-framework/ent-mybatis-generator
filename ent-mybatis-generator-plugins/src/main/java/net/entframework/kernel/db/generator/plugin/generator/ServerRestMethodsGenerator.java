@@ -207,7 +207,7 @@ public class ServerRestMethodsGenerator {
         method.addBodyLine(String.format("%s query = converterService.convert(vo, %s.class);", recordType.getShortName(), recordType.getShortName()));
         method.addBodyLine(String.format("List<%s> result = converterService.convert(%s.select(query, BaseQuery.from(request)), %s.class);", voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
 
-        builder.withImport("io.entframework.kernel.core.vo.BaseQuery");
+        builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
 
         builder.withMethod(method);
     }
@@ -223,7 +223,7 @@ public class ServerRestMethodsGenerator {
         method.setOperation("分页查询");
         method.setVisibility(JavaVisibility.PUBLIC);
         FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
-                "io.entframework.kernel.db.api.pojo.page.PageResult");
+                "net.entframework.kernel.db.api.pojo.page.PageResult");
         builder.withImport(pageResultType);
         pageResultType.addTypeArgument(voJavaType);
         method.setReturnType(pageResultType);
@@ -236,8 +236,8 @@ public class ServerRestMethodsGenerator {
         method.addBodyLine(String.format("PageResult<%s> page = %s.page(record, BaseQuery.from(request));", recordType.getShortName(), serviceFieldName));
         method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);", voJavaType.getShortName(), voJavaType.getShortName()));
         method.addBodyLine(String.format("PageResult<%s> result =  PageResultFactory.createPageResult(records, (long)page.getTotalRows(), page.getPageSize(), page.getPageNo());", voJavaType.getShortName()));
-        builder.withImport("io.entframework.kernel.core.vo.BaseQuery");
-        builder.withImport("io.entframework.kernel.db.api.factory.PageResultFactory");
+        builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
+        builder.withImport("net.entframework.kernel.db.api.factory.PageResultFactory");
         builder.withMethod(method);
     }
 

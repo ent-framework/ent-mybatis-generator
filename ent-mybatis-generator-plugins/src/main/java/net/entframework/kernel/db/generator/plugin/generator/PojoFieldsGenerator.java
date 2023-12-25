@@ -110,7 +110,7 @@ public class PojoFieldsGenerator {
             }
             if (codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
                 pojoRequestField.addAnnotation(String.format("@Description(\"%s\")", fieldDescription));
-                builder.withImport("io.entframework.kernel.core.annotation.Description");
+                builder.withImport("net.entframework.kernel.core.annotation.Description");
             }
 
             builder.withField(pojoRequestField);
@@ -125,7 +125,7 @@ public class PojoFieldsGenerator {
         pluralizeField.addAnnotation("@NotNull(message = \"ID集合不能为空\", groups = {batchDelete.class})");
         if (codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
             pluralizeField.addAnnotation(String.format("@Description(\"%s\")", "ID集合"));
-            builder.withImport("io.entframework.kernel.core.annotation.Description");
+            builder.withImport("net.entframework.kernel.core.annotation.Description");
         }
         pluralizeField.setDescription("ID集合");
         pluralizeField.setAttribute(Constants.FIELD_EXT_ATTR, true);
@@ -171,7 +171,7 @@ public class PojoFieldsGenerator {
             String fieldDescription = field.getDescription();
             if (codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
                 pojoResponseField.addAnnotation(String.format("@Description(\"%s\")", fieldDescription));
-                builder.withImport("io.entframework.kernel.core.annotation.Description");
+                builder.withImport("net.entframework.kernel.core.annotation.Description");
             }
             builder.withField(pojoResponseField);
         }

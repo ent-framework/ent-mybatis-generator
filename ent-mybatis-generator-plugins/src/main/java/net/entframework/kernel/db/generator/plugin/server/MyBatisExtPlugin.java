@@ -169,7 +169,7 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
         String fileDescription = GeneratorUtils.getFileDescription(introspectedTable);
         interfaze.setDescription(fileDescription);
 
-        FullyQualifiedJavaType fqjt = new FullyQualifiedJavaType("io.entframework.kernel.db.mybatis.mapper.BaseMapper");
+        FullyQualifiedJavaType fqjt = new FullyQualifiedJavaType("net.entframework.kernel.db.mybatis.mapper.BaseMapper");
         fqjt.addTypeArgument(new FullyQualifiedJavaType(introspectedTable.getBaseRecordType()));
         interfaze.addSuperInterface(fqjt);
         interfaze.addImportedType(fqjt);

@@ -64,7 +64,7 @@ public class ServicePlugin extends AbstractServerPlugin {
         serviceInterface.setWriteMode(this.writeMode == null ? WriteMode.SKIP_ON_EXIST : this.writeMode);
         IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
         FullyQualifiedJavaType baseServiceType = new FullyQualifiedJavaType(
-                "io.entframework.kernel.db.dao.service.BaseService");
+                "net.entframework.kernel.db.dao.service.BaseService");
         baseServiceType.addTypeArgument(recordType);
         baseServiceType.addTypeArgument(pkColumn.getFullyQualifiedJavaType());
         serviceInterface.addSuperInterface(baseServiceType);
@@ -94,7 +94,7 @@ public class ServicePlugin extends AbstractServerPlugin {
         serviceInterfaceImplClass.addImportedType(interfaceType);
         IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
         FullyQualifiedJavaType baseServiceType = new FullyQualifiedJavaType(
-                "io.entframework.kernel.db.dao.service.BaseServiceImpl");
+                "net.entframework.kernel.db.dao.service.BaseServiceImpl");
         baseServiceType.addTypeArgument(recordType);
         baseServiceType.addTypeArgument(pkColumn.getFullyQualifiedJavaType());
         serviceInterfaceImplClass.setSuperClass(baseServiceType);

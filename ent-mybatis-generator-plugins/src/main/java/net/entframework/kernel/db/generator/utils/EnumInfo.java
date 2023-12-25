@@ -14,9 +14,9 @@ import java.util.regex.Pattern;
 
 public class EnumInfo {
 
-    private static final String ENUM_HANDLER = "io.entframework.kernel.core.annotation.EnumHandler";
+    private static final String ENUM_HANDLER = "net.entframework.kernel.core.annotation.EnumHandler";
 
-    private static final String ENUM_VALUE = "io.entframework.kernel.core.annotation.EnumValue";
+    private static final String ENUM_VALUE = "net.entframework.kernel.core.annotation.EnumValue";
 
     private static final String REMARKS_REGEX = "([\\u4e00-\\u9fa5a-zA-Z0-9]+)\\[([a-zA-Z0-9]+\\(\\S*\\):\\S*\\,?\\s*)*\\]";
 

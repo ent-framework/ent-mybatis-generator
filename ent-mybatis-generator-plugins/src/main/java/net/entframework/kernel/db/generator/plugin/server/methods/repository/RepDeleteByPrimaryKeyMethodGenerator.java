@@ -63,8 +63,8 @@ public class RepDeleteByPrimaryKeyMethodGenerator extends AbstractMethodGenerato
                     StringUtils.capitalize(pk.getJavaProperty())));
             method.addBodyLine("throw new ServiceException(DefaultBusinessExceptionEnum.WRONG_ARGS_ERROR);");
             method.addBodyLine("}");
-            builder.withImport(" io.entframework.kernel.core.exception.base.ServiceException");
-            builder.withImport(" io.entframework.kernel.core.exception.enums.defaults.DefaultBusinessExceptionEnum");
+            builder.withImport(" net.entframework.kernel.core.exception.base.ServiceException");
+            builder.withImport(" net.entframework.kernel.core.exception.enums.defaults.DefaultBusinessExceptionEnum");
             if (logicDelete.isPresent()) {
                 IntrospectedColumn logicDeleteColumn = logicDelete.get();
                 method.addBodyLine(String.format("row.set%s(YesOrNotEnum.Y);",

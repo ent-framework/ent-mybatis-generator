@@ -103,7 +103,7 @@ public class VoFieldsGenerator {
             }
             if (codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
                 pojoRequestField.addAnnotation(String.format("@Description(\"%s\")", fieldDescription));
-                builder.withImport("io.entframework.kernel.core.annotation.Description");
+                builder.withImport("net.entframework.kernel.core.annotation.Description");
             }
 
             builder.withField(pojoRequestField);

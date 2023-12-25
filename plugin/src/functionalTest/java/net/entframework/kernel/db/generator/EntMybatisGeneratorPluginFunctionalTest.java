@@ -45,7 +45,7 @@ class EntMybatisGeneratorPluginFunctionalTest {
         BuildResult result = runner.build();
 
         // Verify the result
-        assertTrue(result.getOutput().contains("Hello from plugin 'io.entframework.kernel.db.generator.greeting'"));
+        assertTrue(result.getOutput().contains("Hello from plugin 'net.entframework.kernel.db.generator.greeting'"));
     }
 
     private void writeString(File file, String string) throws IOException {

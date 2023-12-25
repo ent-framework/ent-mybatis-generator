@@ -115,7 +115,7 @@ public class MapstructPlugin extends AbstractServerPlugin {
                 "ObjectConversionService converterService = SpringUtil.getBean(ObjectConversionService.class);");
         method.addBodyLine(String.format("return converterService.convert(%s, %s.class);",
                 StringUtils.uncapitalize(sourceType.getShortName()), targetType.getShortName()));
-        importTypes.add(new FullyQualifiedJavaType("io.entframework.kernel.converter.support.ObjectConversionService"));
+        importTypes.add(new FullyQualifiedJavaType("net.entframework.kernel.converter.support.ObjectConversionService"));
         importTypes.add(new FullyQualifiedJavaType("cn.hutool.extra.spring.SpringUtil"));
         innerInterface.addMethod(method);
         return importTypes;
@@ -137,7 +137,7 @@ public class MapstructPlugin extends AbstractServerPlugin {
             FullyQualifiedJavaType targetType) {
 
         FullyQualifiedJavaType converter = new FullyQualifiedJavaType(
-                "io.entframework.kernel.converter.support.ObjectConverter");
+                "net.entframework.kernel.converter.support.ObjectConverter");
         mapstructInterface.addImportedType(converter);
         converter.addTypeArgument(sourceType);
         converter.addTypeArgument(targetType);

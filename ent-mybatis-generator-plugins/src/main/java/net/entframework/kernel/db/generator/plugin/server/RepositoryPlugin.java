@@ -68,7 +68,7 @@ public class RepositoryPlugin extends AbstractServerPlugin {
         repositoryInterface.setWriteMode(WriteMode.OVER_WRITE);
         IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
         FullyQualifiedJavaType fqjt = new FullyQualifiedJavaType(
-                "io.entframework.kernel.db.dao.repository.BaseRepository");
+                "net.entframework.kernel.db.dao.repository.BaseRepository");
         fqjt.addTypeArgument(new FullyQualifiedJavaType(introspectedTable.getBaseRecordType()));
         fqjt.addTypeArgument(pkColumn.getFullyQualifiedJavaType());
         repositoryInterface.addSuperInterface(fqjt);
@@ -95,7 +95,7 @@ public class RepositoryPlugin extends AbstractServerPlugin {
         repositoryInterfaceImplClass.addImportedType(interfaceType);
         IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
         FullyQualifiedJavaType fqjt = new FullyQualifiedJavaType(
-                "io.entframework.kernel.db.dao.repository.BaseRepositoryImpl");
+                "net.entframework.kernel.db.dao.repository.BaseRepositoryImpl");
         fqjt.addTypeArgument(new FullyQualifiedJavaType(introspectedTable.getBaseRecordType()));
         fqjt.addTypeArgument(pkColumn.getFullyQualifiedJavaType());
         repositoryInterfaceImplClass.setSuperClass(fqjt);
@@ -127,7 +127,7 @@ public class RepositoryPlugin extends AbstractServerPlugin {
         repositoryInterfaceImplClass.setVisibility(JavaVisibility.PUBLIC);
         FullyQualifiedJavaType interfaceType = getRepositoryJavaType(recordType.getShortName());
         FullyQualifiedJavaType fqjt = new FullyQualifiedJavaType(
-                "io.entframework.kernel.db.mds.repository.BaseRepositoryImpl");
+                "net.entframework.kernel.db.mds.repository.BaseRepositoryImpl");
         fqjt.addTypeArgument(new FullyQualifiedJavaType(introspectedTable.getBaseRecordType()));
         repositoryInterfaceImplClass.setSuperClass(fqjt);
         repositoryInterfaceImplClass.addImportedType(fqjt);
