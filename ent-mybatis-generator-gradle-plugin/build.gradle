@@ -1,6 +1,6 @@
 plugins {
 	id "java-gradle-plugin"
-	id 'maven-publish'
+	id 'net.entframework.java-conventions'
 }
 
 description = "Mybatis Generator Gradle Plugin"

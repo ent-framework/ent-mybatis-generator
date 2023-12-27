@@ -4,12 +4,19 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
 }
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 //java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
             from(components.java)
 
             versionMapping {
@@ -20,19 +27,46 @@ publishing {
                     fromResolutionResult()
                 }
             }
+            pom {
+                name = 'Mybatis Generator Tool'
+                description = 'Mybatis Generator Tool using entframework'
+                url = 'http://entframework.net'
+                //properties = []
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'dancewing'
+                        name = 'Jeff Qian'
+                        email = 'qbaojian@163.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/ent-framework/ent-mybatis-generator.git'
+                    developerConnection = 'scm:git:ssh://github.com/ent-framework/ent-mybatis-generator.git'
+                    url = 'https://github.com/ent-framework/ent-mybatis-generator'
+                }
+            }
         }
     }
     repositories {
-        def host = project.version.endsWith( '-SNAPSHOT' )? mavenSnapshotRepository : mavenRealseRepository
+        def host = project.version.endsWith( '-SNAPSHOT' )? 'https://s01.oss.sonatype.org/content/repositories/snapshots/' : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
         maven {
             allowInsecureProtocol = !host.startsWith('https')
             //指定要上传的maven私服仓库
             url = host
             //认证用户和密码
             credentials {
-                username = mavenDeployUser
-                password = mavenDeployPassword
+                username = ossrhUsername
+                password = ossrhPassword
             }
         }
     }
+}
+signing {
+    sign publishing.publications.mavenJava
 }

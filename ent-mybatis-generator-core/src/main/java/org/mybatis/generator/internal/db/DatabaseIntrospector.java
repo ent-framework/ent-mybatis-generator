@@ -452,7 +452,7 @@ public class DatabaseIntrospector {
                     rs.getString("TABLE_SCHEM"), //$NON-NLS-1$
                     rs.getString("TABLE_NAME")); //$NON-NLS-1$
 
-            // fix bug 只筛选schema 相同的
+            // fix bug
             if (stringHasValue(atn.getCatalog()) && stringHasValue(catalog)
                     && StringUtils.equals(atn.getCatalog(), catalog)) {
                 List<IntrospectedColumn> columns = answer.computeIfAbsent(atn, k -> new ArrayList<>());

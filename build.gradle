@@ -21,14 +21,6 @@ allprojects {
         maven {
             url 'https://maven.aliyun.com/repository/public/'
         }
-        maven {
-            url mavenThirdRepository
-            allowInsecureProtocol !mavenThirdRepository.startsWith('https')
-            credentials {
-                username = mavenDeployUser
-                password = mavenDeployPassword
-            }
-        }
         mavenCentral()
     }
 }
@@ -53,4 +45,19 @@ subprojects {
 
         }
     }
+    tasks.withType(JavaCompile) {
+        //options.encoding = 'UTF-8'
+        options.encoding = 'GBK'
+        // Try to turn them all off automatically
+        options.compilerArgs << '-Xlint:none'
+        options.compilerArgs << '-nowarn' // same as '-Xlint:none'
+    }
+    tasks.withType(Javadoc) {
+        options.encoding = 'GBK'
+        options.addStringOption("charset", "GBK")
+        if (JavaVersion.current().isJava9Compatible()) {
+            options.addBooleanOption('html5', true)
+        }
+    }
 }
+

@@ -190,7 +190,7 @@ public class IntrospectedColumn {
 
     /**
      * 判断字段是否数字类型
-     * @return 是/否
+     * @return Y/N
      */
     public boolean isNumberColumn() {
         return jdbcType == Types.TINYINT || jdbcType == Types.SMALLINT || jdbcType == Types.INTEGER

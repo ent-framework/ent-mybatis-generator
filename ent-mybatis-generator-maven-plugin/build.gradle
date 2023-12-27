@@ -4,7 +4,7 @@
 
 plugins {
     id 'net.entframework.java-conventions'
-    id 'net.entframework.maven-plugin'
+    //id 'net.entframework.maven-plugin'
 }
 
 dependencies {
@@ -12,22 +12,6 @@ dependencies {
     compileOnly 'org.apache.maven:maven-core:3.9.6'
     compileOnly 'org.apache.maven:maven-plugin-api:3.9.6'
     compileOnly 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.10.2'
-}
-
-publishing {
-    repositories {
-        def host = version.endsWith( '-SNAPSHOT' )? mavenSnapshotRepository : mavenRealseRepository
-        maven {
-            allowInsecureProtocol = !host.startsWith('https')
-            //指定要上传的maven私服仓库
-            url = host
-            //认证用户和密码
-            credentials {
-                username = mavenDeployUser
-                password = mavenDeployPassword
-            }
-        }
-    }
 }
 
 description = 'MyBatis Generator Maven Plugin'
