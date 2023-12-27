@@ -1,21 +1,85 @@
 plugins {
-	id "java-gradle-plugin"
-	id 'net.entframework.java-conventions'
+	//id "java-gradle-plugin"
+	id 'java-library'
+	id 'maven-publish'
+	id 'signing'
+}
+
+java {
+	withJavadocJar()
+	withSourcesJar()
 }
 
 description = "Mybatis Generator Gradle Plugin"
 
 dependencies {
-	implementation project(':ent-mybatis-generator-core')
+	api project(':ent-mybatis-generator-core')
+	implementation gradleApi()
 }
 
-gradlePlugin {
-	plugins {
-		MybatisGenerator {
-			id = "net.entframework.MybatisGenerator"
-			displayName = "Mybatis Generator Gradle Plugin"
-			description = "Mybatis Generator Gradle Plugin"
-			implementationClass = "org.mybatis.generator.gradle.plugin.MybatisGeneratorPlugin"
+//gradlePlugin {
+//	plugins {
+//		MybatisGenerator {
+//			id = "net.entframework.MybatisGenerator"
+//			displayName = "Mybatis Generator Gradle Plugin"
+//			description = "Mybatis Generator Gradle Plugin"
+//			implementationClass = "org.mybatis.generator.gradle.plugin.MybatisGeneratorPlugin"
+//		}
+//	}
+//}
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from(components.java)
+
+			versionMapping {
+				usage('java-api') {
+					fromResolutionOf('runtimeClasspath')
+				}
+				usage('java-runtime') {
+					fromResolutionResult()
+				}
+			}
+			pom {
+				name = 'Mybatis Generator Tool'
+				description = 'Mybatis Generator Tool using entframework'
+				url = 'http://entframework.net'
+				//properties = []
+				licenses {
+					license {
+						name = 'The Apache License, Version 2.0'
+						url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+					}
+				}
+				developers {
+					developer {
+						id = 'dancewing'
+						name = 'Jeff Qian'
+						email = 'qbaojian@163.com'
+					}
+				}
+				scm {
+					connection = 'scm:git:git://github.com/ent-framework/ent-mybatis-generator.git'
+					developerConnection = 'scm:git:ssh://github.com/ent-framework/ent-mybatis-generator.git'
+					url = 'https://github.com/ent-framework/ent-mybatis-generator'
+				}
+			}
 		}
 	}
+	repositories {
+		def host = project.version.endsWith( '-SNAPSHOT' )? 'https://s01.oss.sonatype.org/content/repositories/snapshots/' : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+		maven {
+			allowInsecureProtocol = !host.startsWith('https')
+			//指定要上传的maven私服仓库
+			url = host
+			//认证用户和密码
+			credentials {
+				username = ossrhUsername
+				password = ossrhPassword
+			}
+		}
+	}
+}
+signing {
+	sign publishing.publications.mavenJava
 }

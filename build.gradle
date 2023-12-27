@@ -46,15 +46,15 @@ subprojects {
         }
     }
     tasks.withType(JavaCompile) {
-        //options.encoding = 'UTF-8'
-        options.encoding = 'GBK'
+        options.encoding = 'UTF-8'
         // Try to turn them all off automatically
         options.compilerArgs << '-Xlint:none'
         options.compilerArgs << '-nowarn' // same as '-Xlint:none'
     }
     tasks.withType(Javadoc) {
-        options.encoding = 'GBK'
-        options.addStringOption("charset", "GBK")
+        options.encoding = 'UTF-8'
+        options.addStringOption("charset", "UTF-8")
+        options.addStringOption("Xdoclint:none", "-quiet")
         if (JavaVersion.current().isJava9Compatible()) {
             options.addBooleanOption('html5', true)
         }
