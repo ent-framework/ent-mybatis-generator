@@ -2,11 +2,6 @@ plugins {
 	id 'net.entframework.java-conventions'
 }
 
-java {
-	withJavadocJar()
-	withSourcesJar()
-}
-
 description = "Mybatis Generator Gradle Plugin"
 
 dependencies {
