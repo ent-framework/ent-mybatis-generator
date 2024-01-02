@@ -50,31 +50,51 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 
         if (GeneratorUtils.isPrimaryKey(introspectedTable, introspectedColumn)) {
             field.addAnnotation("@Id");
-            topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.Id");
+            topLevelClass.addImportedType("jakarta.persistence.Id");
         }
 
         introspectedTable.getGeneratedKey().ifPresent(generatedKey -> {
             if (generatedKey.getColumn().equals(introspectedColumn.getActualColumnName())) {
                 field.addAnnotation("@GeneratedValue");
-                topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.GeneratedValue");
+                topLevelClass.addImportedType("jakarta.persistence.GeneratedValue");
             }
         });
 
         if (!GeneratorUtils.isRelationField(field)) {
-            StringBuilder sb = new StringBuilder(
+            StringBuilder columnSB = new StringBuilder(
                     String.format("@Column(name = \"%s\"", introspectedColumn.getActualColumnName()));
+            if (introspectedColumn.isStringColumn()) {
+                if (introspectedColumn.getLength() > 0 && introspectedColumn.getLength()!=255) {
+                    columnSB.append(", length=").append(introspectedColumn.getLength());
+                }
+            }
+            if (!introspectedColumn.isNullable()) {
+                columnSB.append(", nullable=").append("false");
+            }
+            if (introspectedColumn.isNumberColumn() && introspectedColumn.getScale() > 0) {
+                columnSB.append(", scale=").append(introspectedColumn.getScale());
+            }
+            columnSB.append(")");
+            field.addAnnotation(columnSB.toString());
+            topLevelClass.addImportedType("jakarta.persistence.Column");
+
+            StringBuilder columnSql = new StringBuilder("@SqlColumn(");
+
             if (!StringUtils.equals("OTHER", introspectedColumn.getJdbcTypeName())) {
-                sb.append(", jdbcType = JDBCType.").append(introspectedColumn.getJdbcTypeName());
+                columnSql.append("jdbcType = JDBCType.").append(introspectedColumn.getJdbcTypeName());
                 topLevelClass.addImportedType(new FullyQualifiedJavaType("java.sql.JDBCType"));
+            } else {
+                throw new RuntimeException("Can't determine jdbc type for column: " + introspectedColumn.getActualColumnName() + " in table :" + introspectedTable.getFullyQualifiedTableNameAtRuntime());
             }
             if (StringUtils.isNotEmpty(introspectedColumn.getTypeHandler())) {
                 FullyQualifiedJavaType typeHandler = new FullyQualifiedJavaType(introspectedColumn.getTypeHandler());
                 topLevelClass.addImportedType(typeHandler);
-                sb.append(", typeHandler = ").append(typeHandler.getShortName()).append(".class");
+                columnSql.append(", typeHandler = ").append(typeHandler.getShortName()).append(".class");
             }
-            sb.append(")");
-            field.addAnnotation(sb.toString());
-            topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.Column");
+            columnSql.append(")");
+            field.addAnnotation(columnSql.toString());
+            topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.SqlColumn");
+
         }
 
         if (StringUtils.equalsIgnoreCase(introspectedColumn.getActualColumnName(),
@@ -87,7 +107,7 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
         if (StringUtils.equalsIgnoreCase(introspectedColumn.getActualColumnName(),
                 introspectedTable.getTableConfiguration().getVersionColumn())) {
             field.addAnnotation("@Version");
-            topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.Version");
+            topLevelClass.addImportedType("jakarta.persistence.Version");
             field.setAttribute(Constants.FIELD_VERSION_ATTR, true);
         }
 
@@ -116,12 +136,9 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
             }
         }
 
-        if (introspectedColumn.isBlobColumn()) {
-            field.addAnnotation("@Blob");
-            topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.Blob");
-        } else if (introspectedColumn.isClobColumn()) {
-            field.addAnnotation("@Clob");
-            topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.Clob");
+        if (introspectedColumn.isBlobColumn() || introspectedColumn.isClobColumn()) {
+            field.addAnnotation("@Lob");
+            topLevelClass.addImportedType("jakarta.persistence.Lob");
         }
 
         return true;
@@ -148,12 +165,12 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
         introspectedTable.setAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS, topLevelClass);
 
         topLevelClass.addAnnotation("@Entity");
-        topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.Entity");
+        topLevelClass.addImportedType("jakarta.persistence.Entity");
         topLevelClass
-                .addAnnotation(String.format("@Table(value = \"%s\")",
+                .addAnnotation(String.format("@Table(name = \"%s\")",
                         introspectedTable.getFullyQualifiedTableNameAtRuntime()));
 
-        topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.Table");
+        topLevelClass.addImportedType("jakarta.persistence.Table");
         return true;
     }
 
@@ -216,10 +233,10 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
                             .targetTable(rightTable).targetColumn(rightTableColumn);
 
                     field.addAnnotation("@OneToMany");
-                    field.addAnnotation(String.format("@JoinColumn(left = \"%s\", right = \"%s\")", leftTableColumn.getActualColumnName(),
+                    field.addAnnotation(String.format("@JoinColumn(name = \"%s\", referencedColumnName = \"%s\")", leftTableColumn.getActualColumnName(),
                             rightTableColumn.getActualColumnName()));
-                    topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.OneToMany");
-                    topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.JoinColumn");
+                    topLevelClass.addImportedType("jakarta.persistence.OneToMany");
+                    topLevelClass.addImportedType("jakarta.persistence.JoinColumn");
                 }
 
                 if (target.getType() == JoinTarget.JoinType.MANY_TO_ONE) {
@@ -232,10 +249,10 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
                             .targetColumn(
                                     GeneratorUtils.getIntrospectedColumnByColumn(rightTable, target.getJoinColumn()));
                     field.addAnnotation("@ManyToOne");
-                    field.addAnnotation(String.format("@JoinColumn(left = \"%s\", right = \"%s\")", leftColumn.getActualColumnName(),
+                    field.addAnnotation(String.format("@JoinColumn(name = \"%s\", referencedColumnName = \"%s\")", leftColumn.getActualColumnName(),
                             rightTableColumn.getActualColumnName()));
-                    topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.ManyToOne");
-                    topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.JoinColumn");
+                    topLevelClass.addImportedType("jakarta.persistence.ManyToOne");
+                    topLevelClass.addImportedType("jakarta.persistence.JoinColumn");
                 }
                 field.setAttribute(Constants.FIELD_RELATION, builder.build());
                 // 重置Field的注释行
@@ -292,15 +309,15 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
                 field.setAttribute(Constants.FIELD_RELATION, builder.build());
 
                 field.addAnnotation("@ManyToMany");
-                field.addAnnotation(String.format("@JoinTable(name = \"%s\", joinColumn = @JoinColumn(left = \"%s\", right = \"%s\"), inverseJoinColumn = @JoinColumn(left = \"%s\", right = \"%s\"))",
+                field.addAnnotation(String.format("@JoinTable(name = \"%s\", joinColumns = @JoinColumn(name = \"%s\", referencedColumnName = \"%s\"), inverseJoinColumns = @JoinColumn(name = \"%s\", referencedColumnName = \"%s\"))",
                         middleTable.getFullyQualifiedTableNameAtRuntime(),
                         joinTable.getJoinColumn().getLeft(),
                         joinTable.getJoinColumn().getRight(),
                         joinTable.getInverseJoinColumn().getLeft(),
                         joinTable.getInverseJoinColumn().getRight()));
-                topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.ManyToMany");
-                topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.JoinTable");
-                topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.JoinColumn");
+                topLevelClass.addImportedType("jakarta.persistence.ManyToMany");
+                topLevelClass.addImportedType("jakarta.persistence.JoinTable");
+                topLevelClass.addImportedType("jakarta.persistence.JoinColumn");
 
                 topLevelClass.addField(field);
             }
