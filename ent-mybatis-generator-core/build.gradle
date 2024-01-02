@@ -27,6 +27,17 @@ dependencies {
 
 description = 'MyBatis Generator Core'
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'Mybatis Generator Core'
+                description = 'Mybatis Generator Core'
+            }
+        }
+    }
+}
+
 test {
     useJUnitPlatform()
 }

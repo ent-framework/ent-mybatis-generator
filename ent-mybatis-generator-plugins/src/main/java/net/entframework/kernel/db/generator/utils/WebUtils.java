@@ -130,9 +130,9 @@ public class WebUtils {
 
     /**
      * 筛选Form输入字段
-     * @param fields
-     * @param pkField
-     * @return
+     * @param fields fields
+     * @param ignoreFields ignoreFields
+     * @return field list
      */
     public static List<Field> getInputFields(List<Field> fields, Set<String> ignoreFields) {
         List<Field> manyToOneFields = GeneratorUtils.getRelatedFields(fields, JoinTarget.JoinType.MANY_TO_ONE);

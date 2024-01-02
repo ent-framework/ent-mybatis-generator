@@ -7,6 +7,8 @@ plugins {
     //id 'net.entframework.maven-plugin'
 }
 
+description = 'MyBatis Generator Maven Plugin'
+
 dependencies {
     api project(':ent-mybatis-generator-core')
     compileOnly 'org.apache.maven:maven-core:3.9.6'
@@ -14,4 +16,14 @@ dependencies {
     compileOnly 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.10.2'
 }
 
-description = 'MyBatis Generator Maven Plugin'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'MyBatis Generator Maven Plugin'
+                description = 'MyBatis Generator Maven Plugin using entframework'
+            }
+        }
+    }
+}
+

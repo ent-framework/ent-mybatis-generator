@@ -93,9 +93,8 @@ public class EnumInfo {
     }
 
     /**
-     * Getter method for property <tt>items</tt>.
+     * Getter method for property items.
      * @return property value of items
-     * @author hewei
      */
     public List<EnumItemInfo> getItems() {
         return items;
@@ -219,9 +218,8 @@ public class EnumInfo {
         }
 
         /**
-         * Getter method for property <tt>value</tt>.
+         * Getter method for property value.
          * @return property value of value
-         * @author hewei
          */
         public Object getOriginalValue() {
             return value;
