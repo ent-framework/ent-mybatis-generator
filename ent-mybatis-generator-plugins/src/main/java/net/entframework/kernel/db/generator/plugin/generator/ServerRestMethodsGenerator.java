@@ -15,248 +15,268 @@ import org.mybatis.generator.api.dom.java.Parameter;
 
 public class ServerRestMethodsGenerator {
 
-    private final RestMethodAndImports.Builder builder = new RestMethodAndImports.Builder();
+	private final RestMethodAndImports.Builder builder = new RestMethodAndImports.Builder();
 
-    private final FullyQualifiedJavaType recordType;
-    private final FullyQualifiedJavaType voJavaType;
+	private final FullyQualifiedJavaType recordType;
 
-    private final String serviceFieldName;
+	private final FullyQualifiedJavaType voJavaType;
 
-    private FullyQualifiedJavaType baseVoType;
+	private final String serviceFieldName;
 
-    private final IntrospectedColumn pkColumn;
+	private FullyQualifiedJavaType baseVoType;
 
-    private final boolean addAnnotation;
+	private final IntrospectedColumn pkColumn;
 
-    public ServerRestMethodsGenerator(FullyQualifiedJavaType recordType, FullyQualifiedJavaType voJavaType, String serviceFieldName, IntrospectedColumn pkColumn , boolean addAnnotation) {
-        this.recordType = recordType;
-        this.voJavaType = voJavaType;
-        this.serviceFieldName =  serviceFieldName;
-        this.pkColumn = pkColumn;
-        this.addAnnotation = addAnnotation;
-    }
+	private final boolean addAnnotation;
 
-    public RestMethodAndImports generate() {
-        // 新增
-        addCreateMethod();
-        // 批量新增
-        // addBatchCreateMethod();
-        // 更新
-        addUpdateMethod();
-        // 列表查询
-        addQueryListMethod();
-        // 分页查询
-        addPageListMethod();
-        // 根据主键ID 删除
-        addDeleteByPrimaryKeyMethod();
-        // 批量删除
-        addBatchDeleteMethod();
-        // 获取单条记录
-        addSelectByPrimaryKeyMethod();
+	public ServerRestMethodsGenerator(FullyQualifiedJavaType recordType, FullyQualifiedJavaType voJavaType,
+			String serviceFieldName, IntrospectedColumn pkColumn, boolean addAnnotation) {
+		this.recordType = recordType;
+		this.voJavaType = voJavaType;
+		this.serviceFieldName = serviceFieldName;
+		this.pkColumn = pkColumn;
+		this.addAnnotation = addAnnotation;
+	}
 
-        builder.withImport(recordType);
+	public RestMethodAndImports generate() {
+		// 新增
+		addCreateMethod();
+		// 批量新增
+		// addBatchCreateMethod();
+		// 更新
+		addUpdateMethod();
+		// 列表查询
+		addQueryListMethod();
+		// 分页查询
+		addPageListMethod();
+		// 根据主键ID 删除
+		addDeleteByPrimaryKeyMethod();
+		// 批量删除
+		addBatchDeleteMethod();
+		// 获取单条记录
+		addSelectByPrimaryKeyMethod();
 
-        if (this.baseVoType != null) {
-            builder.withImport(this.baseVoType);
-        }
+		builder.withImport(recordType);
 
-        return builder.build();
-    }
+		if (this.baseVoType != null) {
+			builder.withImport(this.baseVoType);
+		}
 
-    public void setBaseVoType(FullyQualifiedJavaType baseRequestType) {
-        this.baseVoType = baseRequestType;
-    }
+		return builder.build();
+	}
 
-    public RestMethodAndImports build() {
-        return builder.build();
-    }
+	public void setBaseVoType(FullyQualifiedJavaType baseRequestType) {
+		this.baseVoType = baseRequestType;
+	}
 
-    public RestMethodAndImports.Builder getBuilder() {
-        return builder;
-    }
+	public RestMethodAndImports build() {
+		return builder.build();
+	}
 
-    public void addCreateMethod() {
-        RestMethod method = new RestMethod("insert", "POST", recordType);
-        method.setUrl("/create");
-        method.setOperation("新增");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        method.setReturnType(voJavaType);
-        builder.withImport(voJavaType);
+	public RestMethodAndImports.Builder getBuilder() {
+		return builder;
+	}
 
-        Parameter parameter = new Parameter(voJavaType, "vo");
-        if (addAnnotation) {
-            parameter.addAnnotation("@RequestBody");
-            parameter.addAnnotation(String.format("@Validated(%s.add.class)",
-                    baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
-            builder.withImport("org.springframework.web.bind.annotation.RequestBody");
-            builder.withImport("org.springframework.validation.annotation.Validated");
-        }
+	public void addCreateMethod() {
+		RestMethod method = new RestMethod("insert", "POST", recordType);
+		method.setUrl("/create");
+		method.setOperation("新增");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		method.setReturnType(voJavaType);
+		builder.withImport(voJavaType);
 
-        method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);", recordType.getShortName(), recordType.getShortName()));
-        method.addBodyLine(String.format("%s result = converterService.convert(%s.insert(record), %s.class);", voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
-        method.addParameter(parameter);
+		Parameter parameter = new Parameter(voJavaType, "vo");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			parameter.addAnnotation(String.format("@Validated(%s.add.class)",
+					baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
+			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
+			builder.withImport("org.springframework.validation.annotation.Validated");
+		}
 
-        builder.withMethod(method);
-    }
+		method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);",
+				recordType.getShortName(), recordType.getShortName()));
+		method.addBodyLine(String.format("%s result = converterService.convert(%s.insert(record), %s.class);",
+				voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
+		method.addParameter(parameter);
 
-    public void addBatchCreateMethod() {
-        RestMethod method = new RestMethod("insertMultiple", "POST", recordType);
-        method.setUrl("/batch-create");
-        method.setOperation("批量新增");
-        method.setVisibility(JavaVisibility.PUBLIC);
+		builder.withMethod(method);
+	}
 
-        method.setReturnType(voJavaType);
-        builder.withImport(voJavaType);
+	public void addBatchCreateMethod() {
+		RestMethod method = new RestMethod("insertMultiple", "POST", recordType);
+		method.setUrl("/batch-create");
+		method.setOperation("批量新增");
+		method.setVisibility(JavaVisibility.PUBLIC);
 
-        FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
-        responseBodyWrapperListType.addTypeArgument(voJavaType);
+		method.setReturnType(voJavaType);
+		builder.withImport(voJavaType);
 
-        method.setReturnType(responseBodyWrapperListType);
+		FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
+		responseBodyWrapperListType.addTypeArgument(voJavaType);
 
-        FullyQualifiedJavaType paramListType = FullyQualifiedJavaType.getNewListInstance();
-        paramListType.addTypeArgument(voJavaType);
-        builder.withImport(paramListType);
-        Parameter parameter = new Parameter(paramListType, "voList");
-        if (addAnnotation) {
-            parameter.addAnnotation("@RequestBody");
-            builder.withImport("org.springframework.web.bind.annotation.RequestBody");
-        }
-        method.addBodyLine(String.format("List<%s> records = converterService.convert(voList, %s.class);", recordType.getShortName(), recordType.getShortName()));
-        method.addBodyLine(String.format("List<%s> result = converterService.convert(%s.insertMultiple(records), %s.class);", voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
-        method.addParameter(parameter);
+		method.setReturnType(responseBodyWrapperListType);
 
-        builder.withMethod(method);
-    }
+		FullyQualifiedJavaType paramListType = FullyQualifiedJavaType.getNewListInstance();
+		paramListType.addTypeArgument(voJavaType);
+		builder.withImport(paramListType);
+		Parameter parameter = new Parameter(paramListType, "voList");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
+		}
+		method.addBodyLine(String.format("List<%s> records = converterService.convert(voList, %s.class);",
+				recordType.getShortName(), recordType.getShortName()));
+		method.addBodyLine(
+				String.format("List<%s> result = converterService.convert(%s.insertMultiple(records), %s.class);",
+						voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
+		method.addParameter(parameter);
 
-    public void addUpdateMethod() {
-        RestMethod method = new RestMethod("update", "POST", recordType);
-        method.setOperation("更新-by PK");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        method.setReturnType(voJavaType);
-        Parameter parameter = new Parameter(voJavaType, "vo");
-        if (addAnnotation) {
-            parameter.addAnnotation("@RequestBody");
-            parameter.addAnnotation(String.format("@Validated(%s.update.class)",
-                    baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
-        }
-        method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);", recordType.getShortName(), recordType.getShortName()));
-        method.addBodyLine(String.format("%s result = converterService.convert(%s.update(record), %s.class);", voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
+		builder.withMethod(method);
+	}
 
-        method.addParameter(parameter);
-        builder.withMethod(method);
-    }
+	public void addUpdateMethod() {
+		RestMethod method = new RestMethod("update", "POST", recordType);
+		method.setOperation("更新-by PK");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		method.setReturnType(voJavaType);
+		Parameter parameter = new Parameter(voJavaType, "vo");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			parameter.addAnnotation(String.format("@Validated(%s.update.class)",
+					baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
+		}
+		method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);",
+				recordType.getShortName(), recordType.getShortName()));
+		method.addBodyLine(String.format("%s result = converterService.convert(%s.update(record), %s.class);",
+				voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
 
-    public void addDeleteByPrimaryKeyMethod() {
-        RestMethod method = new RestMethod("delete", "POST", recordType);
-        method.setUrl("/delete");
-        method.setOperation("删除-by PK");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
-        method.setReturnType(responseJavaType);
-        Parameter parameter = new Parameter(voJavaType, "vo");
-        if (addAnnotation) {
-            parameter.addAnnotation("@RequestBody");
-            parameter.addAnnotation(String.format("@Validated(%s.delete.class)",
-                    baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
-        }
-        method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);", recordType.getShortName(), recordType.getShortName()));
-        method.addBodyLine(String.format("Integer result = %s.delete(record);", serviceFieldName));
+		method.addParameter(parameter);
+		builder.withMethod(method);
+	}
 
-        method.addParameter(parameter);
+	public void addDeleteByPrimaryKeyMethod() {
+		RestMethod method = new RestMethod("delete", "POST", recordType);
+		method.setUrl("/delete");
+		method.setOperation("删除-by PK");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
+		method.setReturnType(responseJavaType);
+		Parameter parameter = new Parameter(voJavaType, "vo");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			parameter.addAnnotation(String.format("@Validated(%s.delete.class)",
+					baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
+		}
+		method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);",
+				recordType.getShortName(), recordType.getShortName()));
+		method.addBodyLine(String.format("Integer result = %s.delete(record);", serviceFieldName));
 
-        builder.withMethod(method);
-    }
+		method.addParameter(parameter);
 
-    public void addBatchDeleteMethod() {
-        RestMethod method = new RestMethod("batchDelete", "POST", recordType);
-        method.setOperation("批量删除-by PK");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
+		builder.withMethod(method);
+	}
 
-        FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
-        responseBodyWrapperListType.addTypeArgument(voJavaType);
+	public void addBatchDeleteMethod() {
+		RestMethod method = new RestMethod("batchDelete", "POST", recordType);
+		method.setOperation("批量删除-by PK");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
 
-        method.setReturnType(responseJavaType);
-        Parameter parameter = new Parameter(responseBodyWrapperListType, "voList");
-        if (addAnnotation) {
-            parameter.addAnnotation("@RequestBody");
-            parameter.addAnnotation(String.format("@Validated(%s.batchDelete.class)",
-                    baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
-        }
-        method.addParameter(parameter);
-        method.addBodyLine(String.format("List<%s> record = converterService.convert(voList, %s.class);", recordType.getShortName(), recordType.getShortName()));
-        method.addBodyLine(String.format("Integer result = %s.batchDelete(record);", serviceFieldName));
+		FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
+		responseBodyWrapperListType.addTypeArgument(voJavaType);
 
-        builder.withMethod(method);
-    }
+		method.setReturnType(responseJavaType);
+		Parameter parameter = new Parameter(responseBodyWrapperListType, "voList");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			parameter.addAnnotation(String.format("@Validated(%s.batchDelete.class)",
+					baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
+		}
+		method.addParameter(parameter);
+		method.addBodyLine(String.format("List<%s> record = converterService.convert(voList, %s.class);",
+				recordType.getShortName(), recordType.getShortName()));
+		method.addBodyLine(String.format("Integer result = %s.batchDelete(record);", serviceFieldName));
 
-    public void addQueryListMethod() {
-        RestMethod method = new RestMethod("list", "GET", recordType);
-        method.setOperation("列表");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
-        responseBodyWrapperListType.addTypeArgument(voJavaType);
+		builder.withMethod(method);
+	}
 
-        method.setReturnType(responseBodyWrapperListType);
-        builder.withImport(responseBodyWrapperListType);
-        Parameter parameter = new Parameter(voJavaType, "vo");
-        method.addParameter(parameter);
+	public void addQueryListMethod() {
+		RestMethod method = new RestMethod("list", "GET", recordType);
+		method.setOperation("列表");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
+		responseBodyWrapperListType.addTypeArgument(voJavaType);
 
-        method.addParameter(getRequestParam());
+		method.setReturnType(responseBodyWrapperListType);
+		builder.withImport(responseBodyWrapperListType);
+		Parameter parameter = new Parameter(voJavaType, "vo");
+		method.addParameter(parameter);
 
-        method.addBodyLine(String.format("%s query = converterService.convert(vo, %s.class);", recordType.getShortName(), recordType.getShortName()));
-        method.addBodyLine(String.format("List<%s> result = converterService.convert(%s.select(query, BaseQuery.from(request)), %s.class);", voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
+		method.addParameter(getRequestParam());
 
-        builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
+		method.addBodyLine(String.format("%s query = converterService.convert(vo, %s.class);",
+				recordType.getShortName(), recordType.getShortName()));
+		method.addBodyLine(String.format(
+				"List<%s> result = converterService.convert(%s.select(query, BaseQuery.from(request)), %s.class);",
+				voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
 
-        builder.withMethod(method);
-    }
+		builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
 
-    private Parameter getRequestParam() {
-        FullyQualifiedJavaType requestJavaType = new FullyQualifiedJavaType("jakarta.servlet.http.HttpServletRequest");
-        builder.withImport(requestJavaType);
-        return new Parameter(requestJavaType, "request");
-    }
+		builder.withMethod(method);
+	}
 
-    public void addPageListMethod() {
-        RestMethod method = new RestMethod("page", "GET", recordType);
-        method.setOperation("分页查询");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
-                "net.entframework.kernel.db.api.pojo.page.PageResult");
-        builder.withImport(pageResultType);
-        pageResultType.addTypeArgument(voJavaType);
-        method.setReturnType(pageResultType);
+	private Parameter getRequestParam() {
+		FullyQualifiedJavaType requestJavaType = new FullyQualifiedJavaType("jakarta.servlet.http.HttpServletRequest");
+		builder.withImport(requestJavaType);
+		return new Parameter(requestJavaType, "request");
+	}
 
-        Parameter parameter = new Parameter(voJavaType, "vo");
-        method.addParameter(parameter);
-        method.addParameter(getRequestParam());
+	public void addPageListMethod() {
+		RestMethod method = new RestMethod("page", "GET", recordType);
+		method.setOperation("分页查询");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
+				"net.entframework.kernel.db.api.pojo.page.PageResult");
+		builder.withImport(pageResultType);
+		pageResultType.addTypeArgument(voJavaType);
+		method.setReturnType(pageResultType);
 
-        method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);", recordType.getShortName(), recordType.getShortName()));
-        method.addBodyLine(String.format("PageResult<%s> page = %s.page(record, BaseQuery.from(request));", recordType.getShortName(), serviceFieldName));
-        method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);", voJavaType.getShortName(), voJavaType.getShortName()));
-        method.addBodyLine(String.format("PageResult<%s> result =  PageResultFactory.createPageResult(records, (long)page.getTotalRows(), page.getPageSize(), page.getPageNo());", voJavaType.getShortName()));
-        builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
-        builder.withImport("net.entframework.kernel.db.api.factory.PageResultFactory");
-        builder.withMethod(method);
-    }
+		Parameter parameter = new Parameter(voJavaType, "vo");
+		method.addParameter(parameter);
+		method.addParameter(getRequestParam());
 
-    public void addSelectByPrimaryKeyMethod() {
-        RestMethod method = new RestMethod("load", "GET", recordType);
-        method.setUrl("/detail");
-        method.setOperation("获取记录-by PK");
-        method.setVisibility(JavaVisibility.PUBLIC);
-        method.setReturnType(voJavaType);
-        Parameter parameter = new Parameter(voJavaType, "vo");
-        if (addAnnotation) {
-            parameter.addAnnotation(String.format("@Validated(%s.detail.class)",
-                    baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
-        }
-        method.addParameter(parameter);
-        String pk = StringUtils.capitalize(pkColumn.getJavaProperty());
-        method.addBodyLine(String.format("%s result = converterService.convert(%s.load(vo.get%s()), %s.class);", voJavaType.getShortName(), serviceFieldName, pk, voJavaType.getShortName()));
+		method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);",
+				recordType.getShortName(), recordType.getShortName()));
+		method.addBodyLine(String.format("PageResult<%s> page = %s.page(record, BaseQuery.from(request));",
+				recordType.getShortName(), serviceFieldName));
+		method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);",
+				voJavaType.getShortName(), voJavaType.getShortName()));
+		method.addBodyLine(String.format(
+				"PageResult<%s> result =  PageResultFactory.createPageResult(records, (long)page.getTotalRows(), page.getPageSize(), page.getPageNo());",
+				voJavaType.getShortName()));
+		builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
+		builder.withImport("net.entframework.kernel.db.api.factory.PageResultFactory");
+		builder.withMethod(method);
+	}
 
-        builder.withMethod(method);
-    }
+	public void addSelectByPrimaryKeyMethod() {
+		RestMethod method = new RestMethod("load", "GET", recordType);
+		method.setUrl("/detail");
+		method.setOperation("获取记录-by PK");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		method.setReturnType(voJavaType);
+		Parameter parameter = new Parameter(voJavaType, "vo");
+		if (addAnnotation) {
+			parameter.addAnnotation(String.format("@Validated(%s.detail.class)",
+					baseVoType == null ? voJavaType.getShortName() : baseVoType.getShortName()));
+		}
+		method.addParameter(parameter);
+		String pk = StringUtils.capitalize(pkColumn.getJavaProperty());
+		method.addBodyLine(String.format("%s result = converterService.convert(%s.load(vo.get%s()), %s.class);",
+				voJavaType.getShortName(), serviceFieldName, pk, voJavaType.getShortName()));
+
+		builder.withMethod(method);
+	}
 
 }

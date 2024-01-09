@@ -228,6 +228,7 @@
   logicDeleteColumn CDATA #IMPLIED
   versionColumn CDATA #IMPLIED
   displayField CDATA #IMPLIED
+  parentTable CDATA #IMPLIED
         >
 
 <!--

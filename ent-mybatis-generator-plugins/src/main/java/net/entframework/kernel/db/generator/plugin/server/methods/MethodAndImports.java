@@ -25,76 +25,76 @@ import java.util.Set;
 
 public class MethodAndImports {
 
-    private final List<Method> methods;
+	private final List<Method> methods;
 
-    private final Set<FullyQualifiedJavaType> imports;
+	private final Set<FullyQualifiedJavaType> imports;
 
-    private final Set<String> staticImports;
+	private final Set<String> staticImports;
 
-    private MethodAndImports(Builder builder) {
-        methods = builder.methods;
-        imports = builder.imports;
-        staticImports = builder.staticImports;
-    }
+	private MethodAndImports(Builder builder) {
+		methods = builder.methods;
+		imports = builder.imports;
+		staticImports = builder.staticImports;
+	}
 
-    public List<Method> getMethods() {
-        return methods;
-    }
+	public List<Method> getMethods() {
+		return methods;
+	}
 
-    public Set<FullyQualifiedJavaType> getImports() {
-        return imports;
-    }
+	public Set<FullyQualifiedJavaType> getImports() {
+		return imports;
+	}
 
-    public Set<String> getStaticImports() {
-        return staticImports;
-    }
+	public Set<String> getStaticImports() {
+		return staticImports;
+	}
 
-    public static Builder withMethod(Method method) {
-        return new Builder().withMethod(method);
-    }
+	public static Builder withMethod(Method method) {
+		return new Builder().withMethod(method);
+	}
 
-    public static class Builder {
+	public static class Builder {
 
-        private final List<Method> methods = new ArrayList<>();
+		private final List<Method> methods = new ArrayList<>();
 
-        private final Set<FullyQualifiedJavaType> imports = new HashSet<>();
+		private final Set<FullyQualifiedJavaType> imports = new HashSet<>();
 
-        private final Set<String> staticImports = new HashSet<>();
+		private final Set<String> staticImports = new HashSet<>();
 
-        public Builder withMethod(Method method) {
-            this.methods.add(method);
-            return this;
-        }
+		public Builder withMethod(Method method) {
+			this.methods.add(method);
+			return this;
+		}
 
-        public Builder withImport(FullyQualifiedJavaType importedType) {
-            this.imports.add(importedType);
-            return this;
-        }
+		public Builder withImport(FullyQualifiedJavaType importedType) {
+			this.imports.add(importedType);
+			return this;
+		}
 
-        public Builder withImport(String importedType) {
-            this.imports.add(new FullyQualifiedJavaType(importedType));
-            return this;
-        }
+		public Builder withImport(String importedType) {
+			this.imports.add(new FullyQualifiedJavaType(importedType));
+			return this;
+		}
 
-        public Builder withImports(Set<FullyQualifiedJavaType> imports) {
-            this.imports.addAll(imports);
-            return this;
-        }
+		public Builder withImports(Set<FullyQualifiedJavaType> imports) {
+			this.imports.addAll(imports);
+			return this;
+		}
 
-        public Builder withStaticImport(String staticImport) {
-            this.staticImports.add(staticImport);
-            return this;
-        }
+		public Builder withStaticImport(String staticImport) {
+			this.staticImports.add(staticImport);
+			return this;
+		}
 
-        public Builder withStaticImports(Set<String> staticImports) {
-            this.staticImports.addAll(staticImports);
-            return this;
-        }
+		public Builder withStaticImports(Set<String> staticImports) {
+			this.staticImports.addAll(staticImports);
+			return this;
+		}
 
-        public MethodAndImports build() {
-            return new MethodAndImports(this);
-        }
+		public MethodAndImports build() {
+			return new MethodAndImports(this);
+		}
 
-    }
+	}
 
 }

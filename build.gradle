@@ -5,6 +5,10 @@ buildscript {
         }
         mavenCentral()
     }
+    dependencies {
+        classpath "com.github.ben-manes:gradle-versions-plugin:0.50.0"
+        classpath "io.spring.javaformat:spring-javaformat-gradle-plugin:0.0.40"
+    }
 }
 plugins {
     id 'base'
@@ -23,6 +27,9 @@ allprojects {
         }
         mavenCentral()
     }
+
+    apply plugin: com.github.benmanes.gradle.versions.VersionsPlugin
+    apply plugin: 'io.spring.javaformat'
 }
 
 subprojects {

@@ -18,89 +18,96 @@ import java.util.Set;
 
 public class AbstractWebPlugin extends AbstractDynamicSQLPlugin {
 
-    public static final String API_ROOT = "api";
-    public static final String MODEL_ROOT = "model";
-    public static final String ROUTER_ROOT = "routes";
-    public static final String VIEW_ROOT = "views";
+	public static final String API_ROOT = "api";
 
-    /** global properties set in context -- start **/
-    protected String projectRootAlias = "";
-    protected String typescriptModelPackage;
-    protected String apiPackage;
-    protected String viewPackage;
-    protected String enumPackage;
-    protected String codingStyle;
-    protected String outputSubFolder;
+	public static final String MODEL_ROOT = "model";
 
-    /** global properties set in context -- end **/
-    @Override
-    public boolean validate(List<String> warnings) {
+	public static final String ROUTER_ROOT = "routes";
 
-        this.typescriptModelPackage = this.context.getJavaModelGeneratorConfiguration().getTargetPackage();
-        if (StringUtils.isAnyEmpty(this.typescriptModelPackage)) {
-            warnings.add("请在javaModelGenerator节点中targetPackage属性");
-            return false;
-        }
+	public static final String VIEW_ROOT = "views";
 
-        this.apiPackage = API_ROOT;
-        this.enumPackage = MODEL_ROOT + ".enum";
-        this.viewPackage = VIEW_ROOT;
+	/** global properties set in context -- start **/
+	protected String projectRootAlias = "";
 
-        this.outputSubFolder = this.context.getProperty("outputSubFolder");
-        if (StringUtils.isNotEmpty(this.outputSubFolder)) {
-            this.apiPackage = API_ROOT + "." + this.outputSubFolder;
-            this.enumPackage = MODEL_ROOT + "." + this.outputSubFolder + ".enum";
-            this.viewPackage = VIEW_ROOT + "." + this.outputSubFolder;
-        }
+	protected String typescriptModelPackage;
 
+	protected String apiPackage;
 
-        codingStyle = this.context.getProperty("generatedCodeStyle");
-        if (StringUtils.isEmpty(codingStyle)) {
-            codingStyle = Constants.GENERATED_CODE_STYLE;
-        }
+	protected String viewPackage;
 
-        this.projectRootAlias = this.context.getProperty("projectRootAlias");
-        String mode = this.properties.getProperty("writeMode");
-        if (StringUtils.isNotEmpty(mode)) {
-            WriteMode writeMode = convert(mode);
-            if (writeMode != null) {
-                this.writeMode = writeMode;
-            }
-            else {
-                warnings.add(this.getClass().getName() + "配置了错误的WriteMode, 可用值: NEVER,OVER_WRITE,SKIP_ON_EXIST");
-                return false;
-            }
-        }
-        return true;
-    }
+	protected String enumPackage;
 
-    protected Set<String> getListIgnoreFields() {
-        Set<String> fields = new HashSet<>();
-        String listIgnoreFields = this.context.getProperty("listIgnoreFields");
-        if (StringUtils.isNotBlank(listIgnoreFields)) {
-            fields.addAll(List.of(StringUtils.split(listIgnoreFields, ",")));
-        }
+	protected String codingStyle;
 
-        listIgnoreFields = this.properties.getProperty("listIgnoreFields");
-        if (StringUtils.isNotBlank(listIgnoreFields)) {
-            fields.addAll(List.of(StringUtils.split(listIgnoreFields, ",")));
-        }
-        return fields;
-    }
+	protected String outputSubFolder;
 
-    protected Set<String> getInputIgnoreFields() {
-        Set<String> fields = new HashSet<>();
-        String listIgnoreFields = this.context.getProperty("inputIgnoreFields");
-        if (StringUtils.isNotBlank(listIgnoreFields)) {
-            fields.addAll(List.of(StringUtils.split(listIgnoreFields, ",")));
-        }
+	/** global properties set in context -- end **/
+	@Override
+	public boolean validate(List<String> warnings) {
 
-        listIgnoreFields = this.properties.getProperty("inputIgnoreFields");
-        if (StringUtils.isNotBlank(listIgnoreFields)) {
-            fields.addAll(List.of(StringUtils.split(listIgnoreFields, ",")));
-        }
-        return fields;
-    }
+		this.typescriptModelPackage = this.context.getJavaModelGeneratorConfiguration().getTargetPackage();
+		if (StringUtils.isAnyEmpty(this.typescriptModelPackage)) {
+			warnings.add("请在javaModelGenerator节点中targetPackage属性");
+			return false;
+		}
 
+		this.apiPackage = API_ROOT;
+		this.enumPackage = MODEL_ROOT + ".enum";
+		this.viewPackage = VIEW_ROOT;
+
+		this.outputSubFolder = this.context.getProperty("outputSubFolder");
+		if (StringUtils.isNotEmpty(this.outputSubFolder)) {
+			this.apiPackage = API_ROOT + "." + this.outputSubFolder;
+			this.enumPackage = MODEL_ROOT + "." + this.outputSubFolder + ".enum";
+			this.viewPackage = VIEW_ROOT + "." + this.outputSubFolder;
+		}
+
+		codingStyle = this.context.getProperty("generatedCodeStyle");
+		if (StringUtils.isEmpty(codingStyle)) {
+			codingStyle = Constants.GENERATED_CODE_STYLE;
+		}
+
+		this.projectRootAlias = this.context.getProperty("projectRootAlias");
+		String mode = this.properties.getProperty("writeMode");
+		if (StringUtils.isNotEmpty(mode)) {
+			WriteMode writeMode = convert(mode);
+			if (writeMode != null) {
+				this.writeMode = writeMode;
+			}
+			else {
+				warnings.add(this.getClass().getName() + "配置了错误的WriteMode, 可用值: NEVER,OVER_WRITE,SKIP_ON_EXIST");
+				return false;
+			}
+		}
+		return true;
+	}
+
+	protected Set<String> getListIgnoreFields() {
+		Set<String> fields = new HashSet<>();
+		String listIgnoreFields = this.context.getProperty("listIgnoreFields");
+		if (StringUtils.isNotBlank(listIgnoreFields)) {
+			fields.addAll(List.of(StringUtils.split(listIgnoreFields, ",")));
+		}
+
+		listIgnoreFields = this.properties.getProperty("listIgnoreFields");
+		if (StringUtils.isNotBlank(listIgnoreFields)) {
+			fields.addAll(List.of(StringUtils.split(listIgnoreFields, ",")));
+		}
+		return fields;
+	}
+
+	protected Set<String> getInputIgnoreFields() {
+		Set<String> fields = new HashSet<>();
+		String listIgnoreFields = this.context.getProperty("inputIgnoreFields");
+		if (StringUtils.isNotBlank(listIgnoreFields)) {
+			fields.addAll(List.of(StringUtils.split(listIgnoreFields, ",")));
+		}
+
+		listIgnoreFields = this.properties.getProperty("inputIgnoreFields");
+		if (StringUtils.isNotBlank(listIgnoreFields)) {
+			fields.addAll(List.of(StringUtils.split(listIgnoreFields, ",")));
+		}
+		return fields;
+	}
 
 }

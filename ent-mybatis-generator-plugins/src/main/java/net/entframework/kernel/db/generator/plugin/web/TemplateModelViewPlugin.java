@@ -29,96 +29,99 @@ import java.util.stream.Collectors;
  */
 public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 
-    private final List<GeneratedFile> generatedFiles = new ArrayList<>();
+	private final List<GeneratedFile> generatedFiles = new ArrayList<>();
 
-    public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
 
-        generatedFiles.add(generateModelClass(topLevelClass, introspectedTable));
+		generatedFiles.add(generateModelClass(topLevelClass, introspectedTable));
 
-        return true;
-    }
+		return true;
+	}
 
-    private GeneratedFile generateModelClass(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        String modelObjectName = topLevelClass.getType().getShortNameWithoutTypeArguments();
-        String camelCaseName = JavaBeansUtil.convertCamelCase(modelObjectName, "-");
-        FullyQualifiedTypescriptType tsBaseModelJavaType;
-        if (this.enableSubPackages) {
-            tsBaseModelJavaType = new FullyQualifiedTypescriptType(
-                    this.targetPackage + "." + camelCaseName + "." + modelObjectName, true);
-        }
-        else {
-            tsBaseModelJavaType = new FullyQualifiedTypescriptType(this.targetPackage + "." + modelObjectName, true);
-        }
-        TypescriptTopLevelClass tsApiClass = new TypescriptTopLevelClass(tsBaseModelJavaType);
+	private GeneratedFile generateModelClass(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+		String modelObjectName = topLevelClass.getType().getShortNameWithoutTypeArguments();
+		String camelCaseName = JavaBeansUtil.convertCamelCase(modelObjectName, "-");
+		FullyQualifiedTypescriptType tsBaseModelJavaType;
+		if (this.enableSubPackages) {
+			tsBaseModelJavaType = new FullyQualifiedTypescriptType(
+					this.targetPackage + "." + camelCaseName + "." + modelObjectName, true);
+		}
+		else {
+			tsBaseModelJavaType = new FullyQualifiedTypescriptType(this.targetPackage + "." + modelObjectName, true);
+		}
+		TypescriptTopLevelClass tsApiClass = new TypescriptTopLevelClass(tsBaseModelJavaType);
 
-        tsApiClass.setWriteMode(this.writeMode == null ? WriteMode.SKIP_ON_EXIST : this.writeMode);
+		tsApiClass.setWriteMode(this.writeMode == null ? WriteMode.SKIP_ON_EXIST : this.writeMode);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("projectRootAlias", this.projectRootAlias);
-        data.put("modelPackage", this.typescriptModelPackage.replaceAll("\\.", "/"));
+		Map<String, Object> data = new HashMap<>();
+		data.put("projectRootAlias", this.projectRootAlias);
+		data.put("modelPackage", this.typescriptModelPackage.replaceAll("\\.", "/"));
 
-        data.put("modelName", modelObjectName);
-        data.put("modelDescription", topLevelClass.getDescription());
-        data.put("camelModelName", camelCaseName);
-        data.put("modelPath", this.modelPath);
+		data.put("modelName", modelObjectName);
+		data.put("modelDescription", topLevelClass.getDescription());
+		data.put("camelModelName", camelCaseName);
+		data.put("modelPath", this.modelPath);
 
-        data.putAll(getAdditionalPropertyMap());
+		data.putAll(getAdditionalPropertyMap());
 
-        IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
-        List<Field> fields = WebUtils.getFieldsWithoutPrimaryKey(topLevelClass.getFields(), pkColumn.getJavaProperty());
-        data.put("fields", fields);
-        data.put("listFields", convert(WebUtils.getListFields(fields, getListIgnoreFields()), introspectedTable));
-        data.put("searchFields", convert(WebUtils.getSearchFields(fields, getListIgnoreFields()), introspectedTable));
-        data.put("inputFields", convert(WebUtils.getInputFields(fields, getInputIgnoreFields()), introspectedTable));
+		IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
+		List<Field> fields = WebUtils.getFieldsWithoutPrimaryKey(topLevelClass.getFields(), pkColumn.getJavaProperty());
+		data.put("fields", fields);
+		data.put("listFields", convert(WebUtils.getListFields(fields, getListIgnoreFields()), introspectedTable));
+		data.put("searchFields", convert(WebUtils.getSearchFields(fields, getListIgnoreFields()), introspectedTable));
+		data.put("inputFields", convert(WebUtils.getInputFields(fields, getInputIgnoreFields()), introspectedTable));
 
-        // 获取枚举字段
-        List<Field> enumFields = fields.stream()
-                .filter(field -> field.getAttribute(Constants.TABLE_ENUM_FIELD_ATTR) != null
-                        && !GeneratorUtils.isLogicDeleteField(field))
-                .collect(Collectors.toSet()).stream().toList();
-        data.put("enumFields", convert(enumFields, introspectedTable));
-        data.put("relationFields", convert(WebUtils.getRelationFields(fields), introspectedTable));
-        data.put("pk",
-                new ModelField(GeneratorUtils.getFieldByName(topLevelClass, pkColumn.getJavaProperty()), pkColumn));
+		// 获取枚举字段
+		List<Field> enumFields = fields.stream()
+			.filter(field -> field.getAttribute(Constants.TABLE_ENUM_FIELD_ATTR) != null
+					&& !GeneratorUtils.isLogicDeleteField(field))
+			.collect(Collectors.toSet())
+			.stream()
+			.toList();
+		data.put("enumFields", convert(enumFields, introspectedTable));
+		data.put("relationFields", convert(WebUtils.getRelationFields(fields), introspectedTable));
+		data.put("pk",
+				new ModelField(GeneratorUtils.getFieldByName(topLevelClass, pkColumn.getJavaProperty()), pkColumn));
 
-        String apiPath = StringUtils.replace(this.apiPackage, ".", "/");
-        data.put("apiPath", apiPath);
-        data.put("viewPath", StringUtils.replace(this.viewPackage, ".", "/"));
+		String apiPath = StringUtils.replace(this.apiPackage, ".", "/");
+		data.put("apiPath", apiPath);
+		data.put("viewPath", StringUtils.replace(this.viewPackage, ".", "/"));
 
-        return new TemplateGeneratedFile(tsApiClass, context.getJavaModelGeneratorConfiguration().getTargetProject(),
-                data, this.templatePath, this.fileName, this.fileExt);
-    }
+		return new TemplateGeneratedFile(tsApiClass, context.getJavaModelGeneratorConfiguration().getTargetProject(),
+				data, this.templatePath, this.fileName, this.fileExt);
+	}
 
-    public List<GeneratedFile> contextGenerateAdditionalFiles() {
-        return generatedFiles;
-    }
+	public List<GeneratedFile> contextGenerateAdditionalFiles() {
+		return generatedFiles;
+	}
 
-    protected List<ModelField> convert(List<Field> fields, IntrospectedTable introspectedTable) {
-        List<ModelField> modelFields = new ArrayList<>();
-        for (Field field : fields) {
-            IntrospectedColumn column = null;
-            if (GeneratorUtils.isRelationField(introspectedTable, field)) {
-                Relation relation = (Relation) field.getAttribute(Constants.FIELD_RELATION);
-                if (relation.getJoinType() == JoinTarget.JoinType.MANY_TO_ONE) {
-                    column = GeneratorUtils.safeGetIntrospectedColumnByJavaProperty(introspectedTable,
-                            relation.getSourceField().getName());
-                } else {
-                    continue;
-                }
-            }
-            else {
-                column = GeneratorUtils.safeGetIntrospectedColumnByJavaProperty(introspectedTable, field.getName());
-            }
-            if (column == null) {
-                log.warn("Can't find column in table: "
-                        + introspectedTable.getFullyQualifiedTable().getIntrospectedTableName() + " by field name: "
-                        + field.getName() + "");
-                continue;
-            }
-            ModelField modelField = new ModelField(field, column);
-            modelFields.add(modelField);
-        }
-        return modelFields;
-    }
+	protected List<ModelField> convert(List<Field> fields, IntrospectedTable introspectedTable) {
+		List<ModelField> modelFields = new ArrayList<>();
+		for (Field field : fields) {
+			IntrospectedColumn column = null;
+			if (GeneratorUtils.isRelationField(introspectedTable, field)) {
+				Relation relation = (Relation) field.getAttribute(Constants.FIELD_RELATION);
+				if (relation.getJoinType() == JoinTarget.JoinType.MANY_TO_ONE) {
+					column = GeneratorUtils.safeGetIntrospectedColumnByJavaProperty(introspectedTable,
+							relation.getSourceField().getName());
+				}
+				else {
+					continue;
+				}
+			}
+			else {
+				column = GeneratorUtils.safeGetIntrospectedColumnByJavaProperty(introspectedTable, field.getName());
+			}
+			if (column == null) {
+				log.warn("Can't find column in table: "
+						+ introspectedTable.getFullyQualifiedTable().getIntrospectedTableName() + " by field name: "
+						+ field.getName() + "");
+				continue;
+			}
+			ModelField modelField = new ModelField(field, column);
+			modelFields.add(modelField);
+		}
+		return modelFields;
+	}
 
 }

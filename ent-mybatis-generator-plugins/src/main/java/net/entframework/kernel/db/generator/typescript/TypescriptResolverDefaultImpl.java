@@ -27,210 +27,211 @@ import java.util.*;
 
 public class TypescriptResolverDefaultImpl implements JavaTypeResolver {
 
-    protected List<String> warnings;
+	protected List<String> warnings;
 
-    protected final Properties properties;
+	protected final Properties properties;
 
-    protected Context context;
-    protected boolean convertLongToString;
-    protected final Map<Integer, JdbcTypeInformation> typeMap;
+	protected Context context;
 
-    public TypescriptResolverDefaultImpl() {
-        super();
-        properties = new Properties();
-        typeMap = new HashMap<>();
+	protected boolean convertLongToString;
 
-        typeMap.put(Types.ARRAY, new JdbcTypeInformation("ARRAY", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("any")));
-        typeMap.put(Types.BIGINT, new JdbcTypeInformation("BIGINT", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.BINARY, new JdbcTypeInformation("BINARY", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("byte[]"))); //$NON-NLS-1$
-        typeMap.put(Types.BIT, new JdbcTypeInformation("BIT", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("boolean")));
-        typeMap.put(Types.BLOB, new JdbcTypeInformation("BLOB", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("byte[]"))); //$NON-NLS-1$
-        typeMap.put(Types.BOOLEAN, new JdbcTypeInformation("BOOLEAN", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("boolean")));
-        typeMap.put(Types.CHAR, new JdbcTypeInformation("CHAR", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("string")));
-        typeMap.put(Types.CLOB, new JdbcTypeInformation("CLOB", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("string")));
-        typeMap.put(Types.DATALINK, new JdbcTypeInformation("DATALINK", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("any")));
-        typeMap.put(Types.DATE, new JdbcTypeInformation("DATE", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("Date")));
-        typeMap.put(Types.DECIMAL, new JdbcTypeInformation("DECIMAL", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.DISTINCT, new JdbcTypeInformation("DISTINCT", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("any")));
-        typeMap.put(Types.DOUBLE, new JdbcTypeInformation("DOUBLE", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.FLOAT, new JdbcTypeInformation("FLOAT", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.INTEGER, new JdbcTypeInformation("INTEGER", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.JAVA_OBJECT, new JdbcTypeInformation("JAVA_OBJECT", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("any")));
-        typeMap.put(Types.LONGNVARCHAR, new JdbcTypeInformation("LONGNVARCHAR", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("string")));
-        typeMap.put(Types.LONGVARBINARY, new JdbcTypeInformation("LONGVARBINARY", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("byte[]"))); //$NON-NLS-1$
-        typeMap.put(Types.LONGVARCHAR, new JdbcTypeInformation("LONGVARCHAR", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("string")));
-        typeMap.put(Types.NCHAR, new JdbcTypeInformation("NCHAR", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("string")));
-        typeMap.put(Types.NCLOB, new JdbcTypeInformation("NCLOB", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("string")));
-        typeMap.put(Types.NVARCHAR, new JdbcTypeInformation("NVARCHAR", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("string")));
-        typeMap.put(Types.NULL, new JdbcTypeInformation("NULL", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("any")));
-        typeMap.put(Types.NUMERIC, new JdbcTypeInformation("NUMERIC", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.OTHER, new JdbcTypeInformation("OTHER", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("any")));
-        typeMap.put(Types.REAL, new JdbcTypeInformation("REAL", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.REF, new JdbcTypeInformation("REF", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("any")));
-        typeMap.put(Types.SMALLINT, new JdbcTypeInformation("SMALLINT", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.STRUCT, new JdbcTypeInformation("STRUCT", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("any")));
-        typeMap.put(Types.TIME, new JdbcTypeInformation("TIME", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("Date")));
-        typeMap.put(Types.TIMESTAMP, new JdbcTypeInformation("TIMESTAMP", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("Date")));
-        typeMap.put(Types.TINYINT, new JdbcTypeInformation("TINYINT", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("number")));
-        typeMap.put(Types.VARBINARY, new JdbcTypeInformation("VARBINARY", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("byte[]"))); //$NON-NLS-1$
-        typeMap.put(Types.VARCHAR, new JdbcTypeInformation("VARCHAR", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("string")));
-        // JDK 1.8 types
-        typeMap.put(Types.TIME_WITH_TIMEZONE, new JdbcTypeInformation("TIME_WITH_TIMEZONE", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("java.time.OffsetTime"))); //$NON-NLS-1$
-        typeMap.put(Types.TIMESTAMP_WITH_TIMEZONE, new JdbcTypeInformation("TIMESTAMP_WITH_TIMEZONE", //$NON-NLS-1$
-                new FullyQualifiedTypescriptType("java.time.OffsetDateTime"))); //$NON-NLS-1$
-    }
+	protected final Map<Integer, JdbcTypeInformation> typeMap;
 
-    @Override
-    public void addConfigurationProperties(Properties properties) {
-        this.properties.putAll(properties);
-        convertLongToString = StringUtility
-                .isTrue(properties.getProperty("convertLongToString"));
-    }
+	public TypescriptResolverDefaultImpl() {
+		super();
+		properties = new Properties();
+		typeMap = new HashMap<>();
 
-    @Override
-    public FullyQualifiedTypescriptType calculateJavaType(ActualTableName actualTable,
-            IntrospectedColumn introspectedColumn) {
-        FullyQualifiedTypescriptType answer = null;
-        JdbcTypeInformation jdbcTypeInformation = typeMap.get(introspectedColumn.getJdbcType());
+		typeMap.put(Types.ARRAY, new JdbcTypeInformation("ARRAY", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("any")));
+		typeMap.put(Types.BIGINT, new JdbcTypeInformation("BIGINT", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.BINARY, new JdbcTypeInformation("BINARY", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("byte[]"))); //$NON-NLS-1$
+		typeMap.put(Types.BIT, new JdbcTypeInformation("BIT", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("boolean")));
+		typeMap.put(Types.BLOB, new JdbcTypeInformation("BLOB", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("byte[]"))); //$NON-NLS-1$
+		typeMap.put(Types.BOOLEAN, new JdbcTypeInformation("BOOLEAN", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("boolean")));
+		typeMap.put(Types.CHAR, new JdbcTypeInformation("CHAR", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("string")));
+		typeMap.put(Types.CLOB, new JdbcTypeInformation("CLOB", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("string")));
+		typeMap.put(Types.DATALINK, new JdbcTypeInformation("DATALINK", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("any")));
+		typeMap.put(Types.DATE, new JdbcTypeInformation("DATE", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("Date")));
+		typeMap.put(Types.DECIMAL, new JdbcTypeInformation("DECIMAL", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.DISTINCT, new JdbcTypeInformation("DISTINCT", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("any")));
+		typeMap.put(Types.DOUBLE, new JdbcTypeInformation("DOUBLE", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.FLOAT, new JdbcTypeInformation("FLOAT", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.INTEGER, new JdbcTypeInformation("INTEGER", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.JAVA_OBJECT, new JdbcTypeInformation("JAVA_OBJECT", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("any")));
+		typeMap.put(Types.LONGNVARCHAR, new JdbcTypeInformation("LONGNVARCHAR", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("string")));
+		typeMap.put(Types.LONGVARBINARY, new JdbcTypeInformation("LONGVARBINARY", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("byte[]"))); //$NON-NLS-1$
+		typeMap.put(Types.LONGVARCHAR, new JdbcTypeInformation("LONGVARCHAR", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("string")));
+		typeMap.put(Types.NCHAR, new JdbcTypeInformation("NCHAR", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("string")));
+		typeMap.put(Types.NCLOB, new JdbcTypeInformation("NCLOB", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("string")));
+		typeMap.put(Types.NVARCHAR, new JdbcTypeInformation("NVARCHAR", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("string")));
+		typeMap.put(Types.NULL, new JdbcTypeInformation("NULL", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("any")));
+		typeMap.put(Types.NUMERIC, new JdbcTypeInformation("NUMERIC", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.OTHER, new JdbcTypeInformation("OTHER", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("any")));
+		typeMap.put(Types.REAL, new JdbcTypeInformation("REAL", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.REF, new JdbcTypeInformation("REF", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("any")));
+		typeMap.put(Types.SMALLINT, new JdbcTypeInformation("SMALLINT", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.STRUCT, new JdbcTypeInformation("STRUCT", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("any")));
+		typeMap.put(Types.TIME, new JdbcTypeInformation("TIME", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("Date")));
+		typeMap.put(Types.TIMESTAMP, new JdbcTypeInformation("TIMESTAMP", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("Date")));
+		typeMap.put(Types.TINYINT, new JdbcTypeInformation("TINYINT", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("number")));
+		typeMap.put(Types.VARBINARY, new JdbcTypeInformation("VARBINARY", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("byte[]"))); //$NON-NLS-1$
+		typeMap.put(Types.VARCHAR, new JdbcTypeInformation("VARCHAR", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("string")));
+		// JDK 1.8 types
+		typeMap.put(Types.TIME_WITH_TIMEZONE, new JdbcTypeInformation("TIME_WITH_TIMEZONE", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("java.time.OffsetTime"))); //$NON-NLS-1$
+		typeMap.put(Types.TIMESTAMP_WITH_TIMEZONE, new JdbcTypeInformation("TIMESTAMP_WITH_TIMEZONE", //$NON-NLS-1$
+				new FullyQualifiedTypescriptType("java.time.OffsetDateTime"))); //$NON-NLS-1$
+	}
 
-        if (jdbcTypeInformation != null) {
-            answer = jdbcTypeInformation.getFullyQualifiedJavaType();
-            answer = overrideDefaultType(introspectedColumn, answer);
-        }
-        return answer;
-    }
+	@Override
+	public void addConfigurationProperties(Properties properties) {
+		this.properties.putAll(properties);
+		convertLongToString = StringUtility.isTrue(properties.getProperty("convertLongToString"));
+	}
 
-    protected FullyQualifiedTypescriptType overrideDefaultType(IntrospectedColumn column,
-            FullyQualifiedTypescriptType defaultType) {
-        FullyQualifiedTypescriptType answer = defaultType;
+	@Override
+	public FullyQualifiedTypescriptType calculateJavaType(ActualTableName actualTable,
+			IntrospectedColumn introspectedColumn) {
+		FullyQualifiedTypescriptType answer = null;
+		JdbcTypeInformation jdbcTypeInformation = typeMap.get(introspectedColumn.getJdbcType());
 
-        switch (column.getJdbcType()) {
-            case Types.BIT:
-                answer = calculateBitReplacement(column, defaultType);
-                break;
-            case Types.DECIMAL:
-            case Types.NUMERIC:
-                answer = calculateBigDecimalReplacement(column, defaultType);
-                break;
-            case Types.BIGINT:
-                answer = calculateBigintType(column, defaultType);
-                break;
-            default:
-                break;
-        }
+		if (jdbcTypeInformation != null) {
+			answer = jdbcTypeInformation.getFullyQualifiedJavaType();
+			answer = overrideDefaultType(introspectedColumn, answer);
+		}
+		return answer;
+	}
 
-        return answer;
-    }
+	protected FullyQualifiedTypescriptType overrideDefaultType(IntrospectedColumn column,
+			FullyQualifiedTypescriptType defaultType) {
+		FullyQualifiedTypescriptType answer = defaultType;
 
-    protected FullyQualifiedTypescriptType calculateBigintType(IntrospectedColumn column,
-                                                                  FullyQualifiedTypescriptType defaultType) {
-        FullyQualifiedTypescriptType answer;
+		switch (column.getJdbcType()) {
+			case Types.BIT:
+				answer = calculateBitReplacement(column, defaultType);
+				break;
+			case Types.DECIMAL:
+			case Types.NUMERIC:
+				answer = calculateBigDecimalReplacement(column, defaultType);
+				break;
+			case Types.BIGINT:
+				answer = calculateBigintType(column, defaultType);
+				break;
+			default:
+				break;
+		}
 
-        if (convertLongToString) {
-            answer = new FullyQualifiedTypescriptType("string"); //$NON-NLS-1$
-        }
-        else {
-            answer = defaultType;
-        }
+		return answer;
+	}
 
-        return answer;
-    }
+	protected FullyQualifiedTypescriptType calculateBigintType(IntrospectedColumn column,
+			FullyQualifiedTypescriptType defaultType) {
+		FullyQualifiedTypescriptType answer;
 
-    protected FullyQualifiedTypescriptType calculateBitReplacement(IntrospectedColumn column,
-            FullyQualifiedTypescriptType defaultType) {
-        FullyQualifiedTypescriptType answer;
+		if (convertLongToString) {
+			answer = new FullyQualifiedTypescriptType("string"); //$NON-NLS-1$
+		}
+		else {
+			answer = defaultType;
+		}
 
-        if (column.getLength() > 1) {
-            answer = new FullyQualifiedTypescriptType("byte[]"); //$NON-NLS-1$
-        }
-        else {
-            answer = defaultType;
-        }
+		return answer;
+	}
 
-        return answer;
-    }
+	protected FullyQualifiedTypescriptType calculateBitReplacement(IntrospectedColumn column,
+			FullyQualifiedTypescriptType defaultType) {
+		FullyQualifiedTypescriptType answer;
 
-    protected FullyQualifiedTypescriptType calculateBigDecimalReplacement(IntrospectedColumn column,
-            FullyQualifiedTypescriptType defaultType) {
-        return new FullyQualifiedTypescriptType("number");
-    }
+		if (column.getLength() > 1) {
+			answer = new FullyQualifiedTypescriptType("byte[]"); //$NON-NLS-1$
+		}
+		else {
+			answer = defaultType;
+		}
 
-    @Override
-    public String calculateJdbcTypeName(IntrospectedColumn introspectedColumn) {
-        String answer = null;
-        JdbcTypeInformation jdbcTypeInformation = typeMap.get(introspectedColumn.getJdbcType());
+		return answer;
+	}
 
-        if (jdbcTypeInformation != null) {
-            answer = jdbcTypeInformation.getJdbcTypeName();
-        }
+	protected FullyQualifiedTypescriptType calculateBigDecimalReplacement(IntrospectedColumn column,
+			FullyQualifiedTypescriptType defaultType) {
+		return new FullyQualifiedTypescriptType("number");
+	}
 
-        return answer;
-    }
+	@Override
+	public String calculateJdbcTypeName(IntrospectedColumn introspectedColumn) {
+		String answer = null;
+		JdbcTypeInformation jdbcTypeInformation = typeMap.get(introspectedColumn.getJdbcType());
 
-    @Override
-    public void setWarnings(List<String> warnings) {
-        this.warnings = warnings;
-    }
+		if (jdbcTypeInformation != null) {
+			answer = jdbcTypeInformation.getJdbcTypeName();
+		}
 
-    @Override
-    public void setContext(Context context) {
-        this.context = context;
-    }
+		return answer;
+	}
 
-    public static class JdbcTypeInformation {
+	@Override
+	public void setWarnings(List<String> warnings) {
+		this.warnings = warnings;
+	}
 
-        private final String jdbcTypeName;
+	@Override
+	public void setContext(Context context) {
+		this.context = context;
+	}
 
-        private final FullyQualifiedTypescriptType fullyQualifiedJavaType;
+	public static class JdbcTypeInformation {
 
-        public JdbcTypeInformation(String jdbcTypeName, FullyQualifiedTypescriptType fullyQualifiedJavaType) {
-            this.jdbcTypeName = jdbcTypeName;
-            this.fullyQualifiedJavaType = fullyQualifiedJavaType;
-        }
+		private final String jdbcTypeName;
 
-        public String getJdbcTypeName() {
-            return jdbcTypeName;
-        }
+		private final FullyQualifiedTypescriptType fullyQualifiedJavaType;
 
-        public FullyQualifiedTypescriptType getFullyQualifiedJavaType() {
-            return fullyQualifiedJavaType;
-        }
+		public JdbcTypeInformation(String jdbcTypeName, FullyQualifiedTypescriptType fullyQualifiedJavaType) {
+			this.jdbcTypeName = jdbcTypeName;
+			this.fullyQualifiedJavaType = fullyQualifiedJavaType;
+		}
 
-    }
+		public String getJdbcTypeName() {
+			return jdbcTypeName;
+		}
+
+		public FullyQualifiedTypescriptType getFullyQualifiedJavaType() {
+			return fullyQualifiedJavaType;
+		}
+
+	}
 
 }

@@ -42,42 +42,42 @@ import java.io.StringWriter;
  */
 public class DefaultJavaFormatter implements JavaFormatter, CompilationUnitVisitor<String> {
 
-    protected Context context;
+	protected Context context;
 
-    private static final StreamsFormatter formatter = new StreamsFormatter(
-            JavaFormatConfig.of(JavaBaseline.V11, IndentationStyle.SPACES));
+	private static final StreamsFormatter formatter = new StreamsFormatter(
+			JavaFormatConfig.of(JavaBaseline.V11, IndentationStyle.SPACES));
 
-    @Override
-    public String getFormattedContent(CompilationUnit compilationUnit) {
-        return compilationUnit.accept(this);
-    }
+	@Override
+	public String getFormattedContent(CompilationUnit compilationUnit) {
+		return compilationUnit.accept(this);
+	}
 
-    @Override
-    public void setContext(Context context) {
-        this.context = context;
-    }
+	@Override
+	public void setContext(Context context) {
+		this.context = context;
+	}
 
-    @Override
-    public String visit(TopLevelClass topLevelClass) {
-        StringWriter stringWriter = new StringWriter();
-        formatter.format(new StringReader(new TopLevelClassRenderer().render(topLevelClass))).writeTo(stringWriter);
-        return stringWriter.toString();
-    }
+	@Override
+	public String visit(TopLevelClass topLevelClass) {
+		StringWriter stringWriter = new StringWriter();
+		formatter.format(new StringReader(new TopLevelClassRenderer().render(topLevelClass))).writeTo(stringWriter);
+		return stringWriter.toString();
+	}
 
-    @Override
-    public String visit(TopLevelEnumeration topLevelEnumeration) {
-        StringWriter stringWriter = new StringWriter();
-        formatter.format(new StringReader(new TopLevelEnumerationRenderer().render(topLevelEnumeration)))
-                .writeTo(stringWriter);
-        return stringWriter.toString();
-    }
+	@Override
+	public String visit(TopLevelEnumeration topLevelEnumeration) {
+		StringWriter stringWriter = new StringWriter();
+		formatter.format(new StringReader(new TopLevelEnumerationRenderer().render(topLevelEnumeration)))
+			.writeTo(stringWriter);
+		return stringWriter.toString();
+	}
 
-    @Override
-    public String visit(Interface topLevelInterface) {
-        StringWriter stringWriter = new StringWriter();
-        formatter.format(new StringReader(new TopLevelInterfaceRenderer().render(topLevelInterface)))
-                .writeTo(stringWriter);
-        return stringWriter.toString();
-    }
+	@Override
+	public String visit(Interface topLevelInterface) {
+		StringWriter stringWriter = new StringWriter();
+		formatter.format(new StringReader(new TopLevelInterfaceRenderer().render(topLevelInterface)))
+			.writeTo(stringWriter);
+		return stringWriter.toString();
+	}
 
 }

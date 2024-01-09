@@ -20,37 +20,37 @@ import java.util.Set;
 
 public class Utils {
 
-    public static Set<FullyQualifiedJavaType> getRelatedFieldType(IntrospectedTable introspectedTable) {
-        Set<FullyQualifiedJavaType> relatedFieldType = new HashSet<>();
-        TopLevelClass modelClass = (TopLevelClass) introspectedTable
-                .getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
-        if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.MANY_TO_ONE)) {
-            List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.MANY_TO_ONE);
-            if (fields.size() > 0) {
-                for (Field field : fields) {
-                    relatedFieldType.add(field.getType());
-                }
-            }
-        }
+	public static Set<FullyQualifiedJavaType> getRelatedFieldType(IntrospectedTable introspectedTable) {
+		Set<FullyQualifiedJavaType> relatedFieldType = new HashSet<>();
+		TopLevelClass modelClass = (TopLevelClass) introspectedTable
+			.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
+		if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.MANY_TO_ONE)) {
+			List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.MANY_TO_ONE);
+			if (fields.size() > 0) {
+				for (Field field : fields) {
+					relatedFieldType.add(field.getType());
+				}
+			}
+		}
 
-        if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.ONE_TO_MANY)) {
-            List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.ONE_TO_MANY);
-            if (fields.size() > 0) {
-                for (Field field : fields) {
-                    relatedFieldType.add(field.getType().getTypeArguments().get(0));
-                }
-            }
-        }
-        return relatedFieldType;
-    }
+		if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.ONE_TO_MANY)) {
+			List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.ONE_TO_MANY);
+			if (fields.size() > 0) {
+				for (Field field : fields) {
+					relatedFieldType.add(field.getType().getTypeArguments().get(0));
+				}
+			}
+		}
+		return relatedFieldType;
+	}
 
-    public static String lowerCaseFirstChar(String s) {
-        if (Character.isLowerCase(s.charAt(0))) {
-            return s;
-        }
-        else {
-            return Character.toLowerCase(s.charAt(0)) + s.substring(1);
-        }
-    }
+	public static String lowerCaseFirstChar(String s) {
+		if (Character.isLowerCase(s.charAt(0))) {
+			return s;
+		}
+		else {
+			return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+		}
+	}
 
 }

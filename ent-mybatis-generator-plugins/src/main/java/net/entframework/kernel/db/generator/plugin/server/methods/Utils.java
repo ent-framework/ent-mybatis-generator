@@ -22,59 +22,59 @@ import java.util.Set;
 
 public class Utils {
 
-    public static boolean generateDeleteByPrimaryKey(IntrospectedTable introspectedTable) {
-        return introspectedTable.hasPrimaryKeyColumns();
-    }
+	public static boolean generateDeleteByPrimaryKey(IntrospectedTable introspectedTable) {
+		return introspectedTable.hasPrimaryKeyColumns();
+	}
 
-    public static boolean generateMultipleRowInsert(IntrospectedTable introspectedTable) {
-        // multi row inserts work if we don't expect generated keys, or of the generated
-        // keys are
-        // JDBC standard.
-        return introspectedTable.getGeneratedKey().map(GeneratedKey::isJdbcStandard).orElse(true);
-    }
+	public static boolean generateMultipleRowInsert(IntrospectedTable introspectedTable) {
+		// multi row inserts work if we don't expect generated keys, or of the generated
+		// keys are
+		// JDBC standard.
+		return introspectedTable.getGeneratedKey().map(GeneratedKey::isJdbcStandard).orElse(true);
+	}
 
-    public static boolean canRetrieveMultiRowGeneratedKeys(IntrospectedTable introspectedTable) {
-        // if the generated keys are JDBC standard, then we can retrieve them
-        // if no generated keys, or not JDBC, then we cannot retrieve them
-        return introspectedTable.getGeneratedKey().map(GeneratedKey::isJdbcStandard).orElse(false);
-    }
+	public static boolean canRetrieveMultiRowGeneratedKeys(IntrospectedTable introspectedTable) {
+		// if the generated keys are JDBC standard, then we can retrieve them
+		// if no generated keys, or not JDBC, then we cannot retrieve them
+		return introspectedTable.getGeneratedKey().map(GeneratedKey::isJdbcStandard).orElse(false);
+	}
 
-    public static boolean generateSelectByPrimaryKey(IntrospectedTable introspectedTable) {
-        return introspectedTable.hasPrimaryKeyColumns()
-                && (introspectedTable.hasBaseColumns() || introspectedTable.hasBLOBColumns());
-    }
+	public static boolean generateSelectByPrimaryKey(IntrospectedTable introspectedTable) {
+		return introspectedTable.hasPrimaryKeyColumns()
+				&& (introspectedTable.hasBaseColumns() || introspectedTable.hasBLOBColumns());
+	}
 
-    public static boolean generateUpdateByPrimaryKey(IntrospectedTable introspectedTable) {
-        if (ListUtilities.removeGeneratedAlwaysColumns(introspectedTable.getNonPrimaryKeyColumns()).isEmpty()) {
-            return false;
-        }
+	public static boolean generateUpdateByPrimaryKey(IntrospectedTable introspectedTable) {
+		if (ListUtilities.removeGeneratedAlwaysColumns(introspectedTable.getNonPrimaryKeyColumns()).isEmpty()) {
+			return false;
+		}
 
-        return introspectedTable.hasPrimaryKeyColumns()
-                && (introspectedTable.hasBLOBColumns() || introspectedTable.hasBaseColumns());
-    }
+		return introspectedTable.hasPrimaryKeyColumns()
+				&& (introspectedTable.hasBLOBColumns() || introspectedTable.hasBaseColumns());
+	}
 
-    public static Set<FullyQualifiedJavaType> getRelatedFieldType(IntrospectedTable introspectedTable) {
-        Set<FullyQualifiedJavaType> relatedFieldType = new HashSet<>();
-        TopLevelClass modelClass = (TopLevelClass) introspectedTable
-                .getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
-        if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.MANY_TO_ONE)) {
-            List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.MANY_TO_ONE);
-            if (fields.size() > 0) {
-                for (Field field : fields) {
-                    relatedFieldType.add(field.getType());
-                }
-            }
-        }
+	public static Set<FullyQualifiedJavaType> getRelatedFieldType(IntrospectedTable introspectedTable) {
+		Set<FullyQualifiedJavaType> relatedFieldType = new HashSet<>();
+		TopLevelClass modelClass = (TopLevelClass) introspectedTable
+			.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
+		if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.MANY_TO_ONE)) {
+			List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.MANY_TO_ONE);
+			if (fields.size() > 0) {
+				for (Field field : fields) {
+					relatedFieldType.add(field.getType());
+				}
+			}
+		}
 
-        if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.ONE_TO_MANY)) {
-            List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.ONE_TO_MANY);
-            if (fields.size() > 0) {
-                for (Field field : fields) {
-                    relatedFieldType.add(field.getType().getTypeArguments().get(0));
-                }
-            }
-        }
-        return relatedFieldType;
-    }
+		if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.ONE_TO_MANY)) {
+			List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.ONE_TO_MANY);
+			if (fields.size() > 0) {
+				for (Field field : fields) {
+					relatedFieldType.add(field.getType().getTypeArguments().get(0));
+				}
+			}
+		}
+		return relatedFieldType;
+	}
 
 }

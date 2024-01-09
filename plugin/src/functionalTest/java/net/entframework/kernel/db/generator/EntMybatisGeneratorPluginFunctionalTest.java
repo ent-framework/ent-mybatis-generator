@@ -18,39 +18,39 @@ import static org.junit.jupiter.api.Assertions.*;
  * A simple functional test for the 'io.entframework.kernel.db.generator.greeting' plugin.
  */
 class EntMybatisGeneratorPluginFunctionalTest {
-    @TempDir
-    File projectDir;
 
-    private File getBuildFile() {
-        return new File(projectDir, "build.gradle");
-    }
+	@TempDir
+	File projectDir;
 
-    private File getSettingsFile() {
-        return new File(projectDir, "settings.gradle");
-    }
+	private File getBuildFile() {
+		return new File(projectDir, "build.gradle");
+	}
 
-    @Test void canRunTask() throws IOException {
-        writeString(getSettingsFile(), "");
-        writeString(getBuildFile(),
-            "plugins {" +
-            "  id('net.entframework.kernel.db.generator.greeting')" +
-            "}");
+	private File getSettingsFile() {
+		return new File(projectDir, "settings.gradle");
+	}
 
-        // Run the build
-        GradleRunner runner = GradleRunner.create();
-        runner.forwardOutput();
-        runner.withPluginClasspath();
-        runner.withArguments("greeting");
-        runner.withProjectDir(projectDir);
-        BuildResult result = runner.build();
+	@Test
+	void canRunTask() throws IOException {
+		writeString(getSettingsFile(), "");
+		writeString(getBuildFile(), "plugins {" + "  id('net.entframework.kernel.db.generator.greeting')" + "}");
 
-        // Verify the result
-        assertTrue(result.getOutput().contains("Hello from plugin 'net.entframework.kernel.db.generator.greeting'"));
-    }
+		// Run the build
+		GradleRunner runner = GradleRunner.create();
+		runner.forwardOutput();
+		runner.withPluginClasspath();
+		runner.withArguments("greeting");
+		runner.withProjectDir(projectDir);
+		BuildResult result = runner.build();
 
-    private void writeString(File file, String string) throws IOException {
-        try (Writer writer = new FileWriter(file)) {
-            writer.write(string);
-        }
-    }
+		// Verify the result
+		assertTrue(result.getOutput().contains("Hello from plugin 'net.entframework.kernel.db.generator.greeting'"));
+	}
+
+	private void writeString(File file, String string) throws IOException {
+		try (Writer writer = new FileWriter(file)) {
+			writer.write(string);
+		}
+	}
+
 }

@@ -6,30 +6,32 @@ import java.util.List;
 import java.util.Set;
 
 public class TypescriptImport {
-    private Set<String> objects = new HashSet<>();
 
-    private String path;
+	private Set<String> objects = new HashSet<>();
 
-    private boolean isInterface;
+	private String path;
 
-    public TypescriptImport(String path, boolean isInterface) {
-        this.path = path;
-        this.isInterface = isInterface;
-    }
+	private boolean isInterface;
 
-    public Set<String> getObjects() {
-        return objects;
-    }
+	public TypescriptImport(String path, boolean isInterface) {
+		this.path = path;
+		this.isInterface = isInterface;
+	}
 
-    public String getPath() {
-        return path;
-    }
+	public Set<String> getObjects() {
+		return objects;
+	}
 
-    public void setPath(String path) {
-        this.path = path;
-    }
+	public String getPath() {
+		return path;
+	}
 
-    public boolean isInterface() {
-        return isInterface;
-    }
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public boolean isInterface() {
+		return isInterface;
+	}
+
 }

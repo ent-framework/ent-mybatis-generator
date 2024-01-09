@@ -22,49 +22,51 @@ import java.util.Map;
  */
 public class TemplateGenericViewPlugin extends AbstractTemplatePlugin {
 
-    private GeneratedFile generateModelClass() {
+	private GeneratedFile generateModelClass() {
 
-        FullyQualifiedTypescriptType tsBaseModelJavaType = new FullyQualifiedTypescriptType(
-                this.targetPackage + "." + this.fileName, true);
-        TypescriptTopLevelClass tsGenericClass = new TypescriptTopLevelClass(tsBaseModelJavaType);
+		FullyQualifiedTypescriptType tsBaseModelJavaType = new FullyQualifiedTypescriptType(
+				this.targetPackage + "." + this.fileName, true);
+		TypescriptTopLevelClass tsGenericClass = new TypescriptTopLevelClass(tsBaseModelJavaType);
 
-        tsGenericClass.setWriteMode(this.writeMode == null ? WriteMode.SKIP_ON_EXIST : this.writeMode);
+		tsGenericClass.setWriteMode(this.writeMode == null ? WriteMode.SKIP_ON_EXIST : this.writeMode);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("projectRootAlias", this.projectRootAlias);
-        data.put("modelPath", this.modelPath);
-        String apiPath = StringUtils.replace(this.apiPackage, ".", "/");
-        data.put("apiPath", apiPath);
-        data.put("viewPath", StringUtils.replace(this.viewPackage, ".", "/"));
-        data.putAll(getAdditionalPropertyMap());
+		Map<String, Object> data = new HashMap<>();
+		data.put("projectRootAlias", this.projectRootAlias);
+		data.put("modelPath", this.modelPath);
+		String apiPath = StringUtils.replace(this.apiPackage, ".", "/");
+		data.put("apiPath", apiPath);
+		data.put("viewPath", StringUtils.replace(this.viewPackage, ".", "/"));
+		data.putAll(getAdditionalPropertyMap());
 
-        List<ModelObject> modelObjects = new ArrayList<>();
+		List<ModelObject> modelObjects = new ArrayList<>();
 
-        List<IntrospectedTable> tables = this.context.getIntrospectedTables();
+		List<IntrospectedTable> tables = this.context.getIntrospectedTables();
 
-        for (IntrospectedTable table : tables) {
-            TopLevelClass topLevelClass = (TopLevelClass) table.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
-            if (topLevelClass != null) {
-                ModelObject.Builder builder = ModelObject.builder();
-                String modelObjectName = topLevelClass.getType().getShortName();
-                builder.name(modelObjectName).camelModelName(JavaBeansUtil.convertCamelCase(modelObjectName, "-"))
-                        .description(topLevelClass.getDescription()).type(modelObjectName);
-                modelObjects.add(builder.build());
-            }
-        }
+		for (IntrospectedTable table : tables) {
+			TopLevelClass topLevelClass = (TopLevelClass) table.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
+			if (topLevelClass != null) {
+				ModelObject.Builder builder = ModelObject.builder();
+				String modelObjectName = topLevelClass.getType().getShortName();
+				builder.name(modelObjectName)
+					.camelModelName(JavaBeansUtil.convertCamelCase(modelObjectName, "-"))
+					.description(topLevelClass.getDescription())
+					.type(modelObjectName);
+				modelObjects.add(builder.build());
+			}
+		}
 
-        data.put("models", modelObjects);
+		data.put("models", modelObjects);
 
-        return new TemplateGeneratedFile(tsGenericClass,
-                context.getJavaModelGeneratorConfiguration().getTargetProject(), data, this.templatePath, this.fileName,
-                this.fileExt);
-    }
+		return new TemplateGeneratedFile(tsGenericClass,
+				context.getJavaModelGeneratorConfiguration().getTargetProject(), data, this.templatePath, this.fileName,
+				this.fileExt);
+	}
 
-    @Override
-    public List<GeneratedFile> contextGenerateAdditionalFiles() {
-        List<GeneratedFile> generatedFiles = new ArrayList<>();
-        generatedFiles.add(generateModelClass());
-        return generatedFiles;
-    }
+	@Override
+	public List<GeneratedFile> contextGenerateAdditionalFiles() {
+		List<GeneratedFile> generatedFiles = new ArrayList<>();
+		generatedFiles.add(generateModelClass());
+		return generatedFiles;
+	}
 
 }

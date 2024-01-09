@@ -13,74 +13,75 @@ import java.util.List;
 
 public class IntrospectedTableTypescriptImpl extends IntrospectedTable {
 
-    protected final List<AbstractJavaGenerator> javaGenerators = new ArrayList<>();
+	protected final List<AbstractJavaGenerator> javaGenerators = new ArrayList<>();
 
-    public IntrospectedTableTypescriptImpl() {
-        super(TargetRuntime.MYBATIS3_DSQL);
-    }
+	public IntrospectedTableTypescriptImpl() {
+		super(TargetRuntime.MYBATIS3_DSQL);
+	}
 
-    @Override
-    public void calculateGenerators(List<String> warnings, ProgressCallback progressCallback) {
-        AbstractJavaGenerator javaGenerator = new TypescriptModelGenerator(getModelProject());
-        initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
+	@Override
+	public void calculateGenerators(List<String> warnings, ProgressCallback progressCallback) {
+		AbstractJavaGenerator javaGenerator = new TypescriptModelGenerator(getModelProject());
+		initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
 
-        if (context.getJavaClientGeneratorConfiguration() != null) {
-            TypescriptClientGenerator typescriptApiGenerator = new TypescriptClientGenerator(getModelProject());
-            initializeAbstractGenerator(typescriptApiGenerator, warnings, progressCallback);
-            javaGenerators.add(typescriptApiGenerator);
-        }
+		if (context.getJavaClientGeneratorConfiguration() != null) {
+			TypescriptClientGenerator typescriptApiGenerator = new TypescriptClientGenerator(getModelProject());
+			initializeAbstractGenerator(typescriptApiGenerator, warnings, progressCallback);
+			javaGenerators.add(typescriptApiGenerator);
+		}
 
-        javaGenerators.add(javaGenerator);
-    }
+		javaGenerators.add(javaGenerator);
+	}
 
-    private String getModelProject() {
-        return context.getJavaModelGeneratorConfiguration().getTargetProject();
-    }
+	private String getModelProject() {
+		return context.getJavaModelGeneratorConfiguration().getTargetProject();
+	}
 
-    protected void initializeAbstractGenerator(AbstractGenerator abstractGenerator, List<String> warnings,
-                                               ProgressCallback progressCallback) {
-        if (abstractGenerator == null) {
-            return;
-        }
-        abstractGenerator.setContext(context);
-        abstractGenerator.setIntrospectedTable(this);
-        abstractGenerator.setProgressCallback(progressCallback);
-        abstractGenerator.setWarnings(warnings);
-    }
+	protected void initializeAbstractGenerator(AbstractGenerator abstractGenerator, List<String> warnings,
+			ProgressCallback progressCallback) {
+		if (abstractGenerator == null) {
+			return;
+		}
+		abstractGenerator.setContext(context);
+		abstractGenerator.setIntrospectedTable(this);
+		abstractGenerator.setProgressCallback(progressCallback);
+		abstractGenerator.setWarnings(warnings);
+	}
 
-    @Override
-    public List<GeneratedJavaFile> getGeneratedJavaFiles() {
-        List<GeneratedJavaFile> answer = new ArrayList<>();
+	@Override
+	public List<GeneratedJavaFile> getGeneratedJavaFiles() {
+		List<GeneratedJavaFile> answer = new ArrayList<>();
 
-        for (AbstractJavaGenerator javaGenerator : javaGenerators) {
-            List<CompilationUnit> compilationUnits = javaGenerator.getCompilationUnits();
-            for (CompilationUnit compilationUnit : compilationUnits) {
-                GeneratedJavaFile gjf = new GeneratedTypescriptFile(compilationUnit, javaGenerator.getProject(),
-                        context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING), context.getJavaFormatter());
-                answer.add(gjf);
-            }
-        }
+		for (AbstractJavaGenerator javaGenerator : javaGenerators) {
+			List<CompilationUnit> compilationUnits = javaGenerator.getCompilationUnits();
+			for (CompilationUnit compilationUnit : compilationUnits) {
+				GeneratedJavaFile gjf = new GeneratedTypescriptFile(compilationUnit, javaGenerator.getProject(),
+						context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING), context.getJavaFormatter());
+				answer.add(gjf);
+			}
+		}
 
-        return answer;
-    }
+		return answer;
+	}
 
-    @Override
-    public List<GeneratedXmlFile> getGeneratedXmlFiles() {
-        return Collections.emptyList();
-    }
+	@Override
+	public List<GeneratedXmlFile> getGeneratedXmlFiles() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    public List<GeneratedKotlinFile> getGeneratedKotlinFiles() {
-        return Collections.emptyList();
-    }
+	@Override
+	public List<GeneratedKotlinFile> getGeneratedKotlinFiles() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    public int getGenerationSteps() {
-        return 0;
-    }
+	@Override
+	public int getGenerationSteps() {
+		return 0;
+	}
 
-    @Override
-    public boolean requiresXMLGenerator() {
-        return false;
-    }
+	@Override
+	public boolean requiresXMLGenerator() {
+		return false;
+	}
+
 }

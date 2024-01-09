@@ -16,38 +16,39 @@ import java.util.Set;
 
 public class RepConstructorGenerator extends AbstractMethodGenerator {
 
-    public RepConstructorGenerator(BuildConfig builder) {
-        super(builder);
-    }
+	public RepConstructorGenerator(BuildConfig builder) {
+		super(builder);
+	}
 
-    @Override
-    public MethodAndImports generateMethodAndImports() {
-        Set<FullyQualifiedJavaType> imports = new HashSet<>();
-        Set<String> staticImports = new HashSet<>();
+	@Override
+	public MethodAndImports generateMethodAndImports() {
+		Set<FullyQualifiedJavaType> imports = new HashSet<>();
+		Set<String> staticImports = new HashSet<>();
 
-        imports.add(recordType);
+		imports.add(recordType);
 
-        Method constructorMethod = new Method(this.hostJavaClass.getType().getShortName()); // $NON-NLS-1$
-        constructorMethod.setConstructor(true);
-        constructorMethod.setAbstract(isAbstract);
+		Method constructorMethod = new Method(this.hostJavaClass.getType().getShortName()); // $NON-NLS-1$
+		constructorMethod.setConstructor(true);
+		constructorMethod.setAbstract(isAbstract);
 
-        FullyQualifiedJavaType parameterType = getMapperJavaType(); // $NON-NLS-1$
-        imports.add(parameterType);
-        constructorMethod
-                .addParameter(new Parameter(parameterType, StringUtils.uncapitalize(parameterType.getShortName()))); // $NON-NLS-1$
+		FullyQualifiedJavaType parameterType = getMapperJavaType(); // $NON-NLS-1$
+		imports.add(parameterType);
+		constructorMethod
+			.addParameter(new Parameter(parameterType, StringUtils.uncapitalize(parameterType.getShortName()))); // $NON-NLS-1$
 
-        if (!isAbstract) {
+		if (!isAbstract) {
 
-            constructorMethod.setVisibility(JavaVisibility.PUBLIC);
+			constructorMethod.setVisibility(JavaVisibility.PUBLIC);
 
-            constructorMethod.addBodyLine(String.format("super(%s, %s.class);",
-                    StringUtils.uncapitalize(parameterType.getShortName()), recordType.getShortName()));
+			constructorMethod.addBodyLine(String.format("super(%s, %s.class);",
+					StringUtils.uncapitalize(parameterType.getShortName()), recordType.getShortName()));
 
-        }
-        MethodAndImports.Builder builder = MethodAndImports.withMethod(constructorMethod).withImports(imports)
-                .withStaticImports(staticImports);
+		}
+		MethodAndImports.Builder builder = MethodAndImports.withMethod(constructorMethod)
+			.withImports(imports)
+			.withStaticImports(staticImports);
 
-        return builder.build();
-    }
+		return builder.build();
+	}
 
 }

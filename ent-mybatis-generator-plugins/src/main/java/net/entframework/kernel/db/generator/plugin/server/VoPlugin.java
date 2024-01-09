@@ -28,98 +28,113 @@ import java.util.List;
  */
 public class VoPlugin extends AbstractServerPlugin {
 
-    @Override
-    public boolean validate(List<String> warnings) {
+	@Override
+	public boolean validate(List<String> warnings) {
 
-        boolean validate = super.validate(warnings);
+		boolean validate = super.validate(warnings);
 
-        if (StringUtils.isAnyEmpty(this.voTargetPackage, this.voSuffix, this.mapstructTargetPackage,
-                this.mapstructSuffix)) {
-            warnings.add("请检查PojoPlugin配置");
-            return false;
-        }
+		if (StringUtils.isAnyEmpty(this.voTargetPackage, this.voSuffix, this.mapstructTargetPackage,
+				this.mapstructSuffix)) {
+			warnings.add("请检查PojoPlugin配置");
+			return false;
+		}
 
-        return validate;
-    }
+		return validate;
+	}
 
-    /***
-     * 在model产生后新增pojo request 和 pojo response 插件注册时要注意顺序，因为需要从TopLevelClass读取所有Field
-     * @param topLevelClass the generated base record class
-     * @param introspectedTable The class containing information about the table as
-     * introspected from the database
-     * @return
-     */
-    public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        FullyQualifiedJavaType qualifiedJavaType = topLevelClass.getType();
-        VoFieldsGenerator pojoFieldsGenerator = new VoFieldsGenerator(this.context, this.codingStyle,
-                this.voTargetPackage, this.voSuffix, qualifiedJavaType);
+	/***
+	 * 在model产生后新增pojo request 和 pojo response 插件注册时要注意顺序，因为需要从TopLevelClass读取所有Field
+	 * @param topLevelClass the generated base record class
+	 * @param introspectedTable The class containing information about the table as
+	 * introspected from the database
+	 * @return
+	 */
+	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+		FullyQualifiedJavaType qualifiedJavaType = topLevelClass.getType();
+		VoFieldsGenerator pojoFieldsGenerator = new VoFieldsGenerator(this.context, this.codingStyle,
+				this.voTargetPackage, this.voSuffix, qualifiedJavaType);
 
-        // 判断是否包含Entity父类
-        String rootClass = this.context.getJavaModelGeneratorConfiguration().getProperty("rootClass");
-        if (StringUtils.isNotEmpty(rootClass)) {
-            ClassInfo classInfo = ClassInfo.getInstance(rootClass);
-            TopLevelClass parentEntityClass = classInfo.toTopLevelClass();
-            if (parentEntityClass != null) {
-                topLevelClass.setAttribute(Constants.PARENT_ENTITY_CLASS, parentEntityClass);
-            }
-        }
-        generatedJavaFiles.add(generateVO(topLevelClass, introspectedTable, pojoFieldsGenerator));
+		// 判断是否包含Entity父类
+		String rootClass = this.context.getJavaModelGeneratorConfiguration().getProperty("rootClass");
+		if (StringUtils.isNotEmpty(rootClass)) {
+			ClassInfo classInfo = ClassInfo.getInstance(rootClass);
+			TopLevelClass parentEntityClass = classInfo.toTopLevelClass();
+			if (parentEntityClass != null) {
+				topLevelClass.setAttribute(Constants.PARENT_ENTITY_CLASS, parentEntityClass);
+			}
+		}
+		generatedJavaFiles.add(generateVO(topLevelClass, introspectedTable, pojoFieldsGenerator));
 
-        return true;
-    }
+		return true;
+	}
 
-    private GeneratedJavaFile generateVO(TopLevelClass topLevelClass, IntrospectedTable introspectedTable,
-                                         VoFieldsGenerator pojoFieldsGenerator) {
-        String modelObjectName = topLevelClass.getType().getShortNameWithoutTypeArguments();
+	private GeneratedJavaFile generateVO(TopLevelClass topLevelClass, IntrospectedTable introspectedTable,
+			VoFieldsGenerator pojoFieldsGenerator) {
+		String modelObjectName = topLevelClass.getType().getShortNameWithoutTypeArguments();
 
-        FullyQualifiedJavaType voJavaType = getVoJavaType(modelObjectName);
-        TopLevelClass voClass = new TopLevelClass(voJavaType);
-        voClass.setVisibility(JavaVisibility.PUBLIC);
-        if (StringUtils.isNotEmpty(this.voRootClass)) {
-            voClass.setSuperClass(this.voRootClass);
-            voClass.addImportedType(this.voRootClass);
+		FullyQualifiedJavaType voJavaType = getVoJavaType(modelObjectName);
+		TopLevelClass voClass = new TopLevelClass(voJavaType);
+		voClass.setVisibility(JavaVisibility.PUBLIC);
 
-            ClassInfo classInfo = ClassInfo.getInstance(this.voRootClass);
-            TopLevelClass parentRequestClass = classInfo.toTopLevelClass();
-            if (parentRequestClass != null) {
-                voClass.setAttribute(Constants.PARENT_REQUEST_CLASS, parentRequestClass);
-            }
-        }
+		boolean voParentTableFound = false;
+		if (StringUtils.isNotEmpty(introspectedTable.getTableConfiguration().getParentTable())) {
+			IntrospectedTable parentTable = findParentTable(this.context.getIntrospectedTables(),
+					introspectedTable.getTableConfiguration().getParentTable());
+			if (parentTable != null) {
+				voParentTableFound = true;
+				FullyQualifiedJavaType parent = getVoJavaType(
+						parentTable.getFullyQualifiedTable().getDomainObjectName());
+				voClass.setSuperClass(parent);
+			}
+		}
 
-        voClass.setWriteMode(this.writeMode == null ? WriteMode.OVER_WRITE : this.writeMode);
+		if (StringUtils.isNotEmpty(this.voRootClass)) {
+			if (!voParentTableFound) {
+				voClass.setSuperClass(this.voRootClass);
+				voClass.addImportedType(this.voRootClass);
+			}
+			ClassInfo classInfo = ClassInfo.getInstance(this.voRootClass);
+			TopLevelClass parentRequestClass = classInfo.toTopLevelClass();
+			if (parentRequestClass != null) {
+				voClass.setAttribute(Constants.PARENT_REQUEST_CLASS, parentRequestClass);
+			}
+		}
 
-        GeneratorUtils.addComment(voClass, topLevelClass.getDescription() + " VO类");
+		voClass.setWriteMode(this.writeMode == null ? WriteMode.OVER_WRITE : this.writeMode);
 
-        addLombokAnnotation(voClass);
+		GeneratorUtils.addComment(voClass, topLevelClass.getDescription() + " VO类");
 
-        FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable);
+		addLombokAnnotation(voClass);
 
-        fieldAndImports.getFields().forEach(voClass::addField);
-        fieldAndImports.getImports().forEach(voClass::addImportedType);
+		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable);
 
-        GeneratedJavaFile generatedJavaFile = new GeneratedJavaFile(voClass, context.getJavaModelGeneratorConfiguration().getTargetProject(),
-                context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING), context.getJavaFormatter());
-        generatedJavaFile.setOutputDirectory(getOutputDirectory());
-        return generatedJavaFile;
-    }
+		fieldAndImports.getFields().forEach(voClass::addField);
+		fieldAndImports.getImports().forEach(voClass::addImportedType);
 
-    private void addLombokAnnotation(TopLevelClass topLevelClass) {
-        topLevelClass.addImportedType(LombokAnnotation.DATA.getJavaType());
-        topLevelClass.addAnnotation(LombokAnnotation.DATA.getName());
-        topLevelClass.addImportedType(LombokAnnotation.EqualsAndHashCode.getJavaType());
-        topLevelClass.addAnnotation(LombokAnnotation.EqualsAndHashCode.getName());
-        topLevelClass.addImportedType(LombokAnnotation.ALL_ARGS_CONSTRUCTOR.getJavaType());
-        topLevelClass.addAnnotation(LombokAnnotation.ALL_ARGS_CONSTRUCTOR.getName());
-        topLevelClass.addImportedType(LombokAnnotation.NO_ARGS_CONSTRUCTOR.getJavaType());
-        topLevelClass.addAnnotation(LombokAnnotation.NO_ARGS_CONSTRUCTOR.getName());
-    }
+		GeneratedJavaFile generatedJavaFile = new GeneratedJavaFile(voClass,
+				context.getJavaModelGeneratorConfiguration().getTargetProject(),
+				context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING), context.getJavaFormatter());
+		generatedJavaFile.setOutputDirectory(getOutputDirectory());
+		return generatedJavaFile;
+	}
 
-    /**
-     * @return
-     */
-    @Override
-    public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles() {
-        return generatedJavaFiles;
-    }
+	private void addLombokAnnotation(TopLevelClass topLevelClass) {
+		topLevelClass.addImportedType(LombokAnnotation.DATA.getJavaType());
+		topLevelClass.addAnnotation(LombokAnnotation.DATA.getName());
+		topLevelClass.addImportedType(LombokAnnotation.EqualsAndHashCode.getJavaType());
+		topLevelClass.addAnnotation(LombokAnnotation.EqualsAndHashCode.getName());
+		topLevelClass.addImportedType(LombokAnnotation.ALL_ARGS_CONSTRUCTOR.getJavaType());
+		topLevelClass.addAnnotation(LombokAnnotation.ALL_ARGS_CONSTRUCTOR.getName());
+		topLevelClass.addImportedType(LombokAnnotation.NO_ARGS_CONSTRUCTOR.getJavaType());
+		topLevelClass.addAnnotation(LombokAnnotation.NO_ARGS_CONSTRUCTOR.getName());
+	}
+
+	/**
+	 * @return
+	 */
+	@Override
+	public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles() {
+		return generatedJavaFiles;
+	}
 
 }

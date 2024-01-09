@@ -50,206 +50,213 @@ import org.mybatis.generator.internal.util.StringUtility;
  */
 public class IntrospectedTableMyBatis3Impl extends IntrospectedTable {
 
-    protected final List<AbstractJavaGenerator> javaGenerators = new ArrayList<>();
+	protected final List<AbstractJavaGenerator> javaGenerators = new ArrayList<>();
 
-    protected final List<AbstractKotlinGenerator> kotlinGenerators = new ArrayList<>();
+	protected final List<AbstractKotlinGenerator> kotlinGenerators = new ArrayList<>();
 
-    protected AbstractXmlGenerator xmlMapperGenerator;
+	protected AbstractXmlGenerator xmlMapperGenerator;
 
-    public IntrospectedTableMyBatis3Impl() {
-        super(TargetRuntime.MYBATIS3);
-    }
+	public IntrospectedTableMyBatis3Impl() {
+		super(TargetRuntime.MYBATIS3);
+	}
 
-    @Override
-    public void calculateGenerators(List<String> warnings, ProgressCallback progressCallback) {
-        calculateJavaModelGenerators(warnings, progressCallback);
+	@Override
+	public void calculateGenerators(List<String> warnings, ProgressCallback progressCallback) {
+		calculateJavaModelGenerators(warnings, progressCallback);
 
-        AbstractJavaClientGenerator javaClientGenerator = calculateClientGenerators(warnings, progressCallback);
+		AbstractJavaClientGenerator javaClientGenerator = calculateClientGenerators(warnings, progressCallback);
 
-        calculateXmlMapperGenerator(javaClientGenerator, warnings, progressCallback);
-    }
+		calculateXmlMapperGenerator(javaClientGenerator, warnings, progressCallback);
+	}
 
-    protected void calculateXmlMapperGenerator(AbstractJavaClientGenerator javaClientGenerator, List<String> warnings,
-            ProgressCallback progressCallback) {
-        if (javaClientGenerator == null) {
-            if (context.getSqlMapGeneratorConfiguration() != null) {
-                xmlMapperGenerator = new XMLMapperGenerator();
-            }
-        }
-        else {
-            xmlMapperGenerator = javaClientGenerator.getMatchedXMLGenerator();
-        }
+	protected void calculateXmlMapperGenerator(AbstractJavaClientGenerator javaClientGenerator, List<String> warnings,
+			ProgressCallback progressCallback) {
+		if (javaClientGenerator == null) {
+			if (context.getSqlMapGeneratorConfiguration() != null) {
+				xmlMapperGenerator = new XMLMapperGenerator();
+			}
+		}
+		else {
+			xmlMapperGenerator = javaClientGenerator.getMatchedXMLGenerator();
+		}
 
-        initializeAbstractGenerator(xmlMapperGenerator, warnings, progressCallback);
-    }
+		initializeAbstractGenerator(xmlMapperGenerator, warnings, progressCallback);
+	}
 
-    protected AbstractJavaClientGenerator calculateClientGenerators(List<String> warnings,
-            ProgressCallback progressCallback) {
-        if (!rules.generateJavaClient()) {
-            return null;
-        }
+	protected AbstractJavaClientGenerator calculateClientGenerators(List<String> warnings,
+			ProgressCallback progressCallback) {
+		if (!rules.generateJavaClient()) {
+			return null;
+		}
 
-        AbstractJavaClientGenerator javaGenerator = createJavaClientGenerator();
-        if (javaGenerator == null) {
-            return null;
-        }
+		AbstractJavaClientGenerator javaGenerator = createJavaClientGenerator();
+		if (javaGenerator == null) {
+			return null;
+		}
 
-        initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
-        javaGenerators.add(javaGenerator);
+		initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
+		javaGenerators.add(javaGenerator);
 
-        return javaGenerator;
-    }
+		return javaGenerator;
+	}
 
-    protected AbstractJavaClientGenerator createJavaClientGenerator() {
-        if (context.getJavaClientGeneratorConfiguration() == null) {
-            return null;
-        }
+	protected AbstractJavaClientGenerator createJavaClientGenerator() {
+		if (context.getJavaClientGeneratorConfiguration() == null) {
+			return null;
+		}
 
-        String type = context.getJavaClientGeneratorConfiguration().getConfigurationType();
+		String type = context.getJavaClientGeneratorConfiguration().getConfigurationType();
 
-        AbstractJavaClientGenerator javaGenerator;
-        if ("XMLMAPPER".equalsIgnoreCase(type)) { //$NON-NLS-1$
-            javaGenerator = new JavaMapperGenerator(getClientProject());
-        }
-        else if ("MIXEDMAPPER".equalsIgnoreCase(type)) { //$NON-NLS-1$
-            javaGenerator = new MixedClientGenerator(getClientProject());
-        }
-        else if ("ANNOTATEDMAPPER".equalsIgnoreCase(type)) { //$NON-NLS-1$
-            javaGenerator = new AnnotatedClientGenerator(getClientProject());
-        }
-        else if ("MAPPER".equalsIgnoreCase(type)) { //$NON-NLS-1$
-            javaGenerator = new JavaMapperGenerator(getClientProject());
-        }
-        else {
-            javaGenerator = (AbstractJavaClientGenerator) ObjectFactory.createInternalObject(type);
-        }
+		AbstractJavaClientGenerator javaGenerator;
+		if ("XMLMAPPER".equalsIgnoreCase(type)) { //$NON-NLS-1$
+			javaGenerator = new JavaMapperGenerator(getClientProject());
+		}
+		else if ("MIXEDMAPPER".equalsIgnoreCase(type)) { //$NON-NLS-1$
+			javaGenerator = new MixedClientGenerator(getClientProject());
+		}
+		else if ("ANNOTATEDMAPPER".equalsIgnoreCase(type)) { //$NON-NLS-1$
+			javaGenerator = new AnnotatedClientGenerator(getClientProject());
+		}
+		else if ("MAPPER".equalsIgnoreCase(type)) { //$NON-NLS-1$
+			javaGenerator = new JavaMapperGenerator(getClientProject());
+		}
+		else {
+			javaGenerator = (AbstractJavaClientGenerator) ObjectFactory.createInternalObject(type);
+		}
 
-        return javaGenerator;
-    }
+		return javaGenerator;
+	}
 
-    protected void calculateJavaModelGenerators(List<String> warnings, ProgressCallback progressCallback) {
-        if (getRules().generateExampleClass()) {
-            AbstractJavaGenerator javaGenerator = new ExampleGenerator(getExampleProject());
-            initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
-            javaGenerators.add(javaGenerator);
-        }
+	protected void calculateJavaModelGenerators(List<String> warnings, ProgressCallback progressCallback) {
+		if (getRules().generateExampleClass()) {
+			AbstractJavaGenerator javaGenerator = new ExampleGenerator(getExampleProject());
+			initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
+			javaGenerators.add(javaGenerator);
+		}
 
-        if (getRules().generatePrimaryKeyClass()) {
-            AbstractJavaGenerator javaGenerator = new PrimaryKeyGenerator(getModelProject());
-            initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
-            javaGenerators.add(javaGenerator);
-        }
+		if (getRules().generatePrimaryKeyClass()) {
+			AbstractJavaGenerator javaGenerator = new PrimaryKeyGenerator(getModelProject());
+			initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
+			javaGenerators.add(javaGenerator);
+		}
 
-        if (getRules().generateBaseRecordClass()) {
-            AbstractJavaGenerator javaGenerator = new BaseRecordGenerator(getModelProject());
-            initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
-            javaGenerators.add(javaGenerator);
-        }
+		if (getRules().generateBaseRecordClass()) {
+			AbstractJavaGenerator javaGenerator = new BaseRecordGenerator(getModelProject());
+			initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
+			javaGenerators.add(javaGenerator);
+		}
 
-        if (getRules().generateRecordWithBLOBsClass()) {
-            AbstractJavaGenerator javaGenerator = new RecordWithBLOBsGenerator(getModelProject());
-            initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
-            javaGenerators.add(javaGenerator);
-        }
-    }
+		if (getRules().generateRecordWithBLOBsClass()) {
+			AbstractJavaGenerator javaGenerator = new RecordWithBLOBsGenerator(getModelProject());
+			initializeAbstractGenerator(javaGenerator, warnings, progressCallback);
+			javaGenerators.add(javaGenerator);
+		}
+	}
 
-    protected void initializeAbstractGenerator(AbstractGenerator abstractGenerator, List<String> warnings,
-            ProgressCallback progressCallback) {
-        if (abstractGenerator == null) {
-            return;
-        }
+	protected void initializeAbstractGenerator(AbstractGenerator abstractGenerator, List<String> warnings,
+			ProgressCallback progressCallback) {
+		if (abstractGenerator == null) {
+			return;
+		}
 
-        abstractGenerator.setContext(context);
-        abstractGenerator.setIntrospectedTable(this);
-        abstractGenerator.setProgressCallback(progressCallback);
-        abstractGenerator.setWarnings(warnings);
-    }
+		abstractGenerator.setContext(context);
+		abstractGenerator.setIntrospectedTable(this);
+		abstractGenerator.setProgressCallback(progressCallback);
+		abstractGenerator.setWarnings(warnings);
+	}
 
-    @Override
-    public List<GeneratedJavaFile> getGeneratedJavaFiles() {
-        List<GeneratedJavaFile> answer = new ArrayList<>();
+	@Override
+	public List<GeneratedJavaFile> getGeneratedJavaFiles() {
+		List<GeneratedJavaFile> answer = new ArrayList<>();
 
-        for (AbstractJavaGenerator javaGenerator : javaGenerators) {
-            List<CompilationUnit> compilationUnits = javaGenerator.getCompilationUnits();
-            for (CompilationUnit compilationUnit : compilationUnits) {
-                GeneratedJavaFile gjf = new GeneratedJavaFile(compilationUnit, javaGenerator.getProject(),
-                        context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING), context.getJavaFormatter());
-                answer.add(gjf);
-            }
-        }
+		for (AbstractJavaGenerator javaGenerator : javaGenerators) {
+			List<CompilationUnit> compilationUnits = javaGenerator.getCompilationUnits();
+			for (CompilationUnit compilationUnit : compilationUnits) {
+				GeneratedJavaFile gjf = new GeneratedJavaFile(compilationUnit, javaGenerator.getProject(),
+						context.getProperty(PropertyRegistry.CONTEXT_JAVA_FILE_ENCODING), context.getJavaFormatter());
+				if (StringUtility.stringHasValue(compilationUnit.getOutputDirectory())) {
+					gjf.setOutputDirectory(compilationUnit.getOutputDirectory());
+				}
+				answer.add(gjf);
+			}
+		}
 
-        return answer;
-    }
+		return answer;
+	}
 
-    @Override
-    public List<GeneratedKotlinFile> getGeneratedKotlinFiles() {
-        List<GeneratedKotlinFile> answer = new ArrayList<>();
+	@Override
+	public List<GeneratedKotlinFile> getGeneratedKotlinFiles() {
+		List<GeneratedKotlinFile> answer = new ArrayList<>();
 
-        for (AbstractKotlinGenerator kotlinGenerator : kotlinGenerators) {
-            List<KotlinFile> kotlinFiles = kotlinGenerator.getKotlinFiles();
-            for (KotlinFile kotlinFile : kotlinFiles) {
-                GeneratedKotlinFile gjf = new GeneratedKotlinFile(kotlinFile, kotlinGenerator.getProject(),
-                        context.getProperty(PropertyRegistry.CONTEXT_KOTLIN_FILE_ENCODING),
-                        context.getKotlinFormatter());
-                answer.add(gjf);
-            }
-        }
+		for (AbstractKotlinGenerator kotlinGenerator : kotlinGenerators) {
+			List<KotlinFile> kotlinFiles = kotlinGenerator.getKotlinFiles();
+			for (KotlinFile kotlinFile : kotlinFiles) {
+				GeneratedKotlinFile gjf = new GeneratedKotlinFile(kotlinFile, kotlinGenerator.getProject(),
+						context.getProperty(PropertyRegistry.CONTEXT_KOTLIN_FILE_ENCODING),
+						context.getKotlinFormatter());
+				answer.add(gjf);
+			}
+		}
 
-        return answer;
-    }
+		return answer;
+	}
 
-    protected String getClientProject() {
-        return context.getJavaClientGeneratorConfiguration().getTargetProject();
-    }
+	protected String getClientProject() {
+		return context.getJavaClientGeneratorConfiguration().getTargetProject();
+	}
 
-    protected String getModelProject() {
-        return context.getJavaModelGeneratorConfiguration().getTargetProject();
-    }
+	protected String getClientOutputDirectory() {
+		return context.getJavaClientGeneratorConfiguration().getProperty("outputDirectory");
+	}
 
-    protected String getExampleProject() {
-        String project = context.getJavaModelGeneratorConfiguration()
-                .getProperty(PropertyRegistry.MODEL_GENERATOR_EXAMPLE_PROJECT);
+	protected String getModelProject() {
+		return context.getJavaModelGeneratorConfiguration().getTargetProject();
+	}
 
-        if (StringUtility.stringHasValue(project)) {
-            return project;
-        }
-        else {
-            return getModelProject();
-        }
-    }
+	protected String getExampleProject() {
+		String project = context.getJavaModelGeneratorConfiguration()
+			.getProperty(PropertyRegistry.MODEL_GENERATOR_EXAMPLE_PROJECT);
 
-    @Override
-    public List<GeneratedXmlFile> getGeneratedXmlFiles() {
-        List<GeneratedXmlFile> answer = new ArrayList<>();
+		if (StringUtility.stringHasValue(project)) {
+			return project;
+		}
+		else {
+			return getModelProject();
+		}
+	}
 
-        if (xmlMapperGenerator != null) {
-            Document document = xmlMapperGenerator.getDocument();
-            GeneratedXmlFile gxf = new GeneratedXmlFile(document, getMyBatis3XmlMapperFileName(),
-                    getMyBatis3XmlMapperPackage(), context.getSqlMapGeneratorConfiguration().getTargetProject(), true,
-                    context.getXmlFormatter());
-            if (context.getPlugins().sqlMapGenerated(gxf, this)) {
-                answer.add(gxf);
-            }
-        }
+	@Override
+	public List<GeneratedXmlFile> getGeneratedXmlFiles() {
+		List<GeneratedXmlFile> answer = new ArrayList<>();
 
-        return answer;
-    }
+		if (xmlMapperGenerator != null) {
+			Document document = xmlMapperGenerator.getDocument();
+			GeneratedXmlFile gxf = new GeneratedXmlFile(document, getMyBatis3XmlMapperFileName(),
+					getMyBatis3XmlMapperPackage(), context.getSqlMapGeneratorConfiguration().getTargetProject(), true,
+					context.getXmlFormatter());
+			if (context.getPlugins().sqlMapGenerated(gxf, this)) {
+				answer.add(gxf);
+			}
+		}
 
-    @Override
-    public int getGenerationSteps() {
-        return javaGenerators.size() + (xmlMapperGenerator == null ? 0 : 1);
-    }
+		return answer;
+	}
 
-    @Override
-    public boolean requiresXMLGenerator() {
-        AbstractJavaClientGenerator javaClientGenerator = createJavaClientGenerator();
+	@Override
+	public int getGenerationSteps() {
+		return javaGenerators.size() + (xmlMapperGenerator == null ? 0 : 1);
+	}
 
-        if (javaClientGenerator == null) {
-            return false;
-        }
-        else {
-            return javaClientGenerator.requiresXMLGenerator();
-        }
-    }
+	@Override
+	public boolean requiresXMLGenerator() {
+		AbstractJavaClientGenerator javaClientGenerator = createJavaClientGenerator();
+
+		if (javaClientGenerator == null) {
+			return false;
+		}
+		else {
+			return javaClientGenerator.requiresXMLGenerator();
+		}
+	}
 
 }

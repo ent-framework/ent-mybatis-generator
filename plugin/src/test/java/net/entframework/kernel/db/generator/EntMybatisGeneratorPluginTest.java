@@ -12,12 +12,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * A simple unit test for the 'io.entframework.kernel.db.generator.greeting' plugin.
  */
 class EntMybatisGeneratorPluginTest {
-    @Test void pluginRegistersATask() {
-        // Create a test project and apply the plugin
-        Project project = ProjectBuilder.builder().build();
-        project.getPlugins().apply("net.entframework.kernel.db.generator.greeting");
 
-        // Verify the result
-        assertNotNull(project.getTasks().findByName("greeting"));
-    }
+	@Test
+	void pluginRegistersATask() {
+		// Create a test project and apply the plugin
+		Project project = ProjectBuilder.builder().build();
+		project.getPlugins().apply("net.entframework.kernel.db.generator.greeting");
+
+		// Verify the result
+		assertNotNull(project.getTasks().findByName("greeting"));
+	}
+
 }

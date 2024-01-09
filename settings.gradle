@@ -15,6 +15,7 @@ pluginManagement {
 
 rootProject.name = 'ent-mybatis-generator'
 include('plugin')
+include('ent-mybatis-apt')
 include('ent-mybatis-generator-core')
 include('ent-mybatis-generator-gradle-plugin')
 include('ent-mybatis-generator-maven-plugin')
