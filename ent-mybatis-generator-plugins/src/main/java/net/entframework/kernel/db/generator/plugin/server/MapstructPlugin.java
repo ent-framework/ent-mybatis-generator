@@ -117,7 +117,7 @@ public class MapstructPlugin extends AbstractServerPlugin {
 				StringUtils.uncapitalize(sourceType.getShortName()), targetType.getShortName()));
 		importTypes
 			.add(new FullyQualifiedJavaType("net.entframework.kernel.converter.support.ObjectConversionService"));
-		importTypes.add(new FullyQualifiedJavaType("cn.hutool.extra.spring.SpringUtil"));
+		importTypes.add(new FullyQualifiedJavaType("net.entframework.kernel.core.util.SpringUtil"));
 		innerInterface.addMethod(method);
 		return importTypes;
 	}

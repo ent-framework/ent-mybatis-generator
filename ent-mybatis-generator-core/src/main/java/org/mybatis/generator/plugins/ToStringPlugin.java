@@ -87,9 +87,11 @@ public class ToStringPlugin extends PluginAdapter {
 			sb.setLength(0);
 			sb.append("sb.append(\"") //$NON-NLS-1$
 				.append(", ") //$NON-NLS-1$
-				.append(property).append("=\")") //$NON-NLS-1$
+				.append(property)
+				.append("=\")") //$NON-NLS-1$
 				.append(".append(") //$NON-NLS-1$
-				.append(property).append(");"); //$NON-NLS-1$
+				.append(property)
+				.append(");"); //$NON-NLS-1$
 			method.addBodyLine(sb.toString());
 		}
 

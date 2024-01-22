@@ -375,7 +375,27 @@ public abstract class IntrospectedTable {
 			rules = new ConditionalModelRules(this);
 		}
 
-		context.getPlugins().initialized(this);
+		if (StringUtility.stringHasValue(this.tableConfiguration.getLogicDeleteColumn())
+				&& !findColumn(this.tableConfiguration.getLogicDeleteColumn())) {
+			throw new RuntimeException(
+					"can't find logic delete column(" + this.tableConfiguration.getLogicDeleteColumn() + ") in table ("
+							+ this.getFullyQualifiedTable().getIntrospectedTableName() + ")");
+		}
+		if (StringUtility.stringHasValue(this.tableConfiguration.getVersionColumn())
+				&& !findColumn(this.tableConfiguration.getVersionColumn())) {
+			throw new RuntimeException("can't find version column(" + this.tableConfiguration.getVersionColumn()
+					+ ") in table (" + this.getFullyQualifiedTable().getIntrospectedTableName() + ")");
+		}
+		if (StringUtility.stringHasValue(this.tableConfiguration.getTenantColumn())
+				&& !findColumn(this.tableConfiguration.getTenantColumn())) {
+			throw new RuntimeException("can't find tenant column(" + this.tableConfiguration.getTenantColumn()
+					+ ") in table (" + this.getFullyQualifiedTable().getIntrospectedTableName() + ")");
+		}
+		if (StringUtility.stringHasValue(this.tableConfiguration.getDisplayField())
+				&& !findColumn(this.tableConfiguration.getDisplayField())) {
+			throw new RuntimeException("can't find display field (" + this.tableConfiguration.getDisplayField()
+					+ ") in table (" + this.getFullyQualifiedTable().getIntrospectedTableName() + ")");
+		}
 
 		if (StringUtility.stringHasValue(this.tableConfiguration.getParentTable())) {
 			IntrospectedTable parentTable = this.context.getIntrospectedTables()
@@ -388,7 +408,13 @@ public abstract class IntrospectedTable {
 			if (parentTable != null) {
 				parentTable.setMappedSuperclass(true);
 			}
+			else {
+				throw new RuntimeException(this.tableConfiguration.getParentTable() + " can't find in context");
+			}
 		}
+
+		context.getPlugins().initialized(this);
+
 	}
 
 	protected void calculateXmlAttributes() {
@@ -949,6 +975,10 @@ public abstract class IntrospectedTable {
 
 	public TargetRuntime getTargetRuntime() {
 		return targetRuntime;
+	}
+
+	public boolean findColumn(String columnName) {
+		return this.getColumn(columnName).isPresent();
 	}
 
 	public boolean isImmutable() {

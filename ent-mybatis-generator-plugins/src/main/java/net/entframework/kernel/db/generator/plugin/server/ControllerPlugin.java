@@ -130,9 +130,10 @@ public class ControllerPlugin extends AbstractServerPlugin {
 			if (StringUtils.equals("GET", method.getHttpMethod())) {
 				addGetMapping(baseControllerJavaClass, method, modelDescription);
 			}
+			method.addAnnotation(
+					String.format("@Operation(summary = \"%s-%s\")", modelDescription, method.getOperation()));
+
 			if (StringUtils.isAnyEmpty(this.responseBodyWrapper, this.responseBodySuccessStaticMethod)) {
-				// method.addBodyLine(String.format("return %s.%s(request);",
-				// serviceFieldName, method.getName()));
 				method.addBodyLine("return result;");
 			}
 			else {
@@ -150,6 +151,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
 
 		methodAndImports.getMethods().forEach(baseControllerJavaClass::addMethod);
 		baseControllerJavaClass.addImportedTypes(methodAndImports.getImports());
+		baseControllerJavaClass.addImportedType("io.swagger.v3.oas.annotations.Operation");
 
 		GeneratedJavaFile baseControllerJavaFile = new GeneratedJavaFile(baseControllerJavaClass,
 				context.getJavaModelGeneratorConfiguration().getTargetProject(),
@@ -173,6 +175,9 @@ public class ControllerPlugin extends AbstractServerPlugin {
 				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.ApiResource");
 			}
 
+			controllerJavaClass.addAnnotation(String.format("@Tag(name = \"%s\")", modelClass.getDescription()));
+			controllerJavaClass.addImportedType("io.swagger.v3.oas.annotations.tags.Tag");
+
 			// 子类默认只新增，不覆盖
 			controllerJavaClass.setWriteMode(this.writeMode == null ? WriteMode.SKIP_ON_EXIST : this.writeMode);
 
@@ -188,6 +193,8 @@ public class ControllerPlugin extends AbstractServerPlugin {
 					.addAnnotation(String.format("@ApiResource(displayName = \"%s\")", modelClass.getDescription()));
 				baseControllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.ApiResource");
 			}
+			baseControllerJavaClass.addAnnotation(String.format("@Tag(name = \"%s\")", modelClass.getDescription()));
+			baseControllerJavaClass.addImportedType("io.swagger.v3.oas.annotations.tags.Tag");
 		}
 
 		this.generatedJavaFiles.add(baseControllerJavaFile);

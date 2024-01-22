@@ -92,6 +92,11 @@ public class GeneratorUtils {
 				&& (Boolean) field.getAttribute(Constants.FIELD_LOGIC_DELETE_ATTR);
 	}
 
+	public static boolean isTenantField(Field field) {
+		return field.getAttribute(Constants.FIELD_TENANT_ATTR) != null
+				&& (Boolean) field.getAttribute(Constants.FIELD_TENANT_ATTR);
+	}
+
 	public static boolean isVersionField(Field field) {
 		return field.getAttribute(Constants.FIELD_VERSION_ATTR) != null
 				&& (Boolean) field.getAttribute(Constants.FIELD_VERSION_ATTR);

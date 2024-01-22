@@ -12,6 +12,7 @@ import net.entframework.kernel.db.generator.plugin.generator.FieldAndImports;
 import net.entframework.kernel.db.generator.plugin.generator.GeneratorUtils;
 import net.entframework.kernel.db.generator.plugin.generator.VoFieldsGenerator;
 import net.entframework.kernel.db.generator.utils.ClassInfo;
+import net.entframework.kernel.db.generator.utils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
@@ -24,18 +25,27 @@ import org.mybatis.generator.config.PropertyRegistry;
 import java.util.List;
 
 /***
- * Vo生成
+ * Pojo生成
  */
-public class VoPlugin extends AbstractServerPlugin {
+public class DtoPlugin extends AbstractServerPlugin {
+
+	private String dtoTargetPackage;
+
+	private String dtoSuffix = "";
+
+	private String dtoRootClass = "";
 
 	@Override
 	public boolean validate(List<String> warnings) {
 
 		boolean validate = super.validate(warnings);
 
-		if (StringUtils.isAnyEmpty(this.voTargetPackage, this.voSuffix, this.mapstructTargetPackage,
-				this.mapstructSuffix)) {
-			warnings.add("请检查PojoPlugin配置");
+		this.dtoTargetPackage = this.getProperty("dtoTargetPackage");
+		this.dtoSuffix = this.getProperty("dtoSuffix", Constants.DEFAULT_DTO_SUFFIX);
+		this.dtoRootClass = this.getProperty("dtoRootClass");
+
+		if (StringUtils.isAnyEmpty(this.dtoTargetPackage, this.dtoSuffix)) {
+			warnings.add("请检查DtoPlugin配置");
 			return false;
 		}
 
@@ -52,7 +62,7 @@ public class VoPlugin extends AbstractServerPlugin {
 	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
 		FullyQualifiedJavaType qualifiedJavaType = topLevelClass.getType();
 		VoFieldsGenerator pojoFieldsGenerator = new VoFieldsGenerator(this.context, this.codingStyle,
-				this.voTargetPackage, this.voSuffix, qualifiedJavaType);
+				this.dtoTargetPackage, this.dtoSuffix, qualifiedJavaType);
 
 		// 判断是否包含Entity父类
 		String rootClass = this.context.getJavaModelGeneratorConfiguration().getProperty("rootClass");
@@ -72,7 +82,7 @@ public class VoPlugin extends AbstractServerPlugin {
 			VoFieldsGenerator pojoFieldsGenerator) {
 		String modelObjectName = topLevelClass.getType().getShortNameWithoutTypeArguments();
 
-		FullyQualifiedJavaType voJavaType = getVoJavaType(modelObjectName);
+		FullyQualifiedJavaType voJavaType = getJavaType(modelObjectName, this.dtoTargetPackage, this.dtoSuffix);
 		TopLevelClass voClass = new TopLevelClass(voJavaType);
 		voClass.setVisibility(JavaVisibility.PUBLIC);
 
@@ -88,10 +98,10 @@ public class VoPlugin extends AbstractServerPlugin {
 			}
 		}
 
-		if (StringUtils.isNotEmpty(this.voRootClass)) {
+		if (StringUtils.isNotEmpty(this.dtoRootClass)) {
 			if (!voParentTableFound) {
-				voClass.setSuperClass(this.voRootClass);
-				voClass.addImportedType(this.voRootClass);
+				voClass.setSuperClass(this.dtoRootClass);
+				voClass.addImportedType(this.dtoRootClass);
 			}
 			ClassInfo classInfo = ClassInfo.getInstance(this.voRootClass);
 			TopLevelClass parentRequestClass = classInfo.toTopLevelClass();
@@ -102,14 +112,14 @@ public class VoPlugin extends AbstractServerPlugin {
 
 		voClass.setWriteMode(this.writeMode == null ? WriteMode.OVER_WRITE : this.writeMode);
 
-		GeneratorUtils.addComment(voClass, topLevelClass.getDescription() + " VO类");
+		GeneratorUtils.addComment(voClass, topLevelClass.getDescription() + " Dto类");
 
 		addLombokAnnotation(voClass);
 
-		voClass.addAnnotation(String.format("@Schema(description = \"%s\")", topLevelClass.getDescription()));
-		voClass.addImportedType("io.swagger.v3.oas.annotations.media.Schema");
+		voClass.addAnnotation(String.format("@Description(\"%s\")", topLevelClass.getDescription()));
+		voClass.addImportedType("net.entframework.kernel.core.annotation.Description");
 
-		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, true);
+		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, false);
 
 		fieldAndImports.getFields().forEach(voClass::addField);
 		fieldAndImports.getImports().forEach(voClass::addImportedType);

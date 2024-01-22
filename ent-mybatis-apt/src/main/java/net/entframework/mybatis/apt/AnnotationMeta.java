@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 class AnnotationMeta {
 
-	private static final Map<String, Map<String, Object>> annotationData = new ConcurrentHashMap<>();
+	private final Map<String, Map<String, Object>> annotationData = new ConcurrentHashMap<>();
 
 	private final VariableElement element;
 
@@ -29,7 +29,6 @@ class AnnotationMeta {
 		this.element = variableElement;
 		List<? extends AnnotationMirror> elementAnnotationMirrors = variableElement.getAnnotationMirrors();
 		for (AnnotationMirror annotationMirror : elementAnnotationMirrors) {
-			System.out.println(((TypeElement) annotationMirror.getAnnotationType().asElement()).getQualifiedName());
 			Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotationMirror
 				.getElementValues();
 			Map<String, Object> keyValueMap = new LinkedHashMap<>();

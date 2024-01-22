@@ -39,16 +39,6 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 		String fieldDescription = GeneratorUtils.getFieldDescription(introspectedColumn);
 		field.setDescription(fieldDescription);
 
-		// 默认值处理
-		// if (StringUtils.isNotBlank(introspectedColumn.getDefaultValue())) {
-		// if ("java.lang.String".equals(field.getType().getFullyQualifiedName())) {
-		// field.setInitializationString("\"" + introspectedColumn.getDefaultValue() +
-		// "\"");
-		// } else {
-		// field.setInitializationString(introspectedColumn.getDefaultValue());
-		// }
-		// }
-
 		if (GeneratorUtils.isPrimaryKey(introspectedTable, introspectedColumn)) {
 			field.addAnnotation("@Id");
 			topLevelClass.addImportedType("jakarta.persistence.Id");
@@ -106,6 +96,13 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 			field.addAnnotation("@LogicDelete");
 			topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.LogicDelete");
 			field.setAttribute(Constants.FIELD_LOGIC_DELETE_ATTR, true);
+		}
+
+		if (StringUtils.equalsIgnoreCase(introspectedColumn.getActualColumnName(),
+				introspectedTable.getTableConfiguration().getTenantColumn())) {
+			field.addAnnotation("@Tenant");
+			topLevelClass.addImportedType("org.mybatis.dynamic.sql.annotation.Tenant");
+			field.setAttribute(Constants.FIELD_TENANT_ATTR, true);
 		}
 
 		if (StringUtils.equalsIgnoreCase(introspectedColumn.getActualColumnName(),

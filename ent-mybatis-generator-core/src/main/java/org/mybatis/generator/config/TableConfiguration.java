@@ -80,6 +80,8 @@ public class TableConfiguration extends PropertyHolder {
 
 	private String versionColumn;
 
+	private String tenantColumn;
+
 	private String displayField;
 
 	private String parentTable;
@@ -536,6 +538,14 @@ public class TableConfiguration extends PropertyHolder {
 		this.displayField = displayField;
 	}
 
+	public String getTenantColumn() {
+		return tenantColumn;
+	}
+
+	public void setTenantColumn(String tenantColumn) {
+		this.tenantColumn = tenantColumn;
+	}
+
 	public void merge(TableConfiguration source) {
 		if (source.getDomainObjectRenamingRule() != null) {
 			this.setDomainObjectRenamingRule(source.getDomainObjectRenamingRule());
@@ -545,6 +555,15 @@ public class TableConfiguration extends PropertyHolder {
 		}
 		if (StringUtils.isEmpty(versionColumn) && !StringUtils.isNotEmpty(source.versionColumn)) {
 			versionColumn = source.versionColumn;
+		}
+		if (StringUtils.isEmpty(tenantColumn) && !StringUtils.isNotEmpty(source.tenantColumn)) {
+			tenantColumn = source.tenantColumn;
+		}
+		if (StringUtils.isEmpty(displayField) && !StringUtils.isNotEmpty(source.displayField)) {
+			displayField = source.displayField;
+		}
+		if (StringUtils.isEmpty(parentTable) && !StringUtils.isNotEmpty(source.parentTable)) {
+			parentTable = source.parentTable;
 		}
 	}
 

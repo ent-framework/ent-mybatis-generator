@@ -342,6 +342,11 @@ public class MyBatisGeneratorConfigurationParser {
 			tc.setLogicDeleteColumn(logicDeleteColumn);
 		}
 
+		String tenantColumn = attributes.getProperty("tenantColumn"); //$NON-NLS-1$
+		if (stringHasValue(tenantColumn)) {
+			tc.setTenantColumn(tenantColumn);
+		}
+
 		String versionColumn = attributes.getProperty("versionColumn"); //$NON-NLS-1$
 		if (stringHasValue(versionColumn)) {
 			tc.setVersionColumn(versionColumn);

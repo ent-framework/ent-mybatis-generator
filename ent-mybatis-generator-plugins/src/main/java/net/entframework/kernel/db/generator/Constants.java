@@ -4,6 +4,8 @@ public final class Constants {
 
 	public final static String DEFAULT_VO_SUFFIX = "Vo";
 
+	public final static String DEFAULT_DTO_SUFFIX = "Dto";
+
 	public final static String DEFAULT_POJO_REQUEST_SUFFIX = "Request";
 
 	public final static String DEFAULT_POJO_RESPONSE_SUFFIX = "Response";
@@ -43,6 +45,8 @@ public final class Constants {
 	public final static String TARGET_FIELD_RELATION = "TARGET_FIELD_RELATION";
 
 	public final static String FIELD_LOGIC_DELETE_ATTR = "FIELD_LOGIC_DELETE_ATTR";
+
+	public final static String FIELD_TENANT_ATTR = "FIELD_TENANT_ATTR";
 
 	public final static String FIELD_VERSION_ATTR = "FIELD_VERSION_ATTR";
 

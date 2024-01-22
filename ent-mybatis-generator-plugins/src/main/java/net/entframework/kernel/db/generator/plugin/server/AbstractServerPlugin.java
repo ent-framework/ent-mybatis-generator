@@ -16,6 +16,7 @@ import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.WriteMode;
 import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 import org.mybatis.generator.config.JoinEntry;
+import org.mybatis.generator.internal.util.StringUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,31 +76,31 @@ public abstract class AbstractServerPlugin extends AbstractDynamicSQLPlugin {
 			return false;
 		}
 
-		codingStyle = this.context.getProperty("generatedCodeStyle");
+		codingStyle = this.getProperty("generatedCodeStyle");
 		if (StringUtils.isEmpty(codingStyle)) {
 			codingStyle = Constants.GENERATED_CODE_STYLE;
 		}
 
-		this.voTargetPackage = this.context.getProperty("voTargetPackage");
-		this.voSuffix = PropertyUtils.getProperty(context, "voSuffix", Constants.DEFAULT_VO_SUFFIX);
-		this.voRootClass = this.context.getProperty("voRootClass");
+		this.voTargetPackage = this.getProperty("voTargetPackage");
+		this.voSuffix = this.getProperty("voSuffix", Constants.DEFAULT_VO_SUFFIX);
+		this.voRootClass = this.getProperty("voRootClass");
 
-		this.mapstructTargetPackage = this.context.getProperty("mapstructTargetPackage");
-		this.mapstructSuffix = PropertyUtils.getProperty(context, "mapstructSuffix",
+		this.mapstructTargetPackage = this.getProperty("mapstructTargetPackage");
+		this.mapstructSuffix = this.getProperty("mapstructSuffix",
 				Constants.DEFAULT_MAPSTRUCT_SUFFIX);
 
-		this.serviceTargetPackage = this.context.getProperty("serviceTargetPackage");
-		this.serviceSuffix = PropertyUtils.getProperty(context, "serviceSuffix", Constants.DEFAULT_SERVICE_SUFFIX);
-		this.baseServicePrefix = PropertyUtils.getProperty(context, "baseServicePrefix",
+		this.serviceTargetPackage = this.getProperty("serviceTargetPackage");
+		this.serviceSuffix = this.getProperty("serviceSuffix", Constants.DEFAULT_SERVICE_SUFFIX);
+		this.baseServicePrefix = this.getProperty("baseServicePrefix",
 				Constants.DEFAULT_BASE_SERVICE_PREFIX);
-		this.servicePrefix = PropertyUtils.getProperty(context, "servicePrefix", "");
+		this.servicePrefix = this.getProperty("servicePrefix", "");
 
-		this.repositoryTargetPackage = this.context.getProperty("repositoryTargetPackage");
-		this.repositorySuffix = PropertyUtils.getProperty(context, "repositorySuffix",
+		this.repositoryTargetPackage = this.getProperty("repositoryTargetPackage");
+		this.repositorySuffix = this.getProperty("repositorySuffix",
 				Constants.DEFAULT_REPOSITORY_SUFFIX);
 
 		this.controllerTargetPackage = this.context.getProperty("controllerTargetPackage");
-		this.controllerPrefix = PropertyUtils.getProperty(context, "controllerPrefix",
+		this.controllerPrefix = this.getProperty("controllerPrefix",
 				Constants.DEFAULT_BASE_CONTROLLER_PREFIX);
 
 		String mode = this.properties.getProperty("writeMode");
@@ -116,6 +117,20 @@ public abstract class AbstractServerPlugin extends AbstractDynamicSQLPlugin {
 		return true;
 	}
 
+	//先从plugin 配置获取，获取不到再从context获取
+	protected String getProperty(String key, String defaultValue) {
+		if (this.properties.containsKey(key) && StringUtility.stringHasValue(this.properties.getProperty(key))) {
+			return this.properties.getProperty(key);
+		} else if (StringUtility.stringHasValue(this.context.getProperty(key))) {
+			return this.context.getProperty(key);
+		}
+		return defaultValue;
+	}
+
+	protected String getProperty(String key) {
+		return getProperty(key, null);
+	}
+
 	public FullyQualifiedJavaType getMapperJavaType(String modelObjectName) {
 		return new FullyQualifiedJavaType(this.context.getJavaClientGeneratorConfiguration().getTargetPackage() + "."
 				+ modelObjectName + "Mapper");
@@ -123,6 +138,10 @@ public abstract class AbstractServerPlugin extends AbstractDynamicSQLPlugin {
 
 	public FullyQualifiedJavaType getVoJavaType(String modelObjectName) {
 		return new FullyQualifiedJavaType(this.voTargetPackage + "." + modelObjectName + this.voSuffix);
+	}
+
+	public FullyQualifiedJavaType getJavaType(String modelObjectName, String targetPackage, String suffix) {
+		return new FullyQualifiedJavaType(targetPackage + "." + modelObjectName + suffix);
 	}
 
 	public FullyQualifiedJavaType getMapstructJavaType(String modelObjectName) {

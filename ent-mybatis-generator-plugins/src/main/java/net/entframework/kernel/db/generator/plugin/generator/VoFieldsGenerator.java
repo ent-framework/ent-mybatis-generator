@@ -21,28 +21,29 @@ public class VoFieldsGenerator {
 
 	private final String codingStyle;
 
-	private final String voTargetPackage;
+	private final String targetPackage;
 
-	private String voSuffix = "";
+	private String suffix = "";
 
 	private final FullyQualifiedJavaType factory;
 
-	public VoFieldsGenerator(Context context, String codingStyle, String voTargetPackage, String voSuffix,
+	public VoFieldsGenerator(Context context, String codingStyle, String voTargetPackage, String suffix,
 			FullyQualifiedJavaType factory) {
 		this.context = context;
 		this.codingStyle = codingStyle;
-		this.voTargetPackage = voTargetPackage;
-		this.voSuffix = voSuffix;
+		this.targetPackage = voTargetPackage;
+		this.suffix = suffix;
 		this.factory = factory;
 	}
 
-	public FieldAndImports generateVo(TopLevelClass modelClass, IntrospectedTable introspectedTable) {
+	public FieldAndImports generateVo(TopLevelClass modelClass, IntrospectedTable introspectedTable, boolean isVo) {
 		String modelObjectName = modelClass.getType().getShortNameWithoutTypeArguments();
 		FieldAndImports.Builder builder = new FieldAndImports.Builder();
 
 		List<Field> fields = modelClass.getFields();
 		for (Field field : fields) {
-			if ("serialVersionUID".equals(field.getName()) || GeneratorUtils.isLogicDeleteField(field)) {
+			if ("serialVersionUID".equals(field.getName()) || GeneratorUtils.isLogicDeleteField(field)
+					|| GeneratorUtils.isTenantField(field)) {
 				continue;
 			}
 			Field pojoRequestField = new Field(field);
@@ -77,33 +78,39 @@ public class VoFieldsGenerator {
 						field.getName());
 
 				// 增加通用的注解
-				if (GeneratorUtils.isPrimaryKey(introspectedTable, column)) {
-					if (column.isNumberColumn()) {
-						pojoRequestField.addAnnotation(String.format(
-								"@NotNull(message = \"%s不能为空\", groups = {update.class, delete.class, detail.class, updateStatus.class})",
-								fieldDescription));
-						builder.withImport("jakarta.validation.constraints.NotNull");
+				if (isVo) {
+					if (GeneratorUtils.isPrimaryKey(introspectedTable, column)) {
+						if (column.isNumberColumn()) {
+							pojoRequestField.addAnnotation(String.format(
+									"@NotNull(message = \"%s不能为空\", groups = {update.class, delete.class, detail.class, updateStatus.class})",
+									fieldDescription));
+							builder.withImport("jakarta.validation.constraints.NotNull");
+						}
+						else if (column.isStringColumn()) {
+							pojoRequestField.addAnnotation(String.format(
+									"@NotBlank(message = \"%s不能为空\", groups = {update.class, delete.class, detail.class, updateStatus.class})",
+									fieldDescription));
+							builder.withImport("jakarta.validation.constraints.NotBlank");
+						}
 					}
-					else if (column.isStringColumn()) {
-						pojoRequestField.addAnnotation(String.format(
-								"@NotBlank(message = \"%s不能为空\", groups = {update.class, delete.class, detail.class, updateStatus.class})",
-								fieldDescription));
-						builder.withImport("jakarta.validation.constraints.NotBlank");
-					}
-				}
-				else if (!column.isNullable()) {
-					if (column.isStringColumn()) {
-						pojoRequestField.addAnnotation(
-								String.format("@NotBlank(message = \"%s不能为空\", groups = {add.class, update.class})",
-										fieldDescription));
-						builder.withImport("jakarta.validation.constraints.NotBlank");
+					else if (!column.isNullable()) {
+						if (column.isStringColumn()) {
+							pojoRequestField.addAnnotation(
+									String.format("@NotBlank(message = \"%s不能为空\", groups = {add.class, update.class})",
+											fieldDescription));
+							builder.withImport("jakarta.validation.constraints.NotBlank");
+						}
 					}
 				}
 			}
-			if (codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
+
+			if (isVo) {
+				pojoRequestField.addAnnotation(String.format("@Schema(description = \"%s\")", fieldDescription));
+			} else {
 				pojoRequestField.addAnnotation(String.format("@Description(\"%s\")", fieldDescription));
-				builder.withImport("net.entframework.kernel.core.annotation.Description");
 			}
+
+
 
 			builder.withField(pojoRequestField);
 		}
@@ -130,7 +137,7 @@ public class VoFieldsGenerator {
 	}
 
 	public FullyQualifiedJavaType getVoJavaType(String modelObjectName) {
-		return factory.create(this.voTargetPackage + "." + modelObjectName + this.voSuffix);
+		return factory.create(this.targetPackage + "." + modelObjectName + this.suffix);
 	}
 
 }

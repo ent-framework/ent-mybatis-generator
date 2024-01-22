@@ -63,8 +63,7 @@ public class MybatisProcessor extends AbstractProcessor {
 				TypeMirror superclass = typeElement.getSuperclass();
 				while (superclass != null) {
 					Element typesElement = types.asElement(superclass);
-					if (typesElement instanceof TypeElement) {
-						TypeElement supper = (TypeElement) typesElement;
+					if (typesElement instanceof TypeElement supper) {
 						if (supper.getAnnotation(MappedSuperclass.class) == null) {
 							fields.addAll(getFields(supper));
 						}
@@ -180,14 +179,8 @@ public class MybatisProcessor extends AbstractProcessor {
 		}
 		Map<String, Object> sqlColumnData = element.getAnnotationData(SQL_COLUMN_NAME);
 		if (sqlColumnData != null) {
-			Object jdbcType = sqlColumnData.get("jdbcType");
-			if (jdbcType instanceof JDBCType) {
-				columnMeta.setJdbcType((JDBCType) jdbcType);
-			}
-			else if (jdbcType instanceof Element) {
-				System.out.println(jdbcType);
-			}
-
+			JDBCType jdbcType = (JDBCType) sqlColumnData.get("jdbcType");
+			columnMeta.setJdbcType(jdbcType);
 		}
 		else {
 			System.out.println("Can't get jdbcType from :" + element.fieldName());
@@ -209,18 +202,7 @@ public class MybatisProcessor extends AbstractProcessor {
 		List<? extends Element> enclosedElements = typeElement.getEnclosedElements();
 		enclosedElements.forEach(element -> {
 			if (element.getKind() == ElementKind.FIELD && !element.getModifiers().contains(Modifier.STATIC)
-					&& element instanceof VariableElement) {
-				VariableElement variableElement = (VariableElement) element;
-				List<? extends AnnotationMirror> elementAnnotationMirrors = variableElement.getAnnotationMirrors();
-				for (AnnotationMirror annotationMirror : elementAnnotationMirrors) {
-					System.out
-						.println(((TypeElement) annotationMirror.getAnnotationType().asElement()).getQualifiedName());
-					Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotationMirror
-						.getElementValues();
-					elementValues.forEach((key, value) -> {
-						System.out.println(key.getSimpleName() + ": " + value.getValue());
-					});
-				}
+					&& element instanceof VariableElement variableElement) {
 				AnnotationMeta annotationMeta = new AnnotationMeta(variableElement);
 
 				if (annotationMeta.hasAnnotation(PERSISTENCE_COLUMN_NAME)

@@ -227,6 +227,7 @@
   delimitAllColumns CDATA #IMPLIED
   logicDeleteColumn CDATA #IMPLIED
   versionColumn CDATA #IMPLIED
+  tenantColumn CDATA #IMPLIED
   displayField CDATA #IMPLIED
   parentTable CDATA #IMPLIED
         >
