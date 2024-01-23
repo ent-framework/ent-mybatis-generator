@@ -106,11 +106,10 @@ public class VoFieldsGenerator {
 
 			if (isVo) {
 				pojoRequestField.addAnnotation(String.format("@Schema(description = \"%s\")", fieldDescription));
-			} else {
+			}
+			else {
 				pojoRequestField.addAnnotation(String.format("@Description(\"%s\")", fieldDescription));
 			}
-
-
 
 			builder.withField(pojoRequestField);
 		}

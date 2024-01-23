@@ -17,6 +17,8 @@ public class ModelField {
 
 	private final IntrospectedColumn column;
 
+	private boolean hidden;
+
 	public ModelField(Field field, IntrospectedColumn column) {
 		this.field = field;
 		this.column = column;
@@ -44,6 +46,14 @@ public class ModelField {
 
 	public int getScale() {
 		return column.getScale();
+	}
+
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
 	}
 
 	public String getFieldType() {

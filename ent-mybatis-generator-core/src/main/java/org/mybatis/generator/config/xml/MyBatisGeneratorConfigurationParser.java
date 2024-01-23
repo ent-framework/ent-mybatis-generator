@@ -391,6 +391,9 @@ public class MyBatisGeneratorConfigurationParser {
 			else if ("columnRenamingRule".equals(childNode.getNodeName())) { //$NON-NLS-1$
 				parseColumnRenamingRule(tc, childNode);
 			}
+			else if ("searchable".equals(childNode.getNodeName())) {
+				parseSearchableColumn(tc, childNode);
+			}
 		}
 	}
 
@@ -549,6 +552,16 @@ public class MyBatisGeneratorConfigurationParser {
 		}
 
 		tc.setColumnRenamingRule(crr);
+	}
+
+	private void parseSearchableColumn(TableConfiguration tc, Node node) {
+		Properties attributes = parseAttributes(node);
+		String columnNames = attributes.getProperty("columns"); //$NON-NLS-1$
+
+		if (stringHasValue(columnNames)) {
+			SearchableColumn sc = new SearchableColumn(columnNames);
+			tc.setSearchableColumn(sc);
+		}
 	}
 
 	protected void parseJavaTypeResolver(Context context, Node node) {

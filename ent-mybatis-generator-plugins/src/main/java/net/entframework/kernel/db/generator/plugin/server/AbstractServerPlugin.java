@@ -86,22 +86,18 @@ public abstract class AbstractServerPlugin extends AbstractDynamicSQLPlugin {
 		this.voRootClass = this.getProperty("voRootClass");
 
 		this.mapstructTargetPackage = this.getProperty("mapstructTargetPackage");
-		this.mapstructSuffix = this.getProperty("mapstructSuffix",
-				Constants.DEFAULT_MAPSTRUCT_SUFFIX);
+		this.mapstructSuffix = this.getProperty("mapstructSuffix", Constants.DEFAULT_MAPSTRUCT_SUFFIX);
 
 		this.serviceTargetPackage = this.getProperty("serviceTargetPackage");
 		this.serviceSuffix = this.getProperty("serviceSuffix", Constants.DEFAULT_SERVICE_SUFFIX);
-		this.baseServicePrefix = this.getProperty("baseServicePrefix",
-				Constants.DEFAULT_BASE_SERVICE_PREFIX);
+		this.baseServicePrefix = this.getProperty("baseServicePrefix", Constants.DEFAULT_BASE_SERVICE_PREFIX);
 		this.servicePrefix = this.getProperty("servicePrefix", "");
 
 		this.repositoryTargetPackage = this.getProperty("repositoryTargetPackage");
-		this.repositorySuffix = this.getProperty("repositorySuffix",
-				Constants.DEFAULT_REPOSITORY_SUFFIX);
+		this.repositorySuffix = this.getProperty("repositorySuffix", Constants.DEFAULT_REPOSITORY_SUFFIX);
 
 		this.controllerTargetPackage = this.context.getProperty("controllerTargetPackage");
-		this.controllerPrefix = this.getProperty("controllerPrefix",
-				Constants.DEFAULT_BASE_CONTROLLER_PREFIX);
+		this.controllerPrefix = this.getProperty("controllerPrefix", Constants.DEFAULT_BASE_CONTROLLER_PREFIX);
 
 		String mode = this.properties.getProperty("writeMode");
 		if (StringUtils.isNotEmpty(mode)) {
@@ -117,11 +113,12 @@ public abstract class AbstractServerPlugin extends AbstractDynamicSQLPlugin {
 		return true;
 	}
 
-	//先从plugin 配置获取，获取不到再从context获取
+	// 先从plugin 配置获取，获取不到再从context获取
 	protected String getProperty(String key, String defaultValue) {
 		if (this.properties.containsKey(key) && StringUtility.stringHasValue(this.properties.getProperty(key))) {
 			return this.properties.getProperty(key);
-		} else if (StringUtility.stringHasValue(this.context.getProperty(key))) {
+		}
+		else if (StringUtility.stringHasValue(this.context.getProperty(key))) {
 			return this.context.getProperty(key);
 		}
 		return defaultValue;

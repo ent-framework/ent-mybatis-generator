@@ -78,6 +78,7 @@ public class MybatisProcessor extends AbstractProcessor {
 			// process entityMap
 			Filer filer = processingEnv.getFiler();
 			entityMap.forEach((key, value) -> writeSupportFile(filer, key, value));
+			entityMap.forEach((key, value) -> writeCriteriaFile(filer, key, value));
 		}
 		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Mybatis Entity Support start");
 		return ALLOW_OTHER_PROCESSORS_TO_CLAIM_ANNOTATIONS;
@@ -90,8 +91,6 @@ public class MybatisProcessor extends AbstractProcessor {
 
 		TypeSpec.Builder clazzBuilder = TypeSpec.classBuilder(type.getSimpleName() + "_")
 			.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-
-		// clazzBuilder.addAnnotation(Generated.class);
 
 		String typeName = type.getSimpleName().toString();
 		String uncapitalizeName = Utils.uncapitalize(typeName);
@@ -170,6 +169,147 @@ public class MybatisProcessor extends AbstractProcessor {
 		}
 	}
 
+	/**
+	 * 写入查询文件
+	 * @param filer
+	 * @param type
+	 * @param fields
+	 */
+	private void writeCriteriaFile(Filer filer, TypeElement type, List<AnnotationMeta> fields) {
+		// 被扫描的类的包路径
+		PackageElement packageElement = elementUtils.getPackageOf(type);
+		String packageName = packageElement.getQualifiedName().toString();
+		String criteriaPackageName = getParentPackageName(packageName) + ".criteria";
+
+		TypeSpec.Builder clazzBuilder = TypeSpec.classBuilder(type.getSimpleName() + "Criteria")
+			.addModifiers(Modifier.PUBLIC);
+		clazzBuilder.addAnnotation(ClassName.get("lombok", "Data"));
+		clazzBuilder.superinterfaces.add(ClassName.get("net.entframework.kernel.db.mybatis.criteria", "Criteria"));
+
+		String typeName = type.getSimpleName().toString();
+		String uncapitalizeName = Utils.uncapitalize(typeName);
+
+		List<String> fieldsList = new ArrayList<>();
+
+		fields.forEach(element -> {
+			String fieldName = element.fieldName();
+			fieldsList.add(fieldName);
+			ClassName columnType = ClassName.get("", Utils.capitalize(fieldName) + "Criterion");
+			FieldSpec.Builder fieldBuilder = FieldSpec.builder(columnType, fieldName).addModifiers(Modifier.PRIVATE);
+			// fieldBuilder.initializer("$N.$N", uncapitalizeName, fieldName);
+			clazzBuilder.addField(fieldBuilder.build());
+		});
+
+		ClassName queryExpressionDSL = ClassName.get("java.util", "List");
+		ParameterizedTypeName parameterizedQueryExpressionDSL = ParameterizedTypeName.get(queryExpressionDSL,
+				ClassName.get("org.mybatis.dynamic.sql", "AndOrCriteriaGroup"));
+
+		ClassName criteriaBuilder = ClassName.get("net.entframework.kernel.db.mybatis.criteria", "CriteriaBuilder");
+		MethodSpec.Builder buildBuilder = MethodSpec.methodBuilder("buildQuery")
+			.addModifiers(Modifier.PUBLIC)
+			.returns(parameterizedQueryExpressionDSL)
+			.addStatement("return $T.buildQuery($N)", criteriaBuilder, Utils.join(fieldsList, ","));
+		clazzBuilder.addMethod(buildBuilder.build());
+
+		fields.forEach(element -> {
+			String fieldName = element.fieldName();
+
+			TypeSpec.Builder innerBuilder = TypeSpec.classBuilder(Utils.capitalize(fieldName) + "Criterion")
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+			innerBuilder.addAnnotation(ClassName.get("lombok", "Data"));
+			ClassName supperClassName = ClassName.get("net.entframework.kernel.db.mybatis.criteria", "FieldCriterion");
+			ParameterizedTypeName supperClassTypeName = ParameterizedTypeName.get(supperClassName,
+					TypeName.get(element.asType()));
+			innerBuilder.superclass(supperClassTypeName);
+
+			ClassName columnType = ClassName.get("org.mybatis.dynamic.sql", "SqlColumn");
+			ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(columnType,
+					TypeName.get(element.asType()));
+			FieldSpec.Builder fieldBuilder = FieldSpec.builder(parameterizedTypeName, "column")
+				.addModifiers(Modifier.PRIVATE);
+			ClassName supportType = ClassName.get(packageName, typeName + "_");
+			fieldBuilder.initializer("$T.$N", supportType, fieldName);
+
+			innerBuilder.addField(fieldBuilder.build());
+
+			ColumnMeta columnMeta = getColumnMeta(element);
+
+			List<String> conditions = getConditions(element, columnMeta);
+			ClassName conditionType = ClassName.get("net.entframework.kernel.db.mybatis.criteria",
+					"ConditionCriterion");
+			for (String condition : conditions) {
+				ParameterizedTypeName conditionParameterizedTypeName = ParameterizedTypeName.get(conditionType,
+						TypeName.get(element.asType()));
+				FieldSpec.Builder conditionFieldBuilder = FieldSpec
+					.builder(conditionParameterizedTypeName, Utils.uncapitalize(condition))
+					.addModifiers(Modifier.PRIVATE);
+				ClassName subConditionType = ClassName.get("net.entframework.kernel.db.mybatis.criteria",
+						"ConditionCriterion", condition);
+				conditionFieldBuilder.initializer("addCriterion(new $T<>())", subConditionType);
+				innerBuilder.addField(conditionFieldBuilder.build());
+			}
+
+			clazzBuilder.addType(innerBuilder.build());
+		});
+
+		TypeSpec clazz = clazzBuilder.build();
+
+		// 创建java文件
+		JavaFile javaFile = JavaFile.builder(criteriaPackageName, clazz).build();
+		String className = criteriaPackageName + "." + type.getSimpleName() + "Criteria";
+		try (Writer writer = filer.createSourceFile(className, type).openWriter()) {
+			javaFile.writeTo(writer);
+			writer.flush();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private List<String> getConditions(AnnotationMeta element, ColumnMeta columnMeta) {
+		List<String> results = new ArrayList<>();
+		// common condition
+		results.add("EqualsTo");
+		results.add("NotEqualTo");
+		results.add("NotNull");
+		results.add("IsNull");
+		if (Utils.isStringField(element, columnMeta)) {
+			results.add("Like");
+			results.add("LikeCaseInsensitive");
+			results.add("NotLike");
+			results.add("NotLikeCaseInsensitive");
+		}
+		else if (Utils.isNumberField(element, columnMeta)) {
+			results.add("Between");
+			results.add("GreaterThan");
+			results.add("GreaterThanOrEqualTo");
+			results.add("LessThan");
+			results.add("LessThanOrEqualTo");
+			results.add("NotBetween");
+			results.add("IsIn");
+			results.add("IsNotIn");
+		}
+		else if (Utils.isDateField(element, columnMeta)) {
+			results.add("Between");
+			results.add("GreaterThan");
+			results.add("GreaterThanOrEqualTo");
+			results.add("LessThan");
+			results.add("LessThanOrEqualTo");
+			results.add("NotBetween");
+			results.add("IsIn");
+			results.add("IsNotIn");
+		}
+		return results;
+	}
+
+	private String getParentPackageName(String packageName) {
+		if (packageName != null) {
+			int k = packageName.lastIndexOf(".");
+			return packageName.substring(0, k);
+		}
+		return null;
+	}
+
 	private ColumnMeta getColumnMeta(AnnotationMeta element) {
 		ColumnMeta columnMeta = new ColumnMeta();
 		Map<String, Object> columnData = element.getAnnotationData(PERSISTENCE_COLUMN_NAME);
@@ -183,7 +323,7 @@ public class MybatisProcessor extends AbstractProcessor {
 			columnMeta.setJdbcType(jdbcType);
 		}
 		else {
-			System.out.println("Can't get jdbcType from :" + element.fieldName());
+			throw new RuntimeException("Can't get jdbcType from :" + element.fieldName());
 		}
 		return columnMeta;
 	}

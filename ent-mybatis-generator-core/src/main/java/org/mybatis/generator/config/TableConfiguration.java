@@ -70,6 +70,8 @@ public class TableConfiguration extends PropertyHolder {
 
 	private ColumnRenamingRule columnRenamingRule;
 
+	private SearchableColumn searchableColumn;
+
 	private boolean isAllColumnDelimitingEnabled;
 
 	private String mapperName;
@@ -544,6 +546,14 @@ public class TableConfiguration extends PropertyHolder {
 
 	public void setTenantColumn(String tenantColumn) {
 		this.tenantColumn = tenantColumn;
+	}
+
+	public SearchableColumn getSearchableColumn() {
+		return searchableColumn;
+	}
+
+	public void setSearchableColumn(SearchableColumn searchableColumn) {
+		this.searchableColumn = searchableColumn;
 	}
 
 	public void merge(TableConfiguration source) {
