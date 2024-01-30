@@ -391,11 +391,6 @@ public abstract class IntrospectedTable {
 			throw new RuntimeException("can't find tenant column(" + this.tableConfiguration.getTenantColumn()
 					+ ") in table (" + this.getFullyQualifiedTable().getIntrospectedTableName() + ")");
 		}
-		if (StringUtility.stringHasValue(this.tableConfiguration.getDisplayField())
-				&& !findColumn(this.tableConfiguration.getDisplayField())) {
-			throw new RuntimeException("can't find display field (" + this.tableConfiguration.getDisplayField()
-					+ ") in table (" + this.getFullyQualifiedTable().getIntrospectedTableName() + ")");
-		}
 
 		if (StringUtility.stringHasValue(this.tableConfiguration.getParentTable())) {
 			IntrospectedTable parentTable = this.context.getIntrospectedTables()

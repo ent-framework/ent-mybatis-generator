@@ -15,6 +15,7 @@
  */
 package net.entframework.kernel.db.generator.typescript.render;
 
+import net.entframework.kernel.db.generator.typescript.runtime.TypescriptTopLevelClass;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 
 import java.util.ArrayList;
@@ -28,6 +29,13 @@ public class TopLevelClassRenderer {
 
 		lines.addAll(topLevelClass.getFileCommentLines());
 		lines.addAll(RenderingUtilities.renderImports(topLevelClass));
+
+		if (topLevelClass instanceof TypescriptTopLevelClass typescriptTopLevelClass) {
+			if (!typescriptTopLevelClass.getVariables().isEmpty()) {
+				lines.addAll(RenderUtils.renderVariables(typescriptTopLevelClass.getVariables(), topLevelClass));
+			}
+		}
+
 		lines.addAll(RenderingUtilities.renderInnerClassNoIndent(topLevelClass, topLevelClass));
 		lines = RenderingUtilities.removeLastEmptyLine(lines);
 		lines.add("");

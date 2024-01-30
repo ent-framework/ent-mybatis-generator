@@ -15,6 +15,7 @@ import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.Context;
 import org.mybatis.generator.config.JoinTarget;
+import org.mybatis.generator.config.UIConfig;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 import org.mybatis.generator.internal.util.StringUtility;
 
@@ -125,8 +126,12 @@ public class GeneratorUtils {
 		return introspectedTable.getAllColumns().stream().filter(GeneratorUtils::isVersionColumn).findFirst();
 	}
 
-	public static Optional<Field> getDisplayField(IntrospectedTable introspectedTable) {
-		String displayField = introspectedTable.getTableConfiguration().getDisplayField();
+	public static Field getDisplayField(IntrospectedTable introspectedTable) {
+		String displayField = "";
+		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
+		if (uiConfig != null) {
+			displayField = uiConfig.getDisplayField();
+		}
 		TopLevelClass modelClass = (TopLevelClass) introspectedTable
 			.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
 		if (StringUtils.isEmpty(displayField)) {
@@ -134,12 +139,10 @@ public class GeneratorUtils {
 			return modelClass.getFields()
 				.stream()
 				.filter(field -> StringUtils.equals(field.getName(), pk.getJavaProperty()))
-				.findFirst();
+				.findFirst()
+				.orElse(null);
 		}
-		return modelClass.getFields()
-			.stream()
-			.filter(field -> StringUtils.equals(field.getName(), displayField))
-			.findFirst();
+		return getFieldByName(modelClass, displayField);
 	}
 
 	public static IntrospectedColumn getPrimaryKey(IntrospectedTable introspectedTable) {

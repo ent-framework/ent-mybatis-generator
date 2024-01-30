@@ -6,14 +6,11 @@
       @register="registerTable"
     >
       <template #headerTop>
-        <Alert type="info" show-icon>
+        <Alert v-if="checkedKeys.length > 0" type="info" show-icon>
           <template #message>
-            <template v-if="checkedKeys.length > 0">
+            <template>
               <span>已选中{{ checkedKeys.length }}条记录(可跨页)</span>
               <ent-button type="link" @click="checkedKeys = []" size="small">清空</ent-button>
-            </template>
-            <template v-else>
-              <span>未选中任何记录</span>
             </template>
           </template>
         </Alert>
@@ -95,12 +92,14 @@
         api: ${modelName}Page,
         rowKey: '${pk.name}',
         columns,
+<#if (searchFields?size>0)>
         formConfig: {
           labelWidth: 120,
           schemas: searchFormSchema,
           autoSubmitOnEnter: true,
         },
         useSearchForm: true,
+</#if>
         showTableSetting: true,
         bordered: true,
         handleSearchInfoFn(info) {

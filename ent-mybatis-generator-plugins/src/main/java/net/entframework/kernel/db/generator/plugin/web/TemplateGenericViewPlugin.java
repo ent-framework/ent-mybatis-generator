@@ -49,7 +49,8 @@ public class TemplateGenericViewPlugin extends AbstractTemplatePlugin {
 				String modelObjectName = topLevelClass.getType().getShortName();
 				builder.name(modelObjectName)
 					.camelModelName(JavaBeansUtil.convertCamelCase(modelObjectName, "-"))
-					.description(topLevelClass.getDescription())
+					.description(StringUtils.isEmpty(topLevelClass.getDescription())
+							? table.getFullyQualifiedTable().getDomainObjectName() : topLevelClass.getDescription())
 					.type(modelObjectName);
 				modelObjects.add(builder.build());
 			}

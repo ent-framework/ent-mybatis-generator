@@ -25,6 +25,7 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 		return true;
 	}
 
+	@Override
 	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
 		String tableName = introspectedTable.getFullyQualifiedTable().getIntrospectedTableName();
 		JoinEntry joinEntry = context.getJoinConfig().getJoinEntry(tableName);
@@ -89,7 +90,7 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 						.joinType(JoinTarget.JoinType.MANY_TO_ONE)
 						.bindField(field)
 						.targetTable(rightTable)
-						.displayField(rightTable.getTableConfiguration().getDisplayField())
+						.displayField(GeneratorUtils.getDisplayField(rightTable).getName())
 						.targetColumn(GeneratorUtils.getIntrospectedColumnByColumn(rightTable, target.getJoinColumn()));
 
 				}

@@ -202,7 +202,7 @@
   The table element is used to specify a database table that will be the source information
   for a set of generated objects.
 -->
-<!ELEMENT table (property*, generatedKey?, domainObjectRenamingRule?, columnRenamingRule?, searchable?, (columnOverride | ignoreColumn | ignoreColumnsByRegex)*) >
+<!ELEMENT table (property*, generatedKey?, domainObjectRenamingRule?, columnRenamingRule?, (columnOverride | ignoreColumn | ignoreColumnsByRegex)*, ui?) >
 <!ATTLIST table
   catalog CDATA #IMPLIED
   schema CDATA #IMPLIED
@@ -228,14 +228,30 @@
   logicDeleteColumn CDATA #IMPLIED
   versionColumn CDATA #IMPLIED
   tenantColumn CDATA #IMPLIED
-  displayField CDATA #IMPLIED
   parentTable CDATA #IMPLIED
         >
 
+<!ELEMENT ui (searchable?, criteria?, listFields?, inputFields?)>
+<!ATTLIST ui
+        viewType CDATA #IMPLIED
+        displayField CDATA #IMPLIED>
 <!ELEMENT searchable EMPTY>
 <!ATTLIST searchable
-        columns CDATA #REQUIRED>
-<!--
+        fields CDATA #IMPLIED
+        ignored CDATA #IMPLIED>
+<!ELEMENT criteria EMPTY>
+<!ATTLIST criteria
+        fields CDATA #IMPLIED
+        ignored CDATA #IMPLIED>
+<!ELEMENT listFields EMPTY>
+<!ATTLIST listFields
+        fields CDATA #IMPLIED
+        ignored CDATA #IMPLIED>
+<!ELEMENT inputFields EMPTY>
+<!ATTLIST inputFields
+        fields CDATA #IMPLIED
+        ignored CDATA #IMPLIED>                
+ <!--
   The columnOverride element is used to change certain attributes of the column
   from their default values.
 -->

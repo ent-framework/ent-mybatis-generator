@@ -256,7 +256,7 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 						.joinType(JoinTarget.JoinType.MANY_TO_ONE)
 						.bindField(field)
 						.targetTable(rightTable)
-						.displayField(rightTable.getTableConfiguration().getDisplayField())
+						.displayField(GeneratorUtils.getDisplayField(rightTable).getName())
 						.targetColumn(GeneratorUtils.getIntrospectedColumnByColumn(rightTable, target.getJoinColumn()));
 					field.addAnnotation("@ManyToOne");
 					field.addAnnotation(String.format("@JoinColumn(name = \"%s\", referencedColumnName = \"%s\")",

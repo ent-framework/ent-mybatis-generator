@@ -25,10 +25,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.exception.XMLParserException;
 import org.mybatis.generator.internal.ObjectFactory;
+import org.mybatis.generator.internal.util.StringUtility;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -352,11 +354,6 @@ public class MyBatisGeneratorConfigurationParser {
 			tc.setVersionColumn(versionColumn);
 		}
 
-		String displayField = attributes.getProperty("displayField"); //$NON-NLS-1$
-		if (stringHasValue(displayField)) {
-			tc.setDisplayField(displayField);
-		}
-
 		String parentTable = attributes.getProperty("parentTable"); //$NON-NLS-1$
 		if (stringHasValue(parentTable)) {
 			tc.setParentTable(parentTable);
@@ -390,9 +387,9 @@ public class MyBatisGeneratorConfigurationParser {
 			}
 			else if ("columnRenamingRule".equals(childNode.getNodeName())) { //$NON-NLS-1$
 				parseColumnRenamingRule(tc, childNode);
-			}
-			else if ("searchable".equals(childNode.getNodeName())) {
-				parseSearchableColumn(tc, childNode);
+			} else if ("ui".equals(childNode.getNodeName())) {
+				UIConfig uiConfig = parseUIConfig(childNode);
+				tc.setUiConfig(uiConfig);
 			}
 		}
 	}
@@ -552,16 +549,6 @@ public class MyBatisGeneratorConfigurationParser {
 		}
 
 		tc.setColumnRenamingRule(crr);
-	}
-
-	private void parseSearchableColumn(TableConfiguration tc, Node node) {
-		Properties attributes = parseAttributes(node);
-		String columnNames = attributes.getProperty("columns"); //$NON-NLS-1$
-
-		if (stringHasValue(columnNames)) {
-			SearchableColumn sc = new SearchableColumn(columnNames);
-			tc.setSearchableColumn(sc);
-		}
 	}
 
 	protected void parseJavaTypeResolver(Context context, Node node) {
@@ -953,12 +940,60 @@ public class MyBatisGeneratorConfigurationParser {
 		return joinTable;
 	}
 
+	private UIConfig parseUIConfig(Node node) {
+		Properties attributes = parseAttributes(node);
+		String viewType = attributes.getProperty("viewType"); // $NON-NLS-1$
+		String displayField = attributes.getProperty("displayField"); // $NON-NLS-1$
+		UIConfig uiConfig = new UIConfig();
+		if (StringUtility.stringHasValue(viewType)) {
+			uiConfig.setViewType(viewType);
+		}
+		if (StringUtility.stringHasValue(displayField)) {
+			uiConfig.setDisplayField(displayField);
+		}
+		NodeList nodeList = node.getChildNodes();
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node childNode = nodeList.item(i);
+
+			if (childNode.getNodeType() != Node.ELEMENT_NODE) {
+				continue;
+			}
+			if ("searchable".equals(childNode.getNodeName())) { // $NON-NLS-1$
+				uiConfig.setSearchable(parseLimitDisplayField(childNode));
+			}
+			else if ("criteria".equals(childNode.getNodeName())) {
+				uiConfig.setCriteria(parseLimitDisplayField(childNode));
+			}
+			else if ("listFields".equals(childNode.getNodeName())) {
+				uiConfig.setListFields(parseLimitDisplayField(childNode));
+			}
+			else if ("inputFields".equals(childNode.getNodeName())) {
+				uiConfig.setInputFields(parseLimitDisplayField(childNode));
+			}
+		}
+		return uiConfig;
+	}
+
 	private JoinColumn parseJoinColumn(Node childNode) {
 		JoinColumn joinColumn = new JoinColumn();
 		Properties attributes = parseAttributes(childNode);
 		joinColumn.setLeft(attributes.getProperty("left"));
 		joinColumn.setRight(attributes.getProperty("right"));
 		return joinColumn;
+	}
+
+	private LimitDisplayField parseLimitDisplayField(Node childNode) {
+		LimitDisplayField limitDisplayField = new LimitDisplayField();
+		Properties attributes = parseAttributes(childNode);
+		String fields = attributes.getProperty("fields");
+		String ignored = attributes.getProperty("ignored");
+		if (StringUtility.stringHasValue(fields)) {
+			limitDisplayField.getFields().addAll(Arrays.asList(StringUtils.split(fields, ",")));
+		}
+		if (StringUtility.stringHasValue(ignored)) {
+			limitDisplayField.getIgnored().addAll(Arrays.asList(StringUtils.split(ignored, ",")));
+		}
+		return limitDisplayField;
 	}
 
 	private Pair<String, JoinTarget> parseJoinDetail(Node node) {

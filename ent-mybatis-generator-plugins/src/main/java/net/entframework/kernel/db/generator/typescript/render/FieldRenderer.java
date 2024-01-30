@@ -24,9 +24,8 @@ import java.util.List;
 public class FieldRenderer {
 
 	public List<String> render(Field field, CompilationUnit compilationUnit) {
-		List<String> lines = new ArrayList<>();
 
-		lines.addAll(field.getJavaDocLines());
+		List<String> lines = new ArrayList<>(field.getJavaDocLines());
 		lines.add(renderField(field, compilationUnit));
 
 		return lines;

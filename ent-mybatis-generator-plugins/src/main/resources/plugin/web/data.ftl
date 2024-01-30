@@ -27,18 +27,14 @@ export const columns: BasicColumn[] = [
 ];
 
 export const searchFormSchema: FormSchema[] = [
+<#list searchFields as field>
   {
-    field: 'account',
-    label: '用户名',
+    field: '${field.name}',
+    label: '${field.description}',
     component: 'Input',
     colProps: { span: 8 },
   },
-  {
-    field: 'nickname',
-    label: '昵称',
-    component: 'Input',
-    colProps: { span: 8 },
-  },
+</#list>
 ];
 
 export const detailSchema: DescItem[] = [

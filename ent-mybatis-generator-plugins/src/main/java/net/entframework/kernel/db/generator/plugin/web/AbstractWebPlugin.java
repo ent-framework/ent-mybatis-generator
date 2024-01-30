@@ -10,7 +10,9 @@ package net.entframework.kernel.db.generator.plugin.web;
 import net.entframework.kernel.db.generator.Constants;
 import net.entframework.kernel.db.generator.plugin.AbstractDynamicSQLPlugin;
 import org.apache.commons.lang3.StringUtils;
+import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.WriteMode;
+import org.mybatis.generator.config.UIConfig;
 
 import java.util.HashSet;
 import java.util.List;

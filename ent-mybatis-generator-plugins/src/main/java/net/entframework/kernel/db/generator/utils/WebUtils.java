@@ -10,11 +10,10 @@ import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.Context;
 import org.mybatis.generator.config.JoinTarget;
+import org.mybatis.generator.config.UIConfig;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class WebUtils {
@@ -73,39 +72,44 @@ public class WebUtils {
 	 * @param fields
 	 * @return
 	 */
-	public static List<Field> getListFields(List<Field> fields, Set<String> ignoreFields) {
-		return fields.stream().filter(field -> {
-
-			if (GeneratorUtils.isLogicDeleteField(field) || GeneratorUtils.isVersionField(field)) {
-				return false;
-			}
-
-			if (ignoreFields.contains(field.getName())) {
-				return false;
-			}
-
-			if (GeneratorUtils.isRelationField(field)) {
-				Relation relation = (Relation) field.getAttribute(Constants.FIELD_RELATION);
-				if (relation.getJoinType() != null && relation.getJoinType() == JoinTarget.JoinType.MANY_TO_ONE) {
-					return true;
-				}
-				else {
-					return false;
-				}
-			}
-
-			return true;
-		}).collect(Collectors.toList());
+	public static List<Field> getListFields(List<Field> fields, Set<String> ignoreFields,
+			IntrospectedTable introspectedTable) {
+		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
+		Set<String> definedFields = new HashSet<>();
+		Set<String> ignoredFields = new HashSet<>(ignoreFields);
+		if (uiConfig != null && uiConfig.getListFields() != null) {
+			definedFields.addAll(uiConfig.getListFields().getFields());
+			ignoredFields.addAll(uiConfig.getListFields().getIgnored());
+		}
+		return filterFields(fields, definedFields, ignoredFields);
 	}
 
-	public static List<Field> getSearchFields(List<Field> fields, Set<String> ignoreFields) {
+	public static List<Field> getSearchFields(List<Field> fields, IntrospectedTable introspectedTable) {
+		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
+		Set<String> definedFields = new HashSet<>();
+		Set<String> ignoredFields = new HashSet<>();
+		if (uiConfig != null && uiConfig.getSearchable() != null) {
+			definedFields.addAll(uiConfig.getSearchable().getFields());
+			ignoredFields.addAll(uiConfig.getSearchable().getIgnored());
+		}
+		if (definedFields.isEmpty() && ignoredFields.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return filterFields(fields, definedFields, ignoredFields);
+	}
+
+	private static List<Field> filterFields(List<Field> fields, Set<String> definedFields, Set<String> ignoredFields) {
 		return fields.stream().filter(field -> {
 
 			if (GeneratorUtils.isLogicDeleteField(field) || GeneratorUtils.isVersionField(field)) {
 				return false;
 			}
 
-			if (ignoreFields.contains(field.getName())) {
+			if (!definedFields.isEmpty()) {
+				return definedFields.contains(field.getName());
+			}
+
+			if (ignoredFields.contains(field.getName())) {
 				return false;
 			}
 
@@ -136,8 +140,13 @@ public class WebUtils {
 	 * @param ignoreFields ignoreFields
 	 * @return field list
 	 */
-	public static List<Field> getInputFields(List<Field> fields, Set<String> ignoreFields) {
+	public static List<Field> getInputFields(List<Field> fields, Set<String> ignoreFields,
+			IntrospectedTable introspectedTable) {
 		List<Field> manyToOneFields = GeneratorUtils.getRelatedFields(fields, JoinTarget.JoinType.MANY_TO_ONE);
+		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
+		Set<String> definedFields = new HashSet<>();
+		Set<String> ignoredFields = new HashSet<>();
+
 		return fields.stream().filter(field -> {
 			if (GeneratorUtils.isRelationField(field)) {
 				return false;

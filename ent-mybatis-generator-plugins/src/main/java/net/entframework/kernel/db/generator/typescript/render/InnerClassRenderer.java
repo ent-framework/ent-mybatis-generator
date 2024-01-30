@@ -26,12 +26,10 @@ import java.util.List;
 public class InnerClassRenderer {
 
 	public List<String> render(InnerClass innerClass, CompilationUnit compilationUnit) {
-		List<String> lines = new ArrayList<>();
 
-		lines.addAll(innerClass.getJavaDocLines());
-		// lines.addAll(innerClass.getAnnotations());
+		List<String> lines = new ArrayList<>(innerClass.getJavaDocLines());
 
-		if (innerClass.getFields().size() > 0) {
+		if (!innerClass.getFields().isEmpty()) {
 			lines.add(renderFirstLine(innerClass, compilationUnit));
 
 			lines.addAll(RenderingUtilities.renderFields(innerClass.getFields(), compilationUnit));
@@ -39,7 +37,7 @@ public class InnerClassRenderer {
 			lines = RenderingUtilities.removeLastEmptyLine(lines);
 			lines.add("}"); //$NON-NLS-1$
 		}
-		if (innerClass.getMethods().size() > 0) {
+		if (!innerClass.getMethods().isEmpty()) {
 			lines.addAll(RenderingUtilities.renderClassOrEnumMethods(innerClass.getMethods(), compilationUnit));
 			lines = RenderingUtilities.removeLastEmptyLine(lines);
 		}

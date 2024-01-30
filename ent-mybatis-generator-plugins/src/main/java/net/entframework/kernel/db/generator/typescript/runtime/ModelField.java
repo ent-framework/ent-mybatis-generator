@@ -33,7 +33,11 @@ public class ModelField {
 	}
 
 	public String getDescription() {
-		return field.getDescription();
+		String desc = field.getDescription();
+		if (StringUtils.isEmpty(desc)) {
+			desc = field.getName();
+		}
+		return desc;
 	}
 
 	public int getLength() {

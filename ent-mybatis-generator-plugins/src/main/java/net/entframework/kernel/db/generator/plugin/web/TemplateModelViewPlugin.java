@@ -31,6 +31,7 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 
 	private final List<GeneratedFile> generatedFiles = new ArrayList<>();
 
+	@Override
 	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
 
 		generatedFiles.add(generateModelClass(topLevelClass, introspectedTable));
@@ -67,9 +68,11 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
 		List<Field> fields = WebUtils.getFieldsWithoutPrimaryKey(topLevelClass.getFields(), pkColumn.getJavaProperty());
 		data.put("fields", fields);
-		data.put("listFields", convert(WebUtils.getListFields(fields, getListIgnoreFields()), introspectedTable));
-		data.put("searchFields", convert(WebUtils.getSearchFields(fields, getListIgnoreFields()), introspectedTable));
-		data.put("inputFields", convert(WebUtils.getInputFields(fields, getInputIgnoreFields()), introspectedTable));
+		data.put("listFields",
+				convert(WebUtils.getListFields(fields, getListIgnoreFields(), introspectedTable), introspectedTable));
+		data.put("searchFields", convert(WebUtils.getSearchFields(fields, introspectedTable), introspectedTable));
+		data.put("inputFields",
+				convert(WebUtils.getInputFields(fields, getInputIgnoreFields(), introspectedTable), introspectedTable));
 
 		// 获取枚举字段
 		List<Field> enumFields = fields.stream()
@@ -91,6 +94,7 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 				data, this.templatePath, this.fileName, this.fileExt);
 	}
 
+	@Override
 	public List<GeneratedFile> contextGenerateAdditionalFiles() {
 		return generatedFiles;
 	}

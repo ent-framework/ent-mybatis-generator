@@ -70,8 +70,6 @@ public class TableConfiguration extends PropertyHolder {
 
 	private ColumnRenamingRule columnRenamingRule;
 
-	private SearchableColumn searchableColumn;
-
 	private boolean isAllColumnDelimitingEnabled;
 
 	private String mapperName;
@@ -84,9 +82,9 @@ public class TableConfiguration extends PropertyHolder {
 
 	private String tenantColumn;
 
-	private String displayField;
-
 	private String parentTable;
+
+	private UIConfig uiConfig;
 
 	private final List<IgnoredColumnPattern> ignoredColumnPatterns = new ArrayList<>();
 
@@ -241,7 +239,7 @@ public class TableConfiguration extends PropertyHolder {
 			if (answer.isGeneratedAlways() != global.isGeneratedAlways()) {
 				global.setGeneratedAlways(answer.isGeneratedAlways());
 			}
-			if (answer.getGenericTypes().size() > 0) {
+			if (!answer.getGenericTypes().isEmpty()) {
 				global.getGenericTypes().clear();
 				global.getGenericTypes().addAll(answer.getGenericTypes());
 			}
@@ -532,14 +530,6 @@ public class TableConfiguration extends PropertyHolder {
 		this.versionColumn = versionColumn;
 	}
 
-	public String getDisplayField() {
-		return displayField;
-	}
-
-	public void setDisplayField(String displayField) {
-		this.displayField = displayField;
-	}
-
 	public String getTenantColumn() {
 		return tenantColumn;
 	}
@@ -548,12 +538,12 @@ public class TableConfiguration extends PropertyHolder {
 		this.tenantColumn = tenantColumn;
 	}
 
-	public SearchableColumn getSearchableColumn() {
-		return searchableColumn;
+	public UIConfig getUiConfig() {
+		return uiConfig;
 	}
 
-	public void setSearchableColumn(SearchableColumn searchableColumn) {
-		this.searchableColumn = searchableColumn;
+	public void setUiConfig(UIConfig uiConfig) {
+		this.uiConfig = uiConfig;
 	}
 
 	public void merge(TableConfiguration source) {
@@ -568,9 +558,6 @@ public class TableConfiguration extends PropertyHolder {
 		}
 		if (StringUtils.isEmpty(tenantColumn) && !StringUtils.isNotEmpty(source.tenantColumn)) {
 			tenantColumn = source.tenantColumn;
-		}
-		if (StringUtils.isEmpty(displayField) && !StringUtils.isNotEmpty(source.displayField)) {
-			displayField = source.displayField;
 		}
 		if (StringUtils.isEmpty(parentTable) && !StringUtils.isNotEmpty(source.parentTable)) {
 			parentTable = source.parentTable;
