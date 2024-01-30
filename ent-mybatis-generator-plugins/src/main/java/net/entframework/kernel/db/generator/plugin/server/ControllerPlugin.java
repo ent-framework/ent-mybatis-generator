@@ -34,6 +34,8 @@ public class ControllerPlugin extends AbstractServerPlugin {
 
 	private boolean enableControllerParentMode = false;
 
+	private boolean generatePermCode = true;
+
 	@Override
 	public boolean validate(List<String> warnings) {
 		boolean validate = super.validate(warnings);
@@ -49,6 +51,11 @@ public class ControllerPlugin extends AbstractServerPlugin {
 			this.enableControllerParentMode = true;
 		}
 
+		String generatePermCode = this.properties.getProperty("generatePermCode");
+		if (StringUtility.stringHasValue(generatePermCode) && !StringUtility.isTrue(generatePermCode)) {
+			this.generatePermCode = false;
+		}
+
 		return validate;
 	}
 
@@ -59,6 +66,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
 	 * introspected from the database
 	 * @return
 	 */
+	@Override
 	public boolean clientGenerated(Interface interfaze, IntrospectedTable introspectedTable) {
 
 		String relTable = introspectedTable.getTableConfiguration().getProperty(pluginName);
@@ -204,9 +212,18 @@ public class ControllerPlugin extends AbstractServerPlugin {
 
 	private void addPostMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription) {
 		if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
-			method.addAnnotation(String.format("@PostResource(displayName = \"%s-%s\", path = \"%s\")",
-					modelDescription, method.getOperation(), method.getRestPath()));
-			controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.PostResource");
+			if (this.generatePermCode) {
+				method.addAnnotation(String.format(
+						"@PostResource(displayName = \"%s-%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
+						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath())));
+				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.PostResource");
+			}
+			else {
+				method.addAnnotation(String.format("@PostResource(displayName = \"%s-%s\", path = \"%s\")",
+						modelDescription, method.getOperation(), method.getRestPath()));
+				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.PostResource");
+			}
+
 		}
 		else {
 			method.addAnnotation(String.format("@PostMapping(\"%s\")", method.getRestPath()));
@@ -214,11 +231,28 @@ public class ControllerPlugin extends AbstractServerPlugin {
 		}
 	}
 
+	private String generatePermCode(String restPath) {
+		String path = restPath;
+		if (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+		return StringUtils.replace(path, "/", ":");
+	}
+
 	private void addGetMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription) {
 		if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
-			method.addAnnotation(String.format("@GetResource(displayName = \"%s-%s\", path = \"%s\")", modelDescription,
-					method.getOperation(), method.getRestPath()));
-			controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.GetResource");
+			if (this.generatePermCode) {
+				method.addAnnotation(String.format(
+						"@GetResource(displayName = \"%s-%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
+						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath())));
+				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.GetResource");
+			}
+			else {
+				method.addAnnotation(String.format("@GetResource(displayName = \"%s-%s\", path = \"%s\")",
+						modelDescription, method.getOperation(), method.getRestPath()));
+				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.GetResource");
+			}
+
 		}
 		else {
 			method.addAnnotation(String.format("@GetMapping(\"/%s\")", method.getRestPath()));

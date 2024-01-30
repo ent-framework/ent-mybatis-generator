@@ -49,6 +49,8 @@ public class ServerRestMethodsGenerator {
 		addQueryListMethod();
 		// 分页查询
 		addPageListMethod();
+		// 高级分页查询
+		addAdvancePageListMethod();
 		// 根据主键ID 删除
 		addDeleteByPrimaryKeyMethod();
 		// 批量删除
@@ -249,6 +251,47 @@ public class ServerRestMethodsGenerator {
 		method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);",
 				recordType.getShortName(), recordType.getShortName()));
 		method.addBodyLine(String.format("PageResult<%s> page = %s.page(record, BaseQuery.from(request));",
+				recordType.getShortName(), serviceFieldName));
+		method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);",
+				voJavaType.getShortName(), voJavaType.getShortName()));
+		method.addBodyLine(String.format(
+				"PageResult<%s> result =  PageResultFactory.createPageResult(records, (long)page.getTotalRows(), page.getPageSize(), page.getPageNo());",
+				voJavaType.getShortName()));
+		builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
+		builder.withImport("net.entframework.kernel.db.api.factory.PageResultFactory");
+		builder.withMethod(method);
+	}
+
+	private String getParentPackageName(String packageName) {
+		if (packageName != null) {
+			int k = packageName.lastIndexOf(".");
+			return packageName.substring(0, k);
+		}
+		return null;
+	}
+
+	public void addAdvancePageListMethod() {
+		RestMethod method = new RestMethod("criteria", "POST", recordType);
+		method.setOperation("高级分页查询");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
+				"net.entframework.kernel.db.api.pojo.page.PageResult");
+		builder.withImport(pageResultType);
+		pageResultType.addTypeArgument(voJavaType);
+		method.setReturnType(pageResultType);
+
+		FullyQualifiedJavaType criteria = new FullyQualifiedJavaType(getParentPackageName(recordType.getPackageName())
+				+ ".criteria." + recordType.getShortName() + "Criteria");
+		builder.withImport(criteria);
+		Parameter parameter = new Parameter(criteria, "criteria");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
+		}
+		method.addParameter(parameter);
+		method.addParameter(getRequestParam());
+
+		method.addBodyLine(String.format("PageResult<%s> page = %s.page(criteria, BaseQuery.from(request));",
 				recordType.getShortName(), serviceFieldName));
 		method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);",
 				voJavaType.getShortName(), voJavaType.getShortName()));

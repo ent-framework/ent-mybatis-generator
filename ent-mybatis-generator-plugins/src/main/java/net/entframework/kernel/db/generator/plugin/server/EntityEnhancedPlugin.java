@@ -41,23 +41,7 @@ public class EntityEnhancedPlugin extends PluginAdapter {
 	@Override
 	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
 		addDataAnnotation(topLevelClass, true);
-
-		addFieldEnhancedMethod(topLevelClass);
 		return true;
-	}
-
-	private void addFieldEnhancedMethod(TopLevelClass topLevelClass) {
-		List<Field> fieldList = topLevelClass.getFields();
-		fieldList.forEach(field -> {
-			Method method = new Method(field.getName());
-			method.setVisibility(JavaVisibility.PUBLIC);
-			method.setReturnType(topLevelClass.getType());
-			Parameter parameter = new Parameter(field.getType(), field.getName());
-			method.addParameter(parameter);
-			method.addBodyLine(String.format("this.%s = %s;", field.getName(), field.getName()));
-			method.addBodyLine("return this;");
-			topLevelClass.addMethod(method);
-		});
 	}
 
 	/**
@@ -104,6 +88,7 @@ public class EntityEnhancedPlugin extends PluginAdapter {
 		return true;
 	}
 
+	@Override
 	public boolean dynamicSqlSupportGenerated(TopLevelClass supportClass, IntrospectedTable introspectedTable) {
 		String baseRecordType = introspectedTable.getBaseRecordType();
 		return true;
@@ -129,8 +114,7 @@ public class EntityEnhancedPlugin extends PluginAdapter {
 		if (StringUtils.isNotEmpty(context.getJavaModelGeneratorConfiguration().getProperty("rootClass"))) {
 			annotations.add(LombokAnnotation.EqualsAndHashCode);
 		}
-		annotations.add(LombokAnnotation.NO_ARGS_CONSTRUCTOR);
-		annotations.add(LombokAnnotation.ALL_ARGS_CONSTRUCTOR);
+		annotations.add(LombokAnnotation.ACCESSORS_CHAIN);
 		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
 			boolean isEnable = Boolean.parseBoolean(entry.getValue().toString());
 			if (isEnable) {

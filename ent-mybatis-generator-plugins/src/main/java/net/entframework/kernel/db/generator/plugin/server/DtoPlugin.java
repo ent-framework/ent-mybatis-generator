@@ -59,6 +59,7 @@ public class DtoPlugin extends AbstractServerPlugin {
 	 * introspected from the database
 	 * @return
 	 */
+	@Override
 	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
 		FullyQualifiedJavaType qualifiedJavaType = topLevelClass.getType();
 		VoFieldsGenerator pojoFieldsGenerator = new VoFieldsGenerator(this.context, this.codingStyle,
@@ -92,8 +93,8 @@ public class DtoPlugin extends AbstractServerPlugin {
 					introspectedTable.getTableConfiguration().getParentTable());
 			if (parentTable != null) {
 				voParentTableFound = true;
-				FullyQualifiedJavaType parent = getVoJavaType(
-						parentTable.getFullyQualifiedTable().getDomainObjectName());
+				FullyQualifiedJavaType parent = getJavaType(parentTable.getFullyQualifiedTable().getDomainObjectName(),
+						this.dtoTargetPackage, this.dtoSuffix);
 				voClass.setSuperClass(parent);
 			}
 		}
@@ -103,7 +104,7 @@ public class DtoPlugin extends AbstractServerPlugin {
 				voClass.setSuperClass(this.dtoRootClass);
 				voClass.addImportedType(this.dtoRootClass);
 			}
-			ClassInfo classInfo = ClassInfo.getInstance(this.voRootClass);
+			ClassInfo classInfo = ClassInfo.getInstance(this.dtoRootClass);
 			TopLevelClass parentRequestClass = classInfo.toTopLevelClass();
 			if (parentRequestClass != null) {
 				voClass.setAttribute(Constants.PARENT_REQUEST_CLASS, parentRequestClass);
@@ -136,10 +137,8 @@ public class DtoPlugin extends AbstractServerPlugin {
 		topLevelClass.addAnnotation(LombokAnnotation.DATA.getName());
 		topLevelClass.addImportedType(LombokAnnotation.EqualsAndHashCode.getJavaType());
 		topLevelClass.addAnnotation(LombokAnnotation.EqualsAndHashCode.getName());
-		topLevelClass.addImportedType(LombokAnnotation.ALL_ARGS_CONSTRUCTOR.getJavaType());
-		topLevelClass.addAnnotation(LombokAnnotation.ALL_ARGS_CONSTRUCTOR.getName());
-		topLevelClass.addImportedType(LombokAnnotation.NO_ARGS_CONSTRUCTOR.getJavaType());
-		topLevelClass.addAnnotation(LombokAnnotation.NO_ARGS_CONSTRUCTOR.getName());
+		topLevelClass.addImportedType(LombokAnnotation.ACCESSORS_CHAIN.getJavaType());
+		topLevelClass.addAnnotation(LombokAnnotation.ACCESSORS_CHAIN.getName());
 	}
 
 	/**

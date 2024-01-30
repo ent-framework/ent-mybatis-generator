@@ -235,19 +235,46 @@ public class MybatisProcessor extends AbstractProcessor {
 			ColumnMeta columnMeta = getColumnMeta(element);
 
 			List<String> conditions = getConditions(element, columnMeta);
-			ClassName conditionType = ClassName.get("net.entframework.kernel.db.mybatis.criteria",
-					"ConditionCriterion");
+			ClassName singleValueCriterionType = ClassName.get("net.entframework.kernel.db.mybatis.criteria",
+					"SingleValueCriterion");
+			ClassName listValueCriterionType = ClassName.get("net.entframework.kernel.db.mybatis.criteria",
+					"ListValueCriterion");
 			for (String condition : conditions) {
-				ParameterizedTypeName conditionParameterizedTypeName = ParameterizedTypeName.get(conditionType,
-						TypeName.get(element.asType()));
+				// boolean isListCondition = isListCondition(condition);
+				// ParameterizedTypeName conditionParameterizedTypeName =
+				// ParameterizedTypeName.get(isListCondition ? listValueCriterionType :
+				// singleValueCriterionType,
+				// ("NotNull".equals(condition) || "IsNull".equals(condition)) ?
+				// ClassName.get("java.lang", "Boolean") :
+				// TypeName.get(element.asType()));
+
+				boolean isListCondition = isListCondition(condition);
+				ClassName className = ClassName.get("net.entframework.kernel.db.mybatis.criteria",
+						"ConditionCriterion");
+				ParameterizedTypeName conditionParameterizedTypeName = ParameterizedTypeName
+					.get(className.nestedClass(condition), ("NotNull".equals(condition) || "IsNull".equals(condition))
+							? ClassName.get("java.lang", "Boolean") : TypeName.get(element.asType()));
+
 				FieldSpec.Builder conditionFieldBuilder = FieldSpec
 					.builder(conditionParameterizedTypeName, Utils.uncapitalize(condition))
 					.addModifiers(Modifier.PRIVATE);
 				ClassName subConditionType = ClassName.get("net.entframework.kernel.db.mybatis.criteria",
 						"ConditionCriterion", condition);
-				conditionFieldBuilder.initializer("addCriterion(new $T<>())", subConditionType);
+				// conditionFieldBuilder.initializer("addCriterion(new $T<>())",
+				// subConditionType);
 				innerBuilder.addField(conditionFieldBuilder.build());
 			}
+
+			// 增加方法
+			ParameterizedTypeName parameterizedCriterionList = ParameterizedTypeName.get(queryExpressionDSL,
+					ClassName.get("net.entframework.kernel.db.mybatis.criteria", "Criterion"));
+
+			MethodSpec.Builder criterionBuilder = MethodSpec.methodBuilder("getCriterions")
+				.addModifiers(Modifier.PUBLIC)
+				.returns(parameterizedCriterionList)
+				.addStatement("return $T.asList($N)", ClassName.get("java.util", "Arrays"),
+						Utils.join(conditions.stream().map(Utils::uncapitalize).toList(), ","));
+			innerBuilder.addMethod(criterionBuilder.build());
 
 			clazzBuilder.addType(innerBuilder.build());
 		});
@@ -264,6 +291,11 @@ public class MybatisProcessor extends AbstractProcessor {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean isListCondition(String condition) {
+		return "Between".equals(condition) || "NotBetween".equals(condition) || "IsIn".equals(condition)
+				|| "IsNotIn".equals(condition);
 	}
 
 	private List<String> getConditions(AnnotationMeta element, ColumnMeta columnMeta) {

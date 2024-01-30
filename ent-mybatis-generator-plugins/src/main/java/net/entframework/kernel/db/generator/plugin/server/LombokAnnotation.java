@@ -14,6 +14,9 @@ public enum LombokAnnotation {
 	BUILDER("builder", "@Builder(builderClassName = \"Builder\")", "lombok.Builder"),
 	ALL_ARGS_CONSTRUCTOR("allArgsConstructor", "@AllArgsConstructor", "lombok.AllArgsConstructor"),
 	NO_ARGS_CONSTRUCTOR("noArgsConstructor", "@NoArgsConstructor", "lombok.NoArgsConstructor"),
+	ACCESSORS_CHAIN("accessors", "@Accessors(chain = true)", "lombok.experimental.Accessors"),
+	ACCESSORS_FLUENT("accessors", "@Accessors(fluent = true)", "lombok.experimental.Accessors"),
+
 	TO_STRING("toString", "@ToString", "lombok.ToString"), SLF4J("Slf4j", "@Slf4j", "lombok.extern.slf4j.Slf4j"),;
 
 	private final String paramName;
