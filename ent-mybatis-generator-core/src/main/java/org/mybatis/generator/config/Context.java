@@ -110,7 +110,7 @@ public class Context extends PropertyHolder {
 		tableConfigurations = new ArrayList<>();
 		pluginConfigurations = new ArrayList<>();
 		columnGlobals = new ArrayList<>();
-		joinConfig = new JoinConfig("", "");
+		joinConfig = new JoinConfig();
 	}
 
 	public void addTableConfiguration(TableConfiguration tc) {
@@ -494,6 +494,12 @@ public class Context extends PropertyHolder {
 			generatedJavaFiles.addAll(introspectedTable.getGeneratedJavaFiles());
 			generatedXmlFiles.addAll(introspectedTable.getGeneratedXmlFiles());
 			generatedKotlinFiles.addAll(introspectedTable.getGeneratedKotlinFiles());
+		}
+
+		for (IntrospectedTable introspectedTable : introspectedTables) {
+			callback.checkCancel();
+
+			pluginAggregator.modelBaseRecordClassGenerated(introspectedTable);
 
 			generatedJavaFiles.addAll(pluginAggregator.contextGenerateAdditionalJavaFiles(introspectedTable));
 			generatedXmlFiles.addAll(pluginAggregator.contextGenerateAdditionalXmlFiles(introspectedTable));

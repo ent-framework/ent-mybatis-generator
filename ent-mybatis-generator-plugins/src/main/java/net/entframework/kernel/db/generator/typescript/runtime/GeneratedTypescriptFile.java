@@ -57,6 +57,7 @@ public class GeneratedTypescriptFile extends GeneratedJavaFile {
 	 * @return the CompilationUnit associated with this file, or null if the file is not
 	 * mergeable.
 	 */
+	@Override
 	public CompilationUnit getCompilationUnit() {
 		return this.compilationUnit;
 	}

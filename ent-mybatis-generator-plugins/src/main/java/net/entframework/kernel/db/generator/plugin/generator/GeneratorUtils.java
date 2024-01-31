@@ -132,8 +132,7 @@ public class GeneratorUtils {
 		if (uiConfig != null) {
 			displayField = uiConfig.getDisplayField();
 		}
-		TopLevelClass modelClass = (TopLevelClass) introspectedTable
-			.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
+		TopLevelClass modelClass = introspectedTable.getBaseModelClass();
 		if (StringUtils.isEmpty(displayField)) {
 			IntrospectedColumn pk = getPrimaryKey(introspectedTable);
 			return modelClass.getFields()

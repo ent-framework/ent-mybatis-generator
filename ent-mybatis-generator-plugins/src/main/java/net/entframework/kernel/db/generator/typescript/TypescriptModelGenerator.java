@@ -50,6 +50,8 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 				typescriptModelPackage + "." + camelCaseName + "." + table.getDomainObjectName(), true);
 
 		TypescriptTopLevelClass topLevelClass = new TypescriptTopLevelClass(tsBaseModelJavaType);
+		introspectedTable.setBaseModelClass(topLevelClass);
+
 		topLevelClass.setVisibility(JavaVisibility.PUBLIC);
 		topLevelClass.setDescription(this.introspectedTable.getRemarks());
 
@@ -64,14 +66,19 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 		JavaTypeResolver typeResolver = ObjectFactory.createJavaTypeResolver(this.context, Collections.emptyList());
 
 		for (IntrospectedColumn introspectedColumn : introspectedColumns) {
+
 			Field field = WebUtils.getTypescriptField(introspectedColumn, context, introspectedTable, topLevelClass);
 
-			field.setDescription(introspectedColumn.getRemarks());
-			GeneratorUtils.addComment(field, introspectedColumn.getRemarks());
+			String remarks = introspectedColumn.getRemarks();
+			if (StringUtils.isEmpty(remarks)) {
+				remarks = field.getName();
+			}
+			field.setDescription(remarks);
+			GeneratorUtils.addComment(field, remarks);
 
 			FullyQualifiedJavaType actualType = typeResolver.calculateJavaType(null, introspectedColumn);
+			//检查类型是否一致
 			if (!actualType.equals(introspectedColumn.getFullyQualifiedJavaType())) {
-
 				ClassInfo classInfo = ClassInfo
 					.getInstance(introspectedColumn.getFullyQualifiedJavaType().getFullyQualifiedName());
 				if (classInfo != null && classInfo.isEnum()) {
@@ -98,6 +105,11 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 				field.setAttribute(Constants.FIELD_VERSION_ATTR, true);
 			}
 
+			if (StringUtils.equalsIgnoreCase(introspectedColumn.getActualColumnName(),
+					introspectedTable.getTableConfiguration().getTenantColumn())) {
+				field.setAttribute(Constants.FIELD_TENANT_ATTR, true);
+			}
+
 			if (plugins.modelFieldGenerated(field, topLevelClass, introspectedColumn, introspectedTable,
 					Plugin.ModelClassType.BASE_RECORD)) {
 				topLevelClass.addField(field);
@@ -111,10 +123,9 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 			initializationBlock.addBodyLine(String.format("export type %sPageModel = BasicFetchResult<%s>;",
 					table.getDomainObjectName(), table.getDomainObjectName()));
 			topLevelClass.addImportedType(
-					new FullyQualifiedTypescriptType("", "fe-ent-core.es.logics.types.BasicFetchResult", true));
+					new FullyQualifiedTypescriptType("", "fe-ent-core.es.logics.BasicFetchResult", true));
 			topLevelClass.addInitializationBlock(initializationBlock);
 
-			introspectedTable.setAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS, topLevelClass);
 			answer.add(topLevelClass);
 		}
 		return answer;

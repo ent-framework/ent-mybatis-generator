@@ -92,14 +92,12 @@
         api: ${modelName}Page,
         rowKey: '${pk.name}',
         columns,
-<#if (searchFields?size>0)>
         formConfig: {
           labelWidth: 120,
           schemas: searchFormSchema,
           autoSubmitOnEnter: true,
         },
-        useSearchForm: true,
-</#if>
+        useSearchForm: <#if (searchFields?size>0)>true<#else>false</#if>,
         showTableSetting: true,
         bordered: true,
         handleSearchInfoFn(info) {

@@ -51,7 +51,7 @@
   tables.
 -->
 <!ELEMENT context (property*, plugin*, commentGenerator?, (connectionFactory | jdbcConnection)*, javaTypeResolver?,
-                         javaModelGenerator, sqlMapGenerator?, javaClientGenerator?, columnOverride*, table*, joinConfig?)>
+                         javaModelGenerator, sqlMapGenerator?, javaClientGenerator?, columnOverride*, table*, joinEntry*)>
 <!ATTLIST context id ID #REQUIRED
   defaultModelType CDATA #IMPLIED
   targetRuntime CDATA #IMPLIED
@@ -152,14 +152,6 @@
 <!ELEMENT genericType EMPTY>
 <!ATTLIST genericType
         javaType CDATA #REQUIRED
-        >
-<!--
-  join config
--->
-<!ELEMENT joinConfig (joinEntry*)>
-<!ATTLIST joinConfig
-        targetPackage CDATA #REQUIRED
-        targetProject CDATA #REQUIRED
         >
 
 <!--

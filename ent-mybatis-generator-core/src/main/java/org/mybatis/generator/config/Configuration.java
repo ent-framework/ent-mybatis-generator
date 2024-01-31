@@ -105,8 +105,6 @@ public class Configuration {
 		context.getColumnGlobals().addAll(extendContext.getColumnGlobals());
 		context.getTableConfigurations().addAll(extendContext.getTableConfigurations());
 
-		context.getJoinConfig().setTargetPackage(extendContext.getJoinConfig().getTargetPackage());
-		context.getJoinConfig().setTargetProject(extendContext.getJoinConfig().getTargetProject());
 		context.getJoinConfig().getJoinDetailMap().putAll(extendContext.getJoinConfig().getJoinDetailMap());
 	}
 

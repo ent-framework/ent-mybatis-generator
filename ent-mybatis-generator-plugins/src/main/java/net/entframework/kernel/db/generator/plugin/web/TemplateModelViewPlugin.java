@@ -67,12 +67,13 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 
 		IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
 		List<Field> fields = WebUtils.getFieldsWithoutPrimaryKey(topLevelClass.getFields(), pkColumn.getJavaProperty());
-		data.put("fields", fields);
-		data.put("listFields",
-				convert(WebUtils.getListFields(fields, getListIgnoreFields(), introspectedTable), introspectedTable));
-		data.put("searchFields", convert(WebUtils.getSearchFields(fields, introspectedTable), introspectedTable));
-		data.put("inputFields",
-				convert(WebUtils.getInputFields(fields, getInputIgnoreFields(), introspectedTable), introspectedTable));
+		List<ModelField> modelFields = convert(fields, introspectedTable);
+
+		// 生成描述Detail Schema配置
+		data.put("detailFields", WebUtils.getDetailFields(copy(modelFields)));
+		data.put("listFields", WebUtils.getListFields(copy(modelFields), getListIgnoreFields(), introspectedTable));
+		data.put("searchFields", WebUtils.getSearchFields(copy(modelFields), introspectedTable));
+		data.put("inputFields", WebUtils.getInputFields(copy(modelFields), getInputIgnoreFields(), introspectedTable));
 
 		// 获取枚举字段
 		List<Field> enumFields = fields.stream()
@@ -99,7 +100,13 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		return generatedFiles;
 	}
 
-	protected List<ModelField> convert(List<Field> fields, IntrospectedTable introspectedTable) {
+	/**
+	 * 字段转换，只保留many-to-one类型的
+	 * @param fields
+	 * @param introspectedTable
+	 * @return
+	 */
+	private List<ModelField> convert(List<Field> fields, IntrospectedTable introspectedTable) {
 		List<ModelField> modelFields = new ArrayList<>();
 		for (Field field : fields) {
 			IntrospectedColumn column = null;
@@ -126,6 +133,10 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 			modelFields.add(modelField);
 		}
 		return modelFields;
+	}
+
+	private List<ModelField> copy(List<ModelField> fields) {
+		return fields.stream().map(ModelField::copy).toList();
 	}
 
 }

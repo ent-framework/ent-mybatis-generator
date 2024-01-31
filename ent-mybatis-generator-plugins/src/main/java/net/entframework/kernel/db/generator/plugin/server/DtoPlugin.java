@@ -54,13 +54,13 @@ public class DtoPlugin extends AbstractServerPlugin {
 
 	/***
 	 * 在model产生后新增pojo request 和 pojo response 插件注册时要注意顺序，因为需要从TopLevelClass读取所有Field
-	 * @param topLevelClass the generated base record class
 	 * @param introspectedTable The class containing information about the table as
 	 * introspected from the database
 	 * @return
 	 */
 	@Override
-	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+	public boolean modelBaseRecordClassGenerated(IntrospectedTable introspectedTable) {
+		TopLevelClass topLevelClass = introspectedTable.getBaseModelClass();
 		FullyQualifiedJavaType qualifiedJavaType = topLevelClass.getType();
 		VoFieldsGenerator pojoFieldsGenerator = new VoFieldsGenerator(this.context, this.codingStyle,
 				this.dtoTargetPackage, this.dtoSuffix, qualifiedJavaType);

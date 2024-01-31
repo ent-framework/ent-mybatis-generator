@@ -22,8 +22,7 @@ public class Utils {
 
 	public static Set<FullyQualifiedJavaType> getRelatedFieldType(IntrospectedTable introspectedTable) {
 		Set<FullyQualifiedJavaType> relatedFieldType = new HashSet<>();
-		TopLevelClass modelClass = (TopLevelClass) introspectedTable
-			.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
+		TopLevelClass modelClass = introspectedTable.getBaseModelClass();
 		if (GeneratorUtils.hasRelation(modelClass, JoinTarget.JoinType.MANY_TO_ONE)) {
 			List<Field> fields = GeneratorUtils.getRelatedFields(modelClass, JoinTarget.JoinType.MANY_TO_ONE);
 			if (fields.size() > 0) {

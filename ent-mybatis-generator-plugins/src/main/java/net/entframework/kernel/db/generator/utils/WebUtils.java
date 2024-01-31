@@ -4,6 +4,7 @@ import net.entframework.kernel.db.generator.Constants;
 import net.entframework.kernel.db.generator.config.Relation;
 import net.entframework.kernel.db.generator.plugin.generator.GeneratorUtils;
 import net.entframework.kernel.db.generator.typescript.runtime.FullyQualifiedTypescriptType;
+import net.entframework.kernel.db.generator.typescript.runtime.ModelField;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
@@ -68,12 +69,25 @@ public class WebUtils {
 	}
 
 	/**
+	 * 明细页展示
+	 * @param fields
+	 * @return
+	 */
+	public static List<ModelField> getDetailFields(List<ModelField> fields) {
+		List<ModelField> results = new ArrayList<>();
+
+		results.addAll(fields.stream().filter(modelField -> !(modelField.isTenantField() || modelField.isLogicDeleteField())).toList());
+
+		return results;
+	}
+	/**
 	 * 筛选列表展示字段
 	 * @param fields
 	 * @return
 	 */
-	public static List<Field> getListFields(List<Field> fields, Set<String> ignoreFields,
-			IntrospectedTable introspectedTable) {
+	public static List<ModelField> getListFields(List<ModelField> fields, Set<String> ignoreFields,
+											IntrospectedTable introspectedTable) {
+
 		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
 		Set<String> definedFields = new HashSet<>();
 		Set<String> ignoredFields = new HashSet<>(ignoreFields);
@@ -81,10 +95,36 @@ public class WebUtils {
 			definedFields.addAll(uiConfig.getListFields().getFields());
 			ignoredFields.addAll(uiConfig.getListFields().getIgnored());
 		}
-		return filterFields(fields, definedFields, ignoredFields);
+
+		List<ModelField> results = new ArrayList<>();
+		//先过滤掉逻辑删除字段和Version字段
+		for (ModelField field: fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList()) {
+
+			if (field.isBlob()) {
+				continue;
+			}
+			if (ignoredFields.contains(field.getName())) {
+				continue;
+			}
+
+			if (!definedFields.isEmpty()) {
+				if (!definedFields.contains(field.getName())) {
+					field.setHidden(true);
+				}
+			}
+			results.add(field);
+
+		}
+		return results;
 	}
 
-	public static List<Field> getSearchFields(List<Field> fields, IntrospectedTable introspectedTable) {
+	/**
+	 * 查询字段配置
+	 * @param fields
+	 * @param introspectedTable
+	 * @return
+	 */
+	public static List<ModelField> getSearchFields(List<ModelField> fields, IntrospectedTable introspectedTable) {
 		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
 		Set<String> definedFields = new HashSet<>();
 		Set<String> ignoredFields = new HashSet<>();
@@ -95,15 +135,11 @@ public class WebUtils {
 		if (definedFields.isEmpty() && ignoredFields.isEmpty()) {
 			return Collections.emptyList();
 		}
-		return filterFields(fields, definedFields, ignoredFields);
+		return filterFields(fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList(), definedFields, ignoredFields);
 	}
 
-	private static List<Field> filterFields(List<Field> fields, Set<String> definedFields, Set<String> ignoredFields) {
+	private static List<ModelField> filterFields(List<ModelField> fields, Set<String> definedFields, Set<String> ignoredFields) {
 		return fields.stream().filter(field -> {
-
-			if (GeneratorUtils.isLogicDeleteField(field) || GeneratorUtils.isVersionField(field)) {
-				return false;
-			}
 
 			if (!definedFields.isEmpty()) {
 				return definedFields.contains(field.getName());
@@ -111,16 +147,6 @@ public class WebUtils {
 
 			if (ignoredFields.contains(field.getName())) {
 				return false;
-			}
-
-			if (GeneratorUtils.isRelationField(field)) {
-				Relation relation = (Relation) field.getAttribute(Constants.FIELD_RELATION);
-				if (relation.getJoinType() != null && relation.getJoinType() == JoinTarget.JoinType.MANY_TO_ONE) {
-					return true;
-				}
-				else {
-					return false;
-				}
 			}
 
 			return true;
@@ -140,33 +166,16 @@ public class WebUtils {
 	 * @param ignoreFields ignoreFields
 	 * @return field list
 	 */
-	public static List<Field> getInputFields(List<Field> fields, Set<String> ignoreFields,
+	public static List<ModelField> getInputFields(List<ModelField> fields, Set<String> ignoreFields,
 			IntrospectedTable introspectedTable) {
-		List<Field> manyToOneFields = GeneratorUtils.getRelatedFields(fields, JoinTarget.JoinType.MANY_TO_ONE);
 		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
 		Set<String> definedFields = new HashSet<>();
 		Set<String> ignoredFields = new HashSet<>();
-
-		return fields.stream().filter(field -> {
-			if (GeneratorUtils.isRelationField(field)) {
-				return false;
-			}
-			if (GeneratorUtils.isLogicDeleteField(field) || GeneratorUtils.isVersionField(field)) {
-				return false;
-			}
-
-			if (ignoreFields.contains(field.getName())) {
-				return false;
-			}
-
-			Optional<Field> beRelated = getBeRelatedCommonField(field, manyToOneFields);
-			if (beRelated.isPresent()) {
-				field.setAttribute(Constants.TARGET_FIELD_RELATION,
-						beRelated.get().getAttribute(Constants.FIELD_RELATION));
-				return true;
-			}
-			return field.getAttribute(Constants.FIELD_EXT_ATTR) == null;
-		}).collect(Collectors.toList());
+		if (uiConfig != null && uiConfig.getInputFields() != null) {
+			definedFields.addAll(uiConfig.getInputFields().getFields());
+			ignoredFields.addAll(uiConfig.getInputFields().getIgnored());
+		}
+		return filterFields(fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList(), definedFields, ignoredFields);
 	}
 
 	public static List<Field> getRelationFields(List<Field> fields) {

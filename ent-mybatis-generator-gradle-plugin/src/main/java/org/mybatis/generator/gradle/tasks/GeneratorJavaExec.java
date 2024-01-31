@@ -124,6 +124,9 @@ public class GeneratorJavaExec extends ConventionTask {
 			for (String error : e.getErrors()) {
 				project.getLogger().error(error);
 			}
+			if (extension.getVerbose()!=null && extension.getVerbose()) {
+				e.printStackTrace();
+			}
 			throw new GradleException(e.getMessage());
 		}
 		catch (SQLException | IOException e) {
@@ -131,6 +134,11 @@ public class GeneratorJavaExec extends ConventionTask {
 		}
 		catch (InterruptedException e) {
 			// ignore (will never happen with the DefaultShellCallback)
+		} catch (Exception ex) {
+			if (extension.getVerbose()!=null && extension.getVerbose()) {
+				ex.printStackTrace();
+			}
+			throw new GradleException(ex.getMessage());
 		}
 
 		for (String error : warnings) {

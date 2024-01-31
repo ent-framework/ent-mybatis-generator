@@ -144,25 +144,14 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 		return true;
 	}
 
+
 	/**
 	 * Intercepts base record class generation
-	 * @param topLevelClass
-	 * @param introspectedTable
-	 * @return
 	 */
 	@Override
 	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-		String tableName = introspectedTable.getFullyQualifiedTable().getIntrospectedTableName();
-		JoinEntry joinEntry = context.getJoinConfig().getJoinEntry(tableName);
-		if (joinEntry != null) {
-			addJoinField(topLevelClass, joinEntry);
-		}
-
 		String fileDescription = GeneratorUtils.getFileDescription(introspectedTable);
 		topLevelClass.setDescription(fileDescription);
-
-		// IntrospectedTable 和 TopLevelClass 建立关联, TODO 是否有API，待验证
-		introspectedTable.setAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS, topLevelClass);
 
 		if (introspectedTable.isMappedSuperclass()) {
 			topLevelClass.addAnnotation("@MappedSuperclass");
@@ -177,6 +166,21 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 
 		return true;
 	}
+
+	@Override
+	public boolean modelBaseRecordClassGenerated(IntrospectedTable introspectedTable) {
+		TopLevelClass topLevelClass = introspectedTable.getBaseModelClass();
+		String tableName = introspectedTable.getFullyQualifiedTable().getIntrospectedTableName();
+		JoinEntry joinEntry = context.getJoinConfig().getJoinEntry(tableName);
+		if (joinEntry != null) {
+			addJoinField(topLevelClass, joinEntry);
+		}
+
+		return true;
+	}
+
+
+
 
 	@Override
 	public boolean clientGenerated(Interface interfaze, IntrospectedTable introspectedTable) {

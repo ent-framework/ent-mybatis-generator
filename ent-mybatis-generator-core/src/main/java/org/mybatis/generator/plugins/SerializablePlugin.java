@@ -116,7 +116,7 @@ public class SerializablePlugin extends PluginAdapter {
 				context.getCommentGenerator().addFieldComment(field, introspectedTable);
 			}
 
-			topLevelClass.addField(field);
+			topLevelClass.getFields().add(0, field);
 		}
 	}
 

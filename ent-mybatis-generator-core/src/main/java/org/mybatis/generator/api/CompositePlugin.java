@@ -775,6 +775,16 @@ public abstract class CompositePlugin implements Plugin {
 	}
 
 	@Override
+	public boolean modelBaseRecordClassGenerated(IntrospectedTable introspectedTable) {
+		for (Plugin plugin : plugins) {
+			if (!plugin.modelBaseRecordClassGenerated(introspectedTable)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
 	public boolean modelRecordWithBLOBsClassGenerated(TopLevelClass topLevelClass,
 			IntrospectedTable introspectedTable) {
 		for (Plugin plugin : plugins) {

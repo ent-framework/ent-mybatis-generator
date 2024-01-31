@@ -15,6 +15,7 @@
  */
 package org.mybatis.generator.api;
 
+import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.internal.rules.ConditionalModelRules;
 import org.mybatis.generator.internal.rules.FlatModelRules;
@@ -76,6 +77,8 @@ public abstract class IntrospectedTable {
 	protected Context context;
 
 	protected Rules rules;
+
+	protected TopLevelClass baseModelClass;
 
 	protected final List<IntrospectedColumn> primaryKeyColumns = new ArrayList<>();
 
@@ -1035,4 +1038,11 @@ public abstract class IntrospectedTable {
 		this.tableType = tableType;
 	}
 
+	public TopLevelClass getBaseModelClass() {
+		return baseModelClass;
+	}
+
+	public void setBaseModelClass(TopLevelClass baseModelClass) {
+		this.baseModelClass = baseModelClass;
+	}
 }

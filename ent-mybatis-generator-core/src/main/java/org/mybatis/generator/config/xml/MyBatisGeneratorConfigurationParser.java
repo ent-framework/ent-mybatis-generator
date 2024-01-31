@@ -193,8 +193,8 @@ public class MyBatisGeneratorConfigurationParser {
 			else if ("table".equals(childNode.getNodeName())) { //$NON-NLS-1$
 				parseTable(context, childNode);
 			}
-			else if ("joinConfig".equals(childNode.getNodeName())) {
-				parseJoinConfig(context, childNode);
+			else if (JOIN_ENTRY_ARG.equals(childNode.getNodeName())) {
+				parseJoinEntry(context, childNode);
 			}
 			else if ("columnOverride".equals(childNode.getNodeName())) {
 				context.addColumnGlobal(parseColumnOverride(childNode));
@@ -865,29 +865,12 @@ public class MyBatisGeneratorConfigurationParser {
 		return property;
 	}
 
-	public void parseJoinConfig(Context context, Node node) {
-		Map<String, JoinEntry> joinDetails = new HashMap<>();
-		Properties attributes = parseAttributes(node);
-		String targetProject = attributes.getProperty(JOIN_TARGET_PROJECT_ARG); // $NON-NLS-1$
-		String targetPackage = parsePropertyTokens(context, attributes.getProperty(JOIN_TARGET_PACKAGE_ARG)); // $NON-NLS-1$
-		NodeList nodeList = node.getChildNodes();
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node childNode = nodeList.item(i);
-
-			if (childNode.getNodeType() != Node.ELEMENT_NODE) {
-				continue;
-			}
-
-			if (JOIN_ENTRY_ARG.equals(childNode.getNodeName())) { // $NON-NLS-1$
-				joinDetails.putAll(parseJoinDetail(childNode, targetProject, targetPackage));
-			}
-		}
-		context.getJoinConfig().setTargetPackage(targetPackage);
-		context.getJoinConfig().setTargetProject(targetProject);
-		context.getJoinConfig().getJoinDetailMap().putAll(joinDetails);
+	public void parseJoinEntry(Context context, Node node) {
+		Map<String, JoinEntry> joinEntries = parseJoinDetail(node);
+		context.getJoinConfig().getJoinDetailMap().putAll(joinEntries);
 	}
 
-	private Map<String, JoinEntry> parseJoinDetail(Node node, String targetProject, String targetPackage) {
+	private Map<String, JoinEntry> parseJoinDetail(Node node) {
 		Properties attributes = parseAttributes(node);
 		String leftTable = attributes.getProperty(JOIN_LEFT_TABLE_ARG); // $NON-NLS-1$
 		NodeList nodeList = node.getChildNodes();
@@ -901,13 +884,13 @@ public class MyBatisGeneratorConfigurationParser {
 			}
 
 			if (JOIN_TARGET_ARG.equals(childNode.getNodeName())) { // $NON-NLS-1$
-				details.add(parseJoinDetail(childNode));
+				details.add(parseJoinTarget(childNode));
 			}
 			if (JOIN_TABLE_ARG.equals(childNode.getNodeName())) { // $NON-NLS-1$
 				joinTables.add(parseJoinTable(childNode));
 			}
 		}
-		JoinEntry detail = new JoinEntry(leftTable, targetProject, targetPackage);
+		JoinEntry detail = new JoinEntry(leftTable);
 		detail.getDetails().addAll(details);
 		detail.getJoinTables().addAll(joinTables);
 		return Collections.singletonMap(leftTable, detail);
@@ -996,7 +979,7 @@ public class MyBatisGeneratorConfigurationParser {
 		return limitDisplayField;
 	}
 
-	private Pair<String, JoinTarget> parseJoinDetail(Node node) {
+	private Pair<String, JoinTarget> parseJoinTarget(Node node) {
 		Properties attributes = parseAttributes(node);
 		String leftTableColumn = attributes.getProperty(JOIN_LEFT_COLUMN_ARG);
 		String rightTable = attributes.getProperty(JOIN_RIGHT_TABLE_ARG);

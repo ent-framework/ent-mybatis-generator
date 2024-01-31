@@ -118,8 +118,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
 		baseControllerJavaClass.addField(serviceField);
 
 		String modelDescription = interfaze.getDescription();
-		TopLevelClass modelClass = (TopLevelClass) introspectedTable
-			.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
+		TopLevelClass modelClass = introspectedTable.getBaseModelClass();
 
 		FullyQualifiedJavaType voJavaType = getVoJavaType(recordType.getShortName());
 		IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);

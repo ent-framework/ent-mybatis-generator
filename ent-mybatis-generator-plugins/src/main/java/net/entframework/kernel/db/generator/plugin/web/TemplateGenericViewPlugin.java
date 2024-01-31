@@ -1,6 +1,5 @@
 package net.entframework.kernel.db.generator.plugin.web;
 
-import net.entframework.kernel.db.generator.Constants;
 import net.entframework.kernel.db.generator.typescript.runtime.FullyQualifiedTypescriptType;
 import net.entframework.kernel.db.generator.typescript.runtime.ModelObject;
 import net.entframework.kernel.db.generator.typescript.runtime.TemplateGeneratedFile;
@@ -43,7 +42,7 @@ public class TemplateGenericViewPlugin extends AbstractTemplatePlugin {
 		List<IntrospectedTable> tables = this.context.getIntrospectedTables();
 
 		for (IntrospectedTable table : tables) {
-			TopLevelClass topLevelClass = (TopLevelClass) table.getAttribute(Constants.INTROSPECTED_TABLE_MODEL_CLASS);
+			TopLevelClass topLevelClass = table.getBaseModelClass();
 			if (topLevelClass != null) {
 				ModelObject.Builder builder = ModelObject.builder();
 				String modelObjectName = topLevelClass.getType().getShortName();

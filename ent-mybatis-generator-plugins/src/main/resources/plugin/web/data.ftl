@@ -25,7 +25,7 @@ export const columns: BasicColumn[] = [
 </#if>
 </#list>
 ];
-
+<#if (searchFields?size>0)>
 export const searchFormSchema: FormSchema[] = [
 <#list searchFields as field>
   {
@@ -36,6 +36,10 @@ export const searchFormSchema: FormSchema[] = [
   },
 </#list>
 ];
+<#else>
+export const searchFormSchema: FormSchema[] = [];
+</#if>
+
 
 export const detailSchema: DescItem[] = [
 <#list fields as field>
@@ -48,26 +52,10 @@ export const detailSchema: DescItem[] = [
 
 export const formSchema: FormSchema[] = [
 <#list inputFields as field>
-  <#assign inputType="Input"/>
-  <#if field.fieldType == 'number'>
-    <#assign inputType="InputNumber"/>
-  <#elseif field.fieldType == 'date'>
-    <#assign inputType="DatePicker"/>
-  <#elseif field.fieldType == 'time'>
-    <#assign inputType="TimePicker"/>
-  <#elseif field.fieldType == 'date-time'>
-    <#assign inputType="DatePicker"/>        
-  <#elseif field.fieldType == 'boolean'>
-    <#assign inputType="Switch"/>
-  <#elseif field.fieldType == 'enum'>
-    <#assign inputType="Select"/>         
-  <#elseif field.fieldType == 'relation'>
-    <#assign inputType="ApiSelect"/>       
-  </#if>
   {
     field: '${field.name}',
     label: '${field.description}',
-    component: '${inputType}',
+    component: '${field.inputType}',
     required: ${field.required?c},
 <#if field.fieldType == 'enum'>
     componentProps: {

@@ -9,21 +9,11 @@ public class JoinEntry {
 
 	private String leftTable;
 
-	private String targetProject;
-
-	private String targetPackage;
-
 	private List<Pair<String, JoinTarget>> details = new ArrayList<>();
 
 	private List<JoinTable> joinTables = new ArrayList<>();
-
-	public JoinEntry() {
-	}
-
-	public JoinEntry(String leftTable, String targetProject, String targetPackage) {
+	public JoinEntry(String leftTable) {
 		this.leftTable = leftTable;
-		this.targetProject = targetProject;
-		this.targetPackage = targetPackage;
 	}
 
 	public static String getJoinResultMapId(String javaTableName) {
@@ -33,12 +23,6 @@ public class JoinEntry {
 	public void validate() {
 		if (isEmpty(leftTable)) {
 			throw new RuntimeException("The left table participating in join operation cannot be empty");
-		}
-		if (isEmpty(targetProject)) {
-			throw new RuntimeException("The target project path to store xml mapper cannot be empty");
-		}
-		if (isEmpty(targetPackage)) {
-			throw new RuntimeException("The target package path to store xml mapper cannot be empty");
 		}
 		for (Pair<String, JoinTarget> detail : details) {
 			String leftTableColumn = detail.getLeft();
@@ -61,21 +45,6 @@ public class JoinEntry {
 		this.leftTable = leftTable;
 	}
 
-	public String getTargetProject() {
-		return targetProject;
-	}
-
-	public void setTargetProject(String targetProject) {
-		this.targetProject = targetProject;
-	}
-
-	public String getTargetPackage() {
-		return targetPackage;
-	}
-
-	public void setTargetPackage(String targetPackage) {
-		this.targetPackage = targetPackage;
-	}
 
 	public List<Pair<String, JoinTarget>> getDetails() {
 		return details;

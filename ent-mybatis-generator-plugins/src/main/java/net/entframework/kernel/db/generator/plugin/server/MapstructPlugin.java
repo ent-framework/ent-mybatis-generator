@@ -36,15 +36,14 @@ public class MapstructPlugin extends AbstractServerPlugin {
 
 	/***
 	 * 在model产生后新增pojo request 和 pojo response 插件注册时要注意顺序，因为需要从TopLevelClass读取所有Field
-	 * @param topLevelClass the generated base record class
 	 * @param introspectedTable The class containing information about the table as
 	 * introspected from the database
 	 * @return
 	 */
-	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-
+	@Override
+	public boolean modelBaseRecordClassGenerated(IntrospectedTable introspectedTable) {
+		TopLevelClass topLevelClass = introspectedTable.getBaseModelClass();
 		generatedJavaFiles.add(generateMapstruct(topLevelClass, introspectedTable));
-
 		return true;
 	}
 

@@ -19,9 +19,19 @@ public class ModelField {
 
 	private boolean hidden;
 
+	private String inputType;
+
+	private String fieldType;
+
 	public ModelField(Field field, IntrospectedColumn column) {
 		this.field = field;
 		this.column = column;
+		calc();
+	}
+
+	private void calc() {
+		this.fieldType = calcFieldType();
+		this.inputType = calcInputType();
 	}
 
 	public FullyQualifiedJavaType getJavaType() {
@@ -60,7 +70,7 @@ public class ModelField {
 		this.hidden = hidden;
 	}
 
-	public String getFieldType() {
+	private String calcFieldType() {
 
 		if (StringUtils.equalsAny(this.field.getType().getShortName(), "boolean", "Boolean")) {
 			return "boolean";
@@ -93,12 +103,61 @@ public class ModelField {
 		return "string";
 	}
 
+	private String calcInputType() {
+		if (StringUtils.equals("number", this.fieldType)) {
+			return "InputNumber";
+		}
+		if (StringUtils.equals("date", this.fieldType)) {
+			return "DatePicker";
+		}
+		if (StringUtils.equals("time", this.fieldType)) {
+			return "TimePicker";
+		}
+		if (StringUtils.equals("date-time", this.fieldType)) {
+			return "DatePicker";
+		}
+		if (StringUtils.equals("boolean", this.fieldType)) {
+			return "Switch";
+		}
+		if (StringUtils.equals("enum", this.fieldType)) {
+			return "Select";
+		}
+		if (StringUtils.equals("relation", this.fieldType)) {
+			return "ApiSelect";
+		}
+		return "Input";
+	}
+
+	public String getInputType() {
+		return inputType;
+	}
+
+	public String getFieldType() {
+		return fieldType;
+	}
+
 	public String getRemarks() {
 		return column.getRemarks();
 	}
 
 	public String getDefaultValue() {
 		return column.getDefaultValue();
+	}
+
+	public boolean isLogicDeleteField() {
+		return GeneratorUtils.isLogicDeleteField(field);
+	}
+
+	public boolean isVersionField() {
+		return GeneratorUtils.isVersionField(field);
+	}
+
+	public boolean isTenantField() {
+		return GeneratorUtils.isTenantField(field);
+	}
+
+	public boolean isBlob() {
+		return column.isBLOBColumn();
 	}
 
 	public boolean isBasic() {
@@ -128,6 +187,10 @@ public class ModelField {
 
 	public Relation getTargetRelation() {
 		return (Relation) field.getAttribute(Constants.TARGET_FIELD_RELATION);
+	}
+
+	public static ModelField copy(ModelField source) {
+		return new ModelField(source.field, source.column);
 	}
 
 }
