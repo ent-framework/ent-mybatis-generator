@@ -42,8 +42,10 @@ public class VoFieldsGenerator {
 
 		List<Field> fields = modelClass.getFields();
 		for (Field field : fields) {
-			if ("serialVersionUID".equals(field.getName()) || GeneratorUtils.isLogicDeleteField(field)
-					|| GeneratorUtils.isTenantField(field)) {
+			if ("serialVersionUID".equals(field.getName()) || GeneratorUtils.isLogicDeleteField(field)) {
+				continue;
+			}
+			if (isVo && GeneratorUtils.isTenantField(field)) {
 				continue;
 			}
 			Field pojoRequestField = new Field(field);

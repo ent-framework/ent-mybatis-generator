@@ -2,25 +2,25 @@ package org.mybatis.generator.config;
 
 public class JoinColumn {
 
-	private String left;
+	private String columnName;
 
-	private String right;
+	private String referencedColumnName;
 
-	public String getLeft() {
-		return left;
+	public String getColumnName() {
+		return columnName;
 	}
 
-	public JoinColumn setLeft(String left) {
-		this.left = left;
+	public JoinColumn setColumnName(String columnName) {
+		this.columnName = columnName;
 		return this;
 	}
 
-	public String getRight() {
-		return right;
+	public String getReferencedColumnName() {
+		return referencedColumnName;
 	}
 
-	public JoinColumn setRight(String right) {
-		this.right = right;
+	public JoinColumn setReferencedColumnName(String referencedColumnName) {
+		this.referencedColumnName = referencedColumnName;
 		return this;
 	}
 

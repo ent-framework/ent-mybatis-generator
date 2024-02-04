@@ -960,8 +960,8 @@ public class MyBatisGeneratorConfigurationParser {
 	private JoinColumn parseJoinColumn(Node childNode) {
 		JoinColumn joinColumn = new JoinColumn();
 		Properties attributes = parseAttributes(childNode);
-		joinColumn.setLeft(attributes.getProperty("left"));
-		joinColumn.setRight(attributes.getProperty("right"));
+		joinColumn.setColumnName(attributes.getProperty("columnName"));
+		joinColumn.setReferencedColumnName(attributes.getProperty("referencedColumnName"));
 		return joinColumn;
 	}
 

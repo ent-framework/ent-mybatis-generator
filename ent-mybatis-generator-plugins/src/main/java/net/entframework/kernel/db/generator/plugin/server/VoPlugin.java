@@ -125,7 +125,9 @@ public class VoPlugin extends AbstractServerPlugin {
 	private void addLombokAnnotation(TopLevelClass topLevelClass) {
 		topLevelClass.addImportedType(LombokAnnotation.DATA.getJavaType());
 		topLevelClass.addAnnotation(LombokAnnotation.DATA.getName());
-		topLevelClass.addImportedType(LombokAnnotation.EqualsAndHashCode.getJavaType());
+		if (topLevelClass.getSuperClass().isPresent()) {
+			topLevelClass.addImportedType(LombokAnnotation.EqualsAndHashCode.getJavaType());
+		}
 		topLevelClass.addAnnotation(LombokAnnotation.EqualsAndHashCode.getName());
 		topLevelClass.addImportedType(LombokAnnotation.ALL_ARGS_CONSTRUCTOR.getJavaType());
 		topLevelClass.addAnnotation(LombokAnnotation.ALL_ARGS_CONSTRUCTOR.getName());

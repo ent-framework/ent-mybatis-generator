@@ -8,10 +8,8 @@
       <template #headerTop>
         <Alert v-if="checkedKeys.length > 0" type="info" show-icon>
           <template #message>
-            <template>
-              <span>已选中{{ checkedKeys.length }}条记录(可跨页)</span>
-              <ent-button type="link" @click="checkedKeys = []" size="small">清空</ent-button>
-            </template>
+            <span>已选中{{ checkedKeys.length }}条记录(可跨页)</span>
+            <ent-button type="link" @click="checkedKeys = []" size="small">清空</ent-button>
           </template>
         </Alert>
       </template>

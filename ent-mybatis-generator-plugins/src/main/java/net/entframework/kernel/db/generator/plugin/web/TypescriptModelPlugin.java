@@ -26,7 +26,8 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 	}
 
 	@Override
-	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+	public boolean modelBaseRecordClassGenerated(IntrospectedTable introspectedTable) {
+		TopLevelClass topLevelClass = introspectedTable.getBaseModelClass();
 		String tableName = introspectedTable.getFullyQualifiedTable().getIntrospectedTableName();
 		JoinEntry joinEntry = context.getJoinConfig().getJoinEntry(tableName);
 		if (joinEntry != null) {

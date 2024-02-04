@@ -54,7 +54,7 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 		if (!GeneratorUtils.isRelationField(field)) {
 			StringBuilder columnSB = new StringBuilder(
 					String.format("@Column(name = \"%s\"", introspectedColumn.getActualColumnName()));
-			if (introspectedColumn.isStringColumn()) {
+			if (introspectedColumn.isStringColumn() && !introspectedColumn.isBLOBColumn()) {
 				if (introspectedColumn.getLength() > 0 && introspectedColumn.getLength() != 255) {
 					columnSB.append(", length=").append(introspectedColumn.getLength());
 				}
@@ -309,6 +309,7 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 			introspectedColumn.setIntrospectedTable(rightTable);
 			introspectedColumn.setFullyQualifiedJavaType(new FullyQualifiedJavaType(rightTable.getBaseRecordType()));
 			introspectedColumn.setActualColumnName("");
+			introspectedColumn.setRemarks(StringUtils.isNotEmpty(rightTable.getRemarks()) ? rightTable.getRemarks() : rightTable.getTableConfiguration().getDomainObjectName());
 
 			FullyQualifiedJavaType listJavaType = FullyQualifiedJavaType.getNewListInstance();
 			listJavaType.addTypeArgument(targetBindType);
@@ -316,7 +317,6 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 
 			Field field = new Field(joinTable.getProperty(), listJavaType);
 			field.setAttribute(Constants.FIELD_RELATION, true);
-
 			if (context.getPlugins()
 				.modelFieldGenerated(field, topLevelClass, introspectedColumn, rightTable,
 						Plugin.ModelClassType.BASE_RECORD)) {
@@ -328,9 +328,9 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 				field.addAnnotation("@ManyToMany");
 				field.addAnnotation(String.format(
 						"@JoinTable(name = \"%s\", joinColumns = @JoinColumn(name = \"%s\", referencedColumnName = \"%s\"), inverseJoinColumns = @JoinColumn(name = \"%s\", referencedColumnName = \"%s\"))",
-						middleTable.getFullyQualifiedTableNameAtRuntime(), joinTable.getJoinColumn().getLeft(),
-						joinTable.getJoinColumn().getRight(), joinTable.getInverseJoinColumn().getLeft(),
-						joinTable.getInverseJoinColumn().getRight()));
+						middleTable.getFullyQualifiedTableNameAtRuntime(), joinTable.getJoinColumn().getColumnName(),
+						joinTable.getJoinColumn().getReferencedColumnName(), joinTable.getInverseJoinColumn().getColumnName(),
+						joinTable.getInverseJoinColumn().getReferencedColumnName()));
 				topLevelClass.addImportedType("jakarta.persistence.ManyToMany");
 				topLevelClass.addImportedType("jakarta.persistence.JoinTable");
 				topLevelClass.addImportedType("jakarta.persistence.JoinColumn");

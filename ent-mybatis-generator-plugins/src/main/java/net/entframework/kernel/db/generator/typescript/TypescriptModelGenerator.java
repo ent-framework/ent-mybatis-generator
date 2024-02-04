@@ -63,8 +63,6 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 
 		List<IntrospectedColumn> introspectedColumns = introspectedTable.getAllColumns();
 
-		JavaTypeResolver typeResolver = ObjectFactory.createJavaTypeResolver(this.context, Collections.emptyList());
-
 		for (IntrospectedColumn introspectedColumn : introspectedColumns) {
 
 			Field field = WebUtils.getTypescriptField(introspectedColumn, context, introspectedTable, topLevelClass);
@@ -76,23 +74,17 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 			field.setDescription(remarks);
 			GeneratorUtils.addComment(field, remarks);
 
-			FullyQualifiedJavaType actualType = typeResolver.calculateJavaType(null, introspectedColumn);
-			//检查类型是否一致
-			if (!actualType.equals(introspectedColumn.getFullyQualifiedJavaType())) {
-				ClassInfo classInfo = ClassInfo
+			//检查类型是否枚举类型
+			ClassInfo classInfo = ClassInfo
 					.getInstance(introspectedColumn.getFullyQualifiedJavaType().getFullyQualifiedName());
-				if (classInfo != null && classInfo.isEnum()) {
-					String enumPackage = typescriptModelPackage + ".enum";
-					TopLevelEnumeration topLevelEnumeration = classInfo.toTopLevelEnumeration(enumPackage,
-							introspectedColumn.getFullyQualifiedJavaType().getShortName(), projectRootAlias);
-					topLevelEnumeration.setWriteMode(WriteMode.OVER_WRITE);
-					FullyQualifiedJavaType fqjt = topLevelEnumeration.getType();
-					field.setType(fqjt);
-					answer.add(topLevelEnumeration);
-				}
-				else {
-					field.setType(actualType);
-				}
+			if (classInfo != null && classInfo.isEnum()) {
+				String enumPackage = typescriptModelPackage + ".enum";
+				TopLevelEnumeration topLevelEnumeration = classInfo.toTopLevelEnumeration(enumPackage,
+						introspectedColumn.getFullyQualifiedJavaType().getShortName(), projectRootAlias);
+				topLevelEnumeration.setWriteMode(WriteMode.OVER_WRITE);
+				FullyQualifiedJavaType fqjt = topLevelEnumeration.getType();
+				field.setType(fqjt);
+				answer.add(topLevelEnumeration);
 			}
 
 			if (StringUtils.equalsIgnoreCase(introspectedColumn.getActualColumnName(),

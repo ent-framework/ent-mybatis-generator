@@ -135,8 +135,10 @@ public class DtoPlugin extends AbstractServerPlugin {
 	private void addLombokAnnotation(TopLevelClass topLevelClass) {
 		topLevelClass.addImportedType(LombokAnnotation.DATA.getJavaType());
 		topLevelClass.addAnnotation(LombokAnnotation.DATA.getName());
-		topLevelClass.addImportedType(LombokAnnotation.EqualsAndHashCode.getJavaType());
-		topLevelClass.addAnnotation(LombokAnnotation.EqualsAndHashCode.getName());
+		if (topLevelClass.getSuperClass().isPresent()) {
+			topLevelClass.addImportedType(LombokAnnotation.EqualsAndHashCode.getJavaType());
+			topLevelClass.addAnnotation(LombokAnnotation.EqualsAndHashCode.getName());
+		}
 		topLevelClass.addImportedType(LombokAnnotation.ACCESSORS_CHAIN.getJavaType());
 		topLevelClass.addAnnotation(LombokAnnotation.ACCESSORS_CHAIN.getName());
 	}

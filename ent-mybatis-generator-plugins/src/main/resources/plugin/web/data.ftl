@@ -40,9 +40,8 @@ export const searchFormSchema: FormSchema[] = [
 export const searchFormSchema: FormSchema[] = [];
 </#if>
 
-
 export const detailSchema: DescItem[] = [
-<#list fields as field>
+<#list detailFields as field>
   {
     label: '${field.description}',
     field: '${field.name}',

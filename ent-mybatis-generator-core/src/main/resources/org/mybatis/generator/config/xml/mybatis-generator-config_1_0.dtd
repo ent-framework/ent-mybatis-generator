@@ -183,12 +183,12 @@
 
 <!ELEMENT joinColumn EMPTY>
 <!ATTLIST joinColumn
-        left CDATA #REQUIRED
-        right CDATA #REQUIRED>
+        columnName CDATA #REQUIRED
+        referencedColumnName CDATA #REQUIRED>
 <!ELEMENT inverseJoinColumn EMPTY>
 <!ATTLIST inverseJoinColumn
-        left CDATA #REQUIRED
-        right CDATA #REQUIRED>
+        columnName CDATA #REQUIRED
+        referencedColumnName CDATA #REQUIRED>
 
 <!--
   The table element is used to specify a database table that will be the source information

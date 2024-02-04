@@ -98,7 +98,11 @@ public class WebUtils {
 
 		List<ModelField> results = new ArrayList<>();
 		//先过滤掉逻辑删除字段和Version字段
-		for (ModelField field: fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList()) {
+		for (ModelField field: fields.stream().filter(field -> !(field.isLogicDeleteField()
+				|| field.isVersionField()
+				|| field.isTenantField())
+				|| field.isBlob()
+		).toList()) {
 
 			if (field.isBlob()) {
 				continue;
