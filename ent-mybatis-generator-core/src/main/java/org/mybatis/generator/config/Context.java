@@ -496,11 +496,14 @@ public class Context extends PropertyHolder {
 			generatedKotlinFiles.addAll(introspectedTable.getGeneratedKotlinFiles());
 		}
 
+		// 初始化 IntrospectedTable 中额外的关联关系信息
 		for (IntrospectedTable introspectedTable : introspectedTables) {
 			callback.checkCancel();
-
 			pluginAggregator.modelBaseRecordClassGenerated(introspectedTable);
+		}
 
+		for (IntrospectedTable introspectedTable : introspectedTables) {
+			callback.checkCancel();
 			generatedJavaFiles.addAll(pluginAggregator.contextGenerateAdditionalJavaFiles(introspectedTable));
 			generatedXmlFiles.addAll(pluginAggregator.contextGenerateAdditionalXmlFiles(introspectedTable));
 			generatedKotlinFiles.addAll(pluginAggregator.contextGenerateAdditionalKotlinFiles(introspectedTable));

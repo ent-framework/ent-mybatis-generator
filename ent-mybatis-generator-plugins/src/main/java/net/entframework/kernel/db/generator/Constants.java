@@ -39,7 +39,7 @@ public final class Constants {
 	// Column 关联的 Field, 存放在 Field 的Attribute中
 	public final static String FIELD_RELATION = "FIELD_RELATION";
 
-	public final static String TARGET_FIELD_RELATION = "TARGET_FIELD_RELATION";
+	public final static String FIELD_RELATION_COLUMN = "FIELD_RELATION_COLUMN";
 
 	public final static String FIELD_LOGIC_DELETE_ATTR = "FIELD_LOGIC_DELETE_ATTR";
 

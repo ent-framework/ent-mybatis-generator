@@ -1,7 +1,6 @@
 package net.entframework.kernel.db.generator.plugin.web;
 
 import net.entframework.kernel.db.generator.Constants;
-import net.entframework.kernel.db.generator.config.Relation;
 import net.entframework.kernel.db.generator.plugin.generator.GeneratorUtils;
 import net.entframework.kernel.db.generator.typescript.runtime.FullyQualifiedTypescriptType;
 import net.entframework.kernel.db.generator.typescript.runtime.ModelField;
@@ -15,7 +14,6 @@ import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.WriteMode;
 import org.mybatis.generator.api.dom.java.Field;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
-import org.mybatis.generator.config.JoinTarget;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 
 import java.util.ArrayList;
@@ -29,14 +27,12 @@ import java.util.stream.Collectors;
  */
 public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 
-	private final List<GeneratedFile> generatedFiles = new ArrayList<>();
-
 	@Override
-	public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-
-		generatedFiles.add(generateModelClass(topLevelClass, introspectedTable));
-
-		return true;
+	public List<GeneratedFile> contextGenerateAdditionalFiles(IntrospectedTable introspectedTable) {
+		TopLevelClass topLevelClass = introspectedTable.getBaseModelClass();
+		List<GeneratedFile> results = new ArrayList<>();
+		results.add(generateModelClass(topLevelClass, introspectedTable));
+		return results;
 	}
 
 	private GeneratedFile generateModelClass(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
@@ -66,8 +62,8 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		data.putAll(getAdditionalPropertyMap());
 
 		IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
-		List<Field> fields = WebUtils.getFieldsWithoutPrimaryKey(topLevelClass.getFields(), pkColumn.getJavaProperty());
-		List<ModelField> modelFields = convert(fields, introspectedTable);
+		List<Field> fields = topLevelClass.getFields();
+		List<ModelField> modelFields = convert(fields, introspectedTable, pkColumn);
 
 		// 生成描述Detail Schema配置
 		data.put("detailFields", WebUtils.getDetailFields(copy(modelFields)));
@@ -76,14 +72,18 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		data.put("inputFields", WebUtils.getInputFields(copy(modelFields), getInputIgnoreFields(), introspectedTable));
 
 		// 获取枚举字段
-		List<Field> enumFields = fields.stream()
-			.filter(field -> field.getAttribute(Constants.TABLE_ENUM_FIELD_ATTR) != null
-					&& !GeneratorUtils.isLogicDeleteField(field))
+		List<ModelField> enumFields = modelFields.stream()
+			.filter(mf -> mf.isEnumField() && !mf.isLogicDeleteField())
 			.collect(Collectors.toSet())
 			.stream()
 			.toList();
-		data.put("enumFields", convert(enumFields, introspectedTable));
-		data.put("relationFields", convert(WebUtils.getRelationFields(fields), introspectedTable));
+		List<ModelField> relationFields = modelFields.stream()
+			.filter(ModelField::isRelationField)
+			.collect(Collectors.toSet())
+			.stream()
+			.toList();
+		data.put("enumFields", enumFields);
+		data.put("relationFields", relationFields);
 		data.put("pk",
 				new ModelField(GeneratorUtils.getFieldByName(topLevelClass, pkColumn.getJavaProperty()), pkColumn));
 
@@ -95,41 +95,32 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 				data, this.templatePath, this.fileName, this.fileExt);
 	}
 
-	@Override
-	public List<GeneratedFile> contextGenerateAdditionalFiles() {
-		return generatedFiles;
-	}
-
 	/**
 	 * 字段转换，只保留many-to-one类型的
 	 * @param fields
 	 * @param introspectedTable
 	 * @return
 	 */
-	private List<ModelField> convert(List<Field> fields, IntrospectedTable introspectedTable) {
+	private List<ModelField> convert(List<Field> fields, IntrospectedTable introspectedTable,
+			IntrospectedColumn pkColumn) {
 		List<ModelField> modelFields = new ArrayList<>();
 		for (Field field : fields) {
 			IntrospectedColumn column = null;
 			if (GeneratorUtils.isRelationField(introspectedTable, field)) {
-				Relation relation = (Relation) field.getAttribute(Constants.FIELD_RELATION);
-				if (relation.getJoinType() == JoinTarget.JoinType.MANY_TO_ONE) {
-					column = GeneratorUtils.safeGetIntrospectedColumnByJavaProperty(introspectedTable,
-							relation.getSourceField().getName());
-				}
-				else {
-					continue;
-				}
+				column = (IntrospectedColumn) field.getAttribute(Constants.FIELD_RELATION_COLUMN);
 			}
 			else {
 				column = GeneratorUtils.safeGetIntrospectedColumnByJavaProperty(introspectedTable, field.getName());
 			}
 			if (column == null) {
-				log.warn("Can't find column in table: "
+				throw new RuntimeException("Can't find column in table: "
 						+ introspectedTable.getFullyQualifiedTable().getIntrospectedTableName() + " by field name: "
-						+ field.getName() + "");
-				continue;
+						+ field.getName());
 			}
 			ModelField modelField = new ModelField(field, column);
+			if (StringUtils.equals(column.getActualColumnName(), pkColumn.getActualColumnName())) {
+				modelField.setPrimaryKey(true);
+			}
 			modelFields.add(modelField);
 		}
 		return modelFields;

@@ -1045,4 +1045,5 @@ public abstract class IntrospectedTable {
 	public void setBaseModelClass(TopLevelClass baseModelClass) {
 		this.baseModelClass = baseModelClass;
 	}
+
 }

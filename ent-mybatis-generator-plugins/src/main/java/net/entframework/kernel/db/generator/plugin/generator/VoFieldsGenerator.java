@@ -42,12 +42,15 @@ public class VoFieldsGenerator {
 
 		List<Field> fields = modelClass.getFields();
 		for (Field field : fields) {
-			if ("serialVersionUID".equals(field.getName()) || GeneratorUtils.isLogicDeleteField(field)) {
+			if ("serialVersionUID".equals(field.getName())) {
 				continue;
 			}
-/*			if (isVo && GeneratorUtils.isTenantField(field)) {
+			/*
+			 * if (isVo && GeneratorUtils.isTenantField(field)) { continue; }
+			 */
+			if (!isVo && GeneratorUtils.isLogicDeleteField(field)) {
 				continue;
-			}*/
+			}
 			Field pojoRequestField = new Field(field);
 			// 清除源字段的Annotation
 			pojoRequestField.getAnnotations().clear();

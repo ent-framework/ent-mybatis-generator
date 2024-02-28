@@ -63,14 +63,16 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 		if (StringUtils.isBlank(projectRootAlias)) {
 			projectRootAlias = "";
 		}
-//		apiDefaultPrefix = this.getProperty("apiDefaultPrefix", properties, this.context.getProperties());
-//		if (StringUtils.isBlank(apiDefaultPrefix)) {
-//			apiDefaultPrefix = "";
-//		}
-//		apiEnvName = this.getProperty("apiEnvName", properties, this.context.getProperties());
-//		if (StringUtils.isBlank(apiEnvName)) {
-//			apiEnvName = "";
-//		}
+		// apiDefaultPrefix = this.getProperty("apiDefaultPrefix", properties,
+		// this.context.getProperties());
+		// if (StringUtils.isBlank(apiDefaultPrefix)) {
+		// apiDefaultPrefix = "";
+		// }
+		// apiEnvName = this.getProperty("apiEnvName", properties,
+		// this.context.getProperties());
+		// if (StringUtils.isBlank(apiEnvName)) {
+		// apiEnvName = "";
+		// }
 		apiDefaultPrefix = this.context.getJavaClientGeneratorConfiguration().getProperty("apiDefaultPrefix");
 		apiEnvName = this.context.getJavaClientGeneratorConfiguration().getProperty("apiEnvName");
 	}

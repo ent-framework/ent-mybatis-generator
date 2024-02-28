@@ -144,7 +144,6 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 		return true;
 	}
 
-
 	/**
 	 * Intercepts base record class generation
 	 */
@@ -178,9 +177,6 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 
 		return true;
 	}
-
-
-
 
 	@Override
 	public boolean clientGenerated(Interface interfaze, IntrospectedTable introspectedTable) {
@@ -309,7 +305,8 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 			introspectedColumn.setIntrospectedTable(rightTable);
 			introspectedColumn.setFullyQualifiedJavaType(new FullyQualifiedJavaType(rightTable.getBaseRecordType()));
 			introspectedColumn.setActualColumnName("");
-			introspectedColumn.setRemarks(StringUtils.isNotEmpty(rightTable.getRemarks()) ? rightTable.getRemarks() : rightTable.getTableConfiguration().getDomainObjectName());
+			introspectedColumn.setRemarks(StringUtils.isNotEmpty(rightTable.getRemarks()) ? rightTable.getRemarks()
+					: rightTable.getTableConfiguration().getDomainObjectName());
 
 			FullyQualifiedJavaType listJavaType = FullyQualifiedJavaType.getNewListInstance();
 			listJavaType.addTypeArgument(targetBindType);
@@ -329,7 +326,8 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 				field.addAnnotation(String.format(
 						"@JoinTable(name = \"%s\", joinColumns = @JoinColumn(name = \"%s\", referencedColumnName = \"%s\"), inverseJoinColumns = @JoinColumn(name = \"%s\", referencedColumnName = \"%s\"))",
 						middleTable.getFullyQualifiedTableNameAtRuntime(), joinTable.getJoinColumn().getColumnName(),
-						joinTable.getJoinColumn().getReferencedColumnName(), joinTable.getInverseJoinColumn().getColumnName(),
+						joinTable.getJoinColumn().getReferencedColumnName(),
+						joinTable.getInverseJoinColumn().getColumnName(),
 						joinTable.getInverseJoinColumn().getReferencedColumnName()));
 				topLevelClass.addImportedType("jakarta.persistence.ManyToMany");
 				topLevelClass.addImportedType("jakarta.persistence.JoinTable");

@@ -58,7 +58,7 @@ public class DynamicSqlModelGenerator extends AbstractJavaGenerator {
 		List<IntrospectedTable> tables = context.getIntrospectedTables();
 		FullyQualifiedJavaType type = new FullyQualifiedJavaType(introspectedTable.getBaseRecordType());
 		TopLevelClass topLevelClass = new TopLevelClass(type);
-		//build connection between introspectedTable and base model Top Level class
+		// build connection between introspectedTable and base model Top Level class
 		introspectedTable.setBaseModelClass(topLevelClass);
 		topLevelClass.setVisibility(JavaVisibility.PUBLIC);
 		commentGenerator.addJavaFileComment(topLevelClass);

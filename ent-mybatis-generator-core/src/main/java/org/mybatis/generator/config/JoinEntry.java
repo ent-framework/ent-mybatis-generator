@@ -12,6 +12,7 @@ public class JoinEntry {
 	private List<Pair<String, JoinTarget>> details = new ArrayList<>();
 
 	private List<JoinTable> joinTables = new ArrayList<>();
+
 	public JoinEntry(String leftTable) {
 		this.leftTable = leftTable;
 	}
@@ -44,7 +45,6 @@ public class JoinEntry {
 	public void setLeftTable(String leftTable) {
 		this.leftTable = leftTable;
 	}
-
 
 	public List<Pair<String, JoinTarget>> getDetails() {
 		return details;

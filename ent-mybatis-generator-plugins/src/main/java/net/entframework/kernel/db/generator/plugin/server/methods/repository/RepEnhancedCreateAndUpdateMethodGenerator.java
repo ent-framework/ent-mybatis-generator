@@ -108,7 +108,8 @@ public class RepEnhancedCreateAndUpdateMethodGenerator extends AbstractMethodGen
 									break;
 								default:
 							}
-						} else {
+						}
+						else {
 							if (column.isNumberColumn()) {
 								switch (field.getType().getFullyQualifiedName()) {
 									case "java.lang.Long":
@@ -123,10 +124,12 @@ public class RepEnhancedCreateAndUpdateMethodGenerator extends AbstractMethodGen
 										break;
 									default:
 								}
-							} else if (column.isStringColumn()) {
+							}
+							else if (column.isStringColumn()) {
 								if (defaultValue.startsWith("'") && defaultValue.endsWith("'")) {
 									defaultValue = "\"" + defaultValue.substring(1, defaultValue.length() - 1) + "\"";
-								} else {
+								}
+								else {
 									defaultValue = "\"" + defaultValue + "\"";
 								}
 							}

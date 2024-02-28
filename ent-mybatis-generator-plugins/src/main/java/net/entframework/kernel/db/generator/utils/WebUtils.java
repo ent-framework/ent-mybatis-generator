@@ -76,17 +76,20 @@ public class WebUtils {
 	public static List<ModelField> getDetailFields(List<ModelField> fields) {
 		List<ModelField> results = new ArrayList<>();
 
-		results.addAll(fields.stream().filter(modelField -> !(modelField.isTenantField() || modelField.isLogicDeleteField())).toList());
+		results.addAll(fields.stream()
+			.filter(modelField -> !(modelField.isTenantField() || modelField.isLogicDeleteField()))
+			.toList());
 
 		return results;
 	}
+
 	/**
 	 * 筛选列表展示字段
 	 * @param fields
 	 * @return
 	 */
 	public static List<ModelField> getListFields(List<ModelField> fields, Set<String> ignoreFields,
-											IntrospectedTable introspectedTable) {
+			IntrospectedTable introspectedTable) {
 
 		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
 		Set<String> definedFields = new HashSet<>();
@@ -97,18 +100,22 @@ public class WebUtils {
 		}
 
 		List<ModelField> results = new ArrayList<>();
-		//先过滤掉逻辑删除字段和Version字段
-		for (ModelField field: fields.stream().filter(field -> !(field.isLogicDeleteField()
-				|| field.isVersionField()
-				|| field.isTenantField())
-				|| field.isBlob()
-		).toList()) {
+		// 先过滤掉逻辑删除字段和Version字段
+		for (ModelField field : fields.stream()
+			.filter(field -> !(field.isLogicDeleteField() || field.isVersionField() || field.isTenantField())
+					|| field.isBlob())
+			.toList()) {
 
 			if (field.isBlob()) {
 				continue;
 			}
 			if (ignoredFields.contains(field.getName())) {
-				continue;
+				if (!definedFields.isEmpty()) {
+					continue;
+				}
+				else {
+					field.setHidden(true);
+				}
 			}
 
 			if (!definedFields.isEmpty()) {
@@ -139,10 +146,13 @@ public class WebUtils {
 		if (definedFields.isEmpty() && ignoredFields.isEmpty()) {
 			return Collections.emptyList();
 		}
-		return filterFields(fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList(), definedFields, ignoredFields);
+		return filterFields(
+				fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList(),
+				definedFields, ignoredFields);
 	}
 
-	private static List<ModelField> filterFields(List<ModelField> fields, Set<String> definedFields, Set<String> ignoredFields) {
+	private static List<ModelField> filterFields(List<ModelField> fields, Set<String> definedFields,
+			Set<String> ignoredFields) {
 		return fields.stream().filter(field -> {
 
 			if (!definedFields.isEmpty()) {
@@ -174,12 +184,14 @@ public class WebUtils {
 			IntrospectedTable introspectedTable) {
 		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
 		Set<String> definedFields = new HashSet<>();
-		Set<String> ignoredFields = new HashSet<>();
+		Set<String> ignoredFields = new HashSet<>(ignoreFields);
 		if (uiConfig != null && uiConfig.getInputFields() != null) {
 			definedFields.addAll(uiConfig.getInputFields().getFields());
 			ignoredFields.addAll(uiConfig.getInputFields().getIgnored());
 		}
-		return filterFields(fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList(), definedFields, ignoredFields);
+		return filterFields(
+				fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList(),
+				definedFields, ignoredFields);
 	}
 
 	public static List<Field> getRelationFields(List<Field> fields) {

@@ -59,10 +59,9 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 			introspectedColumn.setActualColumnName(target.getJoinColumn());
 			IntrospectedColumn rightTableColumn = GeneratorUtils.getIntrospectedColumnByColumn(rightTable,
 					target.getJoinColumn());
-
 			Field field = getJavaBeansFieldWithGeneratedAnnotation(introspectedColumn, context, rightTable,
 					topLevelClass);
-			field.setAttribute(Constants.FIELD_RELATION, true);
+			field.setAttribute(Constants.FIELD_RELATION_COLUMN, rightTableColumn);
 
 			if (context.getPlugins()
 				.modelFieldGenerated(field, topLevelClass, introspectedColumn, rightTable,
@@ -121,13 +120,12 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 
 			FullyQualifiedJavaType listJavaType = FullyQualifiedJavaType.getNewListInstance();
 			listJavaType.addTypeArgument(targetBindType);
-
 			topLevelClass.addImportedType(targetBindType);
 
 			Field field = new Field(joinTable.getProperty(), listJavaType);
 			field.setDescription(GeneratorUtils.getFileDescription(rightTable));
 			GeneratorUtils.addComment(field, field.getDescription());
-			field.setAttribute(Constants.FIELD_RELATION, true);
+			field.setAttribute(Constants.FIELD_RELATION_COLUMN, introspectedColumn);
 
 			if (context.getPlugins()
 				.modelFieldGenerated(field, topLevelClass, introspectedColumn, rightTable,

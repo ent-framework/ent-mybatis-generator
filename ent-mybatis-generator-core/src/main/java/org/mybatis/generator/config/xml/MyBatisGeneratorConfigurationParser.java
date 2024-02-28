@@ -387,7 +387,8 @@ public class MyBatisGeneratorConfigurationParser {
 			}
 			else if ("columnRenamingRule".equals(childNode.getNodeName())) { //$NON-NLS-1$
 				parseColumnRenamingRule(tc, childNode);
-			} else if ("ui".equals(childNode.getNodeName())) {
+			}
+			else if ("ui".equals(childNode.getNodeName())) {
 				UIConfig uiConfig = parseUIConfig(childNode);
 				tc.setUiConfig(uiConfig);
 			}

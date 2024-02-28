@@ -19,6 +19,8 @@ public class ModelField {
 
 	private boolean hidden;
 
+	private boolean isPrimaryKey;
+
 	private String inputType;
 
 	private String fieldType;
@@ -26,12 +28,21 @@ public class ModelField {
 	public ModelField(Field field, IntrospectedColumn column) {
 		this.field = field;
 		this.column = column;
+		this.isPrimaryKey = false;
 		calc();
 	}
 
 	private void calc() {
 		this.fieldType = calcFieldType();
 		this.inputType = calcInputType();
+	}
+
+	public void setPrimaryKey(boolean primaryKey) {
+		this.isPrimaryKey = primaryKey;
+	}
+
+	public boolean isPrimaryKey() {
+		return this.isPrimaryKey;
 	}
 
 	public FullyQualifiedJavaType getJavaType() {
@@ -72,15 +83,17 @@ public class ModelField {
 
 	private String calcFieldType() {
 
+		if (field.getAttribute(Constants.FIELD_RELATION) != null) {
+			return "relation";
+		}
+
 		if (StringUtils.equalsAny(this.field.getType().getShortName(), "boolean", "Boolean")) {
 			return "boolean";
 		}
 		if (this.field.getAttribute(Constants.TABLE_ENUM_FIELD_ATTR) != null) {
 			return "enum";
 		}
-		if (this.field.getAttribute(Constants.TARGET_FIELD_RELATION) != null) {
-			return "relation";
-		}
+
 		if (this.column.isStringColumn()) {
 			return "string";
 		}
@@ -147,6 +160,10 @@ public class ModelField {
 		return GeneratorUtils.isLogicDeleteField(field);
 	}
 
+	public boolean isEnumField() {
+		return field.getAttribute(Constants.TABLE_ENUM_FIELD_ATTR) != null;
+	}
+
 	public boolean isVersionField() {
 		return GeneratorUtils.isVersionField(field);
 	}
@@ -168,28 +185,26 @@ public class ModelField {
 	}
 
 	public boolean isManyToOne() {
-		return isRelationField() && isRelationType(JoinTarget.JoinType.MANY_TO_ONE);
+		return isRelationType(JoinTarget.JoinType.MANY_TO_ONE);
 	}
 
 	public boolean isRelationMany() {
-		return isRelationField() && isRelationType(JoinTarget.JoinType.ONE_TO_MANY);
+		return isRelationType(JoinTarget.JoinType.ONE_TO_MANY);
 	}
 
 	private boolean isRelationType(JoinTarget.JoinType joinType) {
 		Relation relation = (Relation) field.getAttribute(Constants.FIELD_RELATION);
-		return relation.getJoinType() != null && relation.getJoinType() == joinType;
+		return relation != null && relation.getJoinType() != null && relation.getJoinType() == joinType;
 	}
 
 	public Relation getRelation() {
 		return (Relation) field.getAttribute(Constants.FIELD_RELATION);
 	}
 
-	public Relation getTargetRelation() {
-		return (Relation) field.getAttribute(Constants.TARGET_FIELD_RELATION);
-	}
-
 	public static ModelField copy(ModelField source) {
-		return new ModelField(source.field, source.column);
+		ModelField result = new ModelField(source.field, source.column);
+		result.setPrimaryKey(source.isPrimaryKey);
+		return result;
 	}
 
 }

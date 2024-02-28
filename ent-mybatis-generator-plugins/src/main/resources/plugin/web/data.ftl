@@ -13,7 +13,10 @@ export const columns: BasicColumn[] = [
   {
     title: '${field.description}',
     dataIndex: '${field.name}',
-<#if field.relationField && field.manyToOne>
+<#if field.hidden>
+    defaultHidden: true,
+</#if>
+<#if (field.relationField && field.manyToOne)>
     width: 110,
 <#elseif field.fieldType == 'enum'>
     width: 120,
@@ -87,20 +90,22 @@ export const formSchema: FormSchema[] = [
 <#if field.required>
     required: ${field.required?c},
 </#if>
+    colProps: {
+      span: 24,
+    },
 <#if field.fieldType == 'enum'>
     componentProps: {
       options: ${field.javaType.shortName}Types,
     },
 <#elseif field.fieldType == 'relation'>
     componentProps: {
-      // more details see /src/components/Form/src/components/ApiSelect.vue
-      api: ${field.targetRelation.bindField.type.shortName}List,
+      api: ${field.relation.bindField.type.shortName}List,
       resultField: 'items',
       // use name as label
-      labelField: '${field.targetRelation.displayField}',
+      labelField: '${field.relation.displayField}',
       // use id as value
-      valueField: '${field.targetRelation.targetColumn.javaProperty}',
-      // not request untill to select
+      valueField: '${field.relation.targetColumn.javaProperty}',
+      // not request until to select
       immediate: true,
     },
 </#if>    

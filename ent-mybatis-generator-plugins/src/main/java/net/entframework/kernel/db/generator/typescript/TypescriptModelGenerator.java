@@ -74,9 +74,9 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 			field.setDescription(remarks);
 			GeneratorUtils.addComment(field, remarks);
 
-			//检查类型是否枚举类型
+			// 检查类型是否枚举类型
 			ClassInfo classInfo = ClassInfo
-					.getInstance(introspectedColumn.getFullyQualifiedJavaType().getFullyQualifiedName());
+				.getInstance(introspectedColumn.getFullyQualifiedJavaType().getFullyQualifiedName());
 			if (classInfo != null && classInfo.isEnum()) {
 				String enumPackage = typescriptModelPackage + ".enum";
 				TopLevelEnumeration topLevelEnumeration = classInfo.toTopLevelEnumeration(enumPackage,
@@ -115,8 +115,8 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 			InitializationBlock initializationBlock = new InitializationBlock();
 			initializationBlock.addBodyLine(String.format("export type %sPageModel = BasicFetchResult<%s>;",
 					table.getDomainObjectName(), table.getDomainObjectName()));
-			topLevelClass.addImportedType(
-					new FullyQualifiedTypescriptType("", "fe-ent-core.es.logics.BasicFetchResult", true));
+			topLevelClass
+				.addImportedType(new FullyQualifiedTypescriptType("", "fe-ent-core.es.logics.BasicFetchResult", true));
 			topLevelClass.addInitializationBlock(initializationBlock);
 
 			answer.add(topLevelClass);
