@@ -9,8 +9,8 @@ plugins {
 dependencies {
     api 'org.apache.commons:commons-lang3'
     implementation 'commons-io:commons-io'
-    implementation 'io.spring.javaformat:spring-javaformat-formatter:0.0.39'
-    implementation 'io.spring.javaformat:spring-javaformat-formatter-eclipse-runtime:0.0.39'
+    implementation 'io.spring.javaformat:spring-javaformat-formatter:0.0.40'
+    implementation 'io.spring.javaformat:spring-javaformat-formatter-eclipse-runtime:0.0.40'
     testImplementation 'ch.qos.logback:logback-classic'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.junit.jupiter:junit-jupiter-params'

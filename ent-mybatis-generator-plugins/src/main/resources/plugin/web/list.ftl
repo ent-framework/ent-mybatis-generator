@@ -58,7 +58,6 @@
 </template>
 <script lang="ts">
   import { defineComponent, reactive, ref } from 'vue';
-
   import { EntTable, EntTableAction, useTable } from 'fe-ent-core/es/components/table';
   import { ${modelName}BatchDelete, ${modelName}Delete, ${modelName}Page } from '${projectRootAlias}${apiPath}/${camelModelName}';
   import { useDrawer } from 'fe-ent-core/es/components/drawer';
@@ -99,9 +98,23 @@
         showTableSetting: true,
         bordered: true,
         handleSearchInfoFn(info) {
-          console.log('handleSearchInfoFn', info);
           return info;
         },
+<#if (searchFields?size>0)>
+        beforeFetch(params) {
+          <#list searchFields as field>
+          <#if (field.fieldType == 'date-time' || field.fieldType == 'date')>
+          if (params.${field.name}) {
+            params.searchTimeField = '${field.name}';
+            params.searchBeginTime = params.${field.name}[0];
+            params.searchEndTime = params.${field.name}[1];
+            params.${field.name} = undefined;
+          }
+          </#if>
+          </#list>
+          return params;
+        },
+</#if>
         actionColumn: {
           width: 120,
           title: '操作',

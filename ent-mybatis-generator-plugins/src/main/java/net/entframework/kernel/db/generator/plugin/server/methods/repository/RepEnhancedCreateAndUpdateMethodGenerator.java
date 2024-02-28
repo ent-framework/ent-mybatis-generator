@@ -96,23 +96,6 @@ public class RepEnhancedCreateAndUpdateMethodGenerator extends AbstractMethodGen
 				if (field != null) {
 					if (column.getDefaultValue() != null) {
 						String defaultValue = column.getDefaultValue();
-						if (column.isNumberColumn()) {
-							switch (field.getType().getFullyQualifiedName()) {
-								case "java.lang.Long":
-									if (!defaultValue.toUpperCase().endsWith("L")) {
-										defaultValue += "L";
-									}
-									break;
-								case "java.lang.Double":
-									if (!defaultValue.toUpperCase().endsWith("D")) {
-										defaultValue += "D";
-									}
-									break;
-							}
-						}
-						if (defaultValue.startsWith("'") && defaultValue.endsWith("'")) {
-							defaultValue = "\"" + defaultValue.substring(1, defaultValue.length() - 1) + "\"";
-						}
 						if ("CURRENT_TIMESTAMP".equals(defaultValue)) {
 							switch (field.getType().getFullyQualifiedName()) {
 								case "java.time.LocalDateTime":
@@ -123,6 +106,29 @@ public class RepEnhancedCreateAndUpdateMethodGenerator extends AbstractMethodGen
 									defaultValue = "new Date()";
 									imports.add(new FullyQualifiedJavaType("java.util.Date"));
 									break;
+								default:
+							}
+						} else {
+							if (column.isNumberColumn()) {
+								switch (field.getType().getFullyQualifiedName()) {
+									case "java.lang.Long":
+										if (!defaultValue.toUpperCase().endsWith("L")) {
+											defaultValue += "L";
+										}
+										break;
+									case "java.lang.Double":
+										if (!defaultValue.toUpperCase().endsWith("D")) {
+											defaultValue += "D";
+										}
+										break;
+									default:
+								}
+							} else if (column.isStringColumn()) {
+								if (defaultValue.startsWith("'") && defaultValue.endsWith("'")) {
+									defaultValue = "\"" + defaultValue.substring(1, defaultValue.length() - 1) + "\"";
+								} else {
+									defaultValue = "\"" + defaultValue + "\"";
+								}
 							}
 						}
 						setDefaultValueMethod.addBodyLine(String.format("if (Objects.isNull(row.get%s())) {",

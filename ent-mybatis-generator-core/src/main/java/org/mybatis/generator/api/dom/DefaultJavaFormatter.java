@@ -45,7 +45,7 @@ public class DefaultJavaFormatter implements JavaFormatter, CompilationUnitVisit
 	protected Context context;
 
 	private static final StreamsFormatter formatter = new StreamsFormatter(
-			JavaFormatConfig.of(JavaBaseline.V11, IndentationStyle.SPACES));
+			JavaFormatConfig.of(JavaBaseline.V11, IndentationStyle.TABS));
 
 	@Override
 	public String getFormattedContent(CompilationUnit compilationUnit) {

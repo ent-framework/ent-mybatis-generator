@@ -1,7 +1,7 @@
 <template>
   <EntDrawer
     v-bind="$attrs"
-    width="500px"
+    width="640px"
     show-footer
     :title="getTitle"
     @register="registerDrawer"
@@ -11,21 +11,21 @@
   </EntDrawer>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, computed, unref } from 'vue';
+  import { computed, defineComponent, ref, unref } from 'vue';
   import { EntForm, useForm } from 'fe-ent-core/es/components/form';
   import { formSchema } from './data';
   import { EntDrawer, useDrawerInner } from 'fe-ent-core/es/components/drawer';
   import { useMessage } from 'fe-ent-core/es/hooks/web/use-message';
-  import { ${modelName}Insert, ${modelName}Update } from '${projectRootAlias}${apiPath}/${camelModelName}';
+  import { ${modelName}Insert, ${modelName}Load, ${modelName}Update } from '${projectRootAlias}${apiPath}/${camelModelName}';
 
   export default defineComponent({
-    name: '${modelName}Drawer',
+    name: '${modelName}EditDrawer',
     components: { EntDrawer, EntForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const mode = ref('c');
       const { createMessage } = useMessage();
-      const ${pk.name} = ref(null);
+      const ${pk.name} = ref<any>(null);
       const [registerForm, { resetFields, setFieldsValue, validate, setProps }] = useForm({
         labelWidth: 90,
         schemas: formSchema,
@@ -36,17 +36,22 @@
         await resetFields();
         setDrawerProps({ confirmLoading: false, destroyOnClose: true });
         mode.value = data?.edit_mode;
-
-        if (unref(mode) === 'u' || unref(mode) === 'r') {
-          ${pk.name}.value = data.record.${pk.name};
-          await setFieldsValue({
-            ...data.record,
-          });
-          if (unref(mode) === 'r') {
-            await setProps({ disabled: true });
-          } else {
-            await setProps({ disabled: false });
+        try {
+          if (unref(mode) === 'u' || unref(mode) === 'r') {
+            setDrawerProps({ confirmLoading: true });
+            const detail = await ${modelName}Load({ ${pk.name}: data.record.${pk.name} });
+            ${pk.name}.value = detail.${pk.name};
+            await setFieldsValue({
+              ...detail,
+            });
+            if (unref(mode) === 'r') {
+              await setProps({ disabled: true });
+            } else {
+              await setProps({ disabled: false });
+            }
           }
+        } finally {
+          setDrawerProps({ confirmLoading: false });
         }
       });
 

@@ -54,15 +54,29 @@ publishing {
         }
     }
     repositories {
-        def host = project.version.endsWith( '-SNAPSHOT' )? 'https://s01.oss.sonatype.org/content/repositories/snapshots/' : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-        maven {
-            allowInsecureProtocol = !host.startsWith('https')
-            //指定要上传的maven私服仓库
-            url = host
-            //认证用户和密码
-            credentials {
-                username = ossrhUsername
-                password = ossrhPassword
+        if (project.hasProperty('deployToAliyun')) {
+            def host = project.version.endsWith( '-SNAPSHOT' )?  mavenSnapshotRepository : mavenReleaseRepository
+            maven {
+                allowInsecureProtocol = !host.startsWith('https')
+                //指定要上传的maven私服仓库
+                url = host
+                //认证用户和密码
+                credentials {
+                    username = mavenDeployUser
+                    password = mavenDeployPassword
+                }
+            }
+        } else {
+            def host = project.version.endsWith( '-SNAPSHOT' )? 'https://s01.oss.sonatype.org/content/repositories/snapshots/' : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            maven {
+                allowInsecureProtocol = !host.startsWith('https')
+                //指定要上传的maven私服仓库
+                url = host
+                //认证用户和密码
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
             }
         }
     }

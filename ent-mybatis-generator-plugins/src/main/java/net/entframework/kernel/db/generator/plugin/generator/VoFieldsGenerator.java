@@ -45,9 +45,9 @@ public class VoFieldsGenerator {
 			if ("serialVersionUID".equals(field.getName()) || GeneratorUtils.isLogicDeleteField(field)) {
 				continue;
 			}
-			if (isVo && GeneratorUtils.isTenantField(field)) {
+/*			if (isVo && GeneratorUtils.isTenantField(field)) {
 				continue;
-			}
+			}*/
 			Field pojoRequestField = new Field(field);
 			// 清除源字段的Annotation
 			pojoRequestField.getAnnotations().clear();

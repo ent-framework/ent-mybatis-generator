@@ -44,8 +44,7 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 
 	@Override
 	public List<CompilationUnit> getCompilationUnits() {
-		progressCallback.startTask(getString("Progress.17", //$NON-NLS-1$
-				introspectedTable.getFullyQualifiedTable().toString()));
+		progressCallback.startTask(getString("Progress.17", introspectedTable.getFullyQualifiedTable().toString()));
 		preCalculate();
 
 		Interface interfaze = createBasicInterface();
@@ -64,14 +63,16 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 		if (StringUtils.isBlank(projectRootAlias)) {
 			projectRootAlias = "";
 		}
-		apiDefaultPrefix = this.getProperty("apiDefaultPrefix", properties, this.context.getProperties());
-		if (StringUtils.isBlank(apiDefaultPrefix)) {
-			apiDefaultPrefix = "";
-		}
-		apiEnvName = this.getProperty("apiEnvName", properties, this.context.getProperties());
-		if (StringUtils.isBlank(apiEnvName)) {
-			apiEnvName = "";
-		}
+//		apiDefaultPrefix = this.getProperty("apiDefaultPrefix", properties, this.context.getProperties());
+//		if (StringUtils.isBlank(apiDefaultPrefix)) {
+//			apiDefaultPrefix = "";
+//		}
+//		apiEnvName = this.getProperty("apiEnvName", properties, this.context.getProperties());
+//		if (StringUtils.isBlank(apiEnvName)) {
+//			apiEnvName = "";
+//		}
+		apiDefaultPrefix = this.context.getJavaClientGeneratorConfiguration().getProperty("apiDefaultPrefix");
+		apiEnvName = this.context.getJavaClientGeneratorConfiguration().getProperty("apiEnvName");
 	}
 
 	private String getProperty(String key, Properties first, Properties second) {

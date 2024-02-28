@@ -650,7 +650,7 @@ public class MyBatisGeneratorConfigurationParser {
 			}
 
 			if ("property".equals(childNode.getNodeName())) { //$NON-NLS-1$
-				parseProperty(javaClientGeneratorConfiguration, childNode);
+				parseProperty(context, javaClientGeneratorConfiguration, childNode);
 			}
 		}
 	}

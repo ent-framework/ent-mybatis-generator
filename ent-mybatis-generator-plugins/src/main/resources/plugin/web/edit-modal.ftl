@@ -19,7 +19,7 @@
   import { ${modelName}Create, ${modelName}Update } from '${projectRootAlias}${apiPath}/${camelModelName}';
 
   export default defineComponent({
-    name: '${modelName}Drawer',
+    name: '${modelName}EditModal',
     components: { EntDrawer, EntForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {

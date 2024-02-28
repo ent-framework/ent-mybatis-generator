@@ -84,6 +84,7 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 				topLevelEnumeration.setWriteMode(WriteMode.OVER_WRITE);
 				FullyQualifiedJavaType fqjt = topLevelEnumeration.getType();
 				field.setType(fqjt);
+				field.setAttribute(Constants.TABLE_ENUM_FIELD_ATTR, true);
 				answer.add(topLevelEnumeration);
 			}
 

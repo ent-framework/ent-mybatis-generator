@@ -90,15 +90,14 @@ public class ModelField {
 		if (this.column.isBLOBColumn()) {
 			return "blob";
 		}
-		if (this.column.isJDBCDateColumn()) {
+		if ("DATE".equals(this.column.getJdbcTypeName()) || this.column.isJDBCDateColumn()) {
 			return "date";
 		}
-		if (this.column.isJDBCTimeColumn()) {
-			return "time";
-		}
-		if (StringUtils.equals(LocalDateTime.class.getName(),
-				this.column.getFullyQualifiedJavaType().getFullyQualifiedName())) {
+		if ("TIMESTAMP".equals(this.column.getJdbcTypeName())) {
 			return "date-time";
+		}
+		if ("TIME".equals(this.column.getJdbcTypeName()) || this.column.isJDBCTimeColumn()) {
+			return "time";
 		}
 		return "string";
 	}
