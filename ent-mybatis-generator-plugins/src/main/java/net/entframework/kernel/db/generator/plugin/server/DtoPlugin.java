@@ -48,7 +48,7 @@ public class DtoPlugin extends AbstractServerPlugin {
 		this.dtoTargetPackage = this.getProperty("dtoTargetPackage");
 		this.dtoSuffix = this.getProperty("dtoSuffix", Constants.DEFAULT_DTO_SUFFIX);
 		this.dtoRootClass = this.getProperty("dtoRootClass");
-		String  dtoIgnoreFields = this.getProperty("dtoIgnoreFields");
+		String dtoIgnoreFields = this.getProperty("dtoIgnoreFields");
 		if (StringUtils.isNotEmpty(dtoIgnoreFields)) {
 			for (String s : StringUtils.split(dtoIgnoreFields)) {
 				globalIgnoreFields.add(StringUtils.trim(s));
@@ -147,7 +147,8 @@ public class DtoPlugin extends AbstractServerPlugin {
 			});
 		}
 
-		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, ignoreFields);
+		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, ignoreFields,
+				false);
 
 		fieldAndImports.getFields().forEach(voClass::addField);
 		fieldAndImports.getImports().forEach(voClass::addImportedType);

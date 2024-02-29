@@ -37,7 +37,8 @@ public class VoFieldsGenerator {
 		this.factory = factory;
 	}
 
-	public FieldAndImports generateVo(TopLevelClass modelClass, IntrospectedTable introspectedTable, Set<String> ignoreFields) {
+	public FieldAndImports generateVo(TopLevelClass modelClass, IntrospectedTable introspectedTable,
+			Set<String> ignoreFields, boolean isVo) {
 		String modelObjectName = modelClass.getType().getShortNameWithoutTypeArguments();
 		FieldAndImports.Builder builder = new FieldAndImports.Builder();
 

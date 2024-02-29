@@ -38,7 +38,7 @@ public class VoPlugin extends AbstractServerPlugin {
 
 		boolean validate = super.validate(warnings);
 
-		String  dtoIgnoreFields = this.getProperty("voIgnoreFields");
+		String dtoIgnoreFields = this.getProperty("voIgnoreFields");
 		if (StringUtils.isNotEmpty(dtoIgnoreFields)) {
 			for (String s : StringUtils.split(dtoIgnoreFields)) {
 				globalIgnoreFields.add(StringUtils.trim(s));
@@ -130,7 +130,8 @@ public class VoPlugin extends AbstractServerPlugin {
 			}
 		}
 
-		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, ignoreFields);
+		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, ignoreFields,
+				true);
 
 		fieldAndImports.getFields().forEach(voClass::addField);
 		fieldAndImports.getImports().forEach(voClass::addImportedType);
