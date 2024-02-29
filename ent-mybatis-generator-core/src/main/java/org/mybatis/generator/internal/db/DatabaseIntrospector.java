@@ -380,12 +380,12 @@ public class DatabaseIntrospector {
 			localTableName = tc.getTableName();
 		}
 		else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			localCatalog = tc.getCatalog() == null ? null : tc.getCatalog().toLowerCase();
+			localCatalog = tc.getCatalog() == null ? catalog.toLowerCase() : tc.getCatalog().toLowerCase();
 			localSchema = tc.getSchema() == null ? null : tc.getSchema().toLowerCase();
 			localTableName = tc.getTableName().toLowerCase();
 		}
 		else if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			localCatalog = tc.getCatalog() == null ? null : tc.getCatalog().toUpperCase();
+			localCatalog = tc.getCatalog() == null ? catalog.toUpperCase() : tc.getCatalog().toUpperCase();
 			localSchema = tc.getSchema() == null ? null : tc.getSchema().toUpperCase();
 			localTableName = tc.getTableName().toUpperCase();
 		}
@@ -393,6 +393,9 @@ public class DatabaseIntrospector {
 			localCatalog = tc.getCatalog();
 			localSchema = tc.getSchema();
 			localTableName = tc.getTableName();
+		}
+		if (localCatalog == null) {
+			localCatalog = catalog;
 		}
 
 		if (tc.isWildcardEscapingEnabled()) {

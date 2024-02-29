@@ -14,6 +14,7 @@ import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.config.Context;
 
 import java.util.List;
+import java.util.Set;
 
 public class VoFieldsGenerator {
 
@@ -36,7 +37,7 @@ public class VoFieldsGenerator {
 		this.factory = factory;
 	}
 
-	public FieldAndImports generateVo(TopLevelClass modelClass, IntrospectedTable introspectedTable, boolean isVo) {
+	public FieldAndImports generateVo(TopLevelClass modelClass, IntrospectedTable introspectedTable, Set<String> ignoreFields) {
 		String modelObjectName = modelClass.getType().getShortNameWithoutTypeArguments();
 		FieldAndImports.Builder builder = new FieldAndImports.Builder();
 
@@ -45,10 +46,7 @@ public class VoFieldsGenerator {
 			if ("serialVersionUID".equals(field.getName())) {
 				continue;
 			}
-			/*
-			 * if (isVo && GeneratorUtils.isTenantField(field)) { continue; }
-			 */
-			if (!isVo && GeneratorUtils.isLogicDeleteField(field)) {
+			if (ignoreFields.contains(field.getName())) {
 				continue;
 			}
 			Field pojoRequestField = new Field(field);

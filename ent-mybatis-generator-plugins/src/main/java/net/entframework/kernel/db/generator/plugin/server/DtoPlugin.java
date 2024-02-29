@@ -22,7 +22,10 @@ import org.mybatis.generator.api.dom.java.JavaVisibility;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.config.PropertyRegistry;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /***
  * Pojo生成
@@ -35,6 +38,8 @@ public class DtoPlugin extends AbstractServerPlugin {
 
 	private String dtoRootClass = "";
 
+	private final List<String> globalIgnoreFields = new ArrayList<>();
+
 	@Override
 	public boolean validate(List<String> warnings) {
 
@@ -43,6 +48,12 @@ public class DtoPlugin extends AbstractServerPlugin {
 		this.dtoTargetPackage = this.getProperty("dtoTargetPackage");
 		this.dtoSuffix = this.getProperty("dtoSuffix", Constants.DEFAULT_DTO_SUFFIX);
 		this.dtoRootClass = this.getProperty("dtoRootClass");
+		String  dtoIgnoreFields = this.getProperty("dtoIgnoreFields");
+		if (StringUtils.isNotEmpty(dtoIgnoreFields)) {
+			for (String s : StringUtils.split(dtoIgnoreFields)) {
+				globalIgnoreFields.add(StringUtils.trim(s));
+			}
+		}
 
 		if (StringUtils.isAnyEmpty(this.dtoTargetPackage, this.dtoSuffix)) {
 			warnings.add("请检查DtoPlugin配置");
@@ -120,7 +131,23 @@ public class DtoPlugin extends AbstractServerPlugin {
 		voClass.addAnnotation(String.format("@Description(\"%s\")", topLevelClass.getDescription()));
 		voClass.addImportedType("net.entframework.kernel.core.annotation.Description");
 
-		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, false);
+		Set<String> ignoreFields = new HashSet<>(globalIgnoreFields);
+		String voIgnoreFields = introspectedTable.getTableConfiguration().getProperty("dtoIgnoreFields");
+		if (StringUtils.isNotEmpty(voIgnoreFields)) {
+			for (String s : StringUtils.split(voIgnoreFields, ",")) {
+				ignoreFields.add(StringUtils.trim(s));
+			}
+		}
+		if (ignoreFields.isEmpty()) {
+			GeneratorUtils.getLogicDeleteColumn(introspectedTable).ifPresent(column -> {
+				ignoreFields.add(column.getJavaProperty());
+			});
+			GeneratorUtils.getTenantColumn(introspectedTable).ifPresent(column -> {
+				ignoreFields.add(column.getJavaProperty());
+			});
+		}
+
+		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, ignoreFields);
 
 		fieldAndImports.getFields().forEach(voClass::addField);
 		fieldAndImports.getImports().forEach(voClass::addImportedType);

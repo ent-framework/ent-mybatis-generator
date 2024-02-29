@@ -179,7 +179,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
 			if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
 				controllerJavaClass
 					.addAnnotation(String.format("@ApiResource(displayName = \"%s\")", modelClass.getDescription()));
-				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.ApiResource");
+				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.ApiResource");
 			}
 
 			controllerJavaClass.addAnnotation(String.format("@Tag(name = \"%s\")", modelClass.getDescription()));
@@ -198,7 +198,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
 			if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
 				baseControllerJavaClass
 					.addAnnotation(String.format("@ApiResource(displayName = \"%s\")", modelClass.getDescription()));
-				baseControllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.ApiResource");
+				baseControllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.ApiResource");
 			}
 			baseControllerJavaClass.addAnnotation(String.format("@Tag(name = \"%s\")", modelClass.getDescription()));
 			baseControllerJavaClass.addImportedType("io.swagger.v3.oas.annotations.tags.Tag");
@@ -215,12 +215,12 @@ public class ControllerPlugin extends AbstractServerPlugin {
 				method.addAnnotation(String.format(
 						"@PostResource(displayName = \"%s-%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
 						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath())));
-				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.PostResource");
+				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.PostResource");
 			}
 			else {
 				method.addAnnotation(String.format("@PostResource(displayName = \"%s-%s\", path = \"%s\")",
 						modelDescription, method.getOperation(), method.getRestPath()));
-				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.PostResource");
+				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.PostResource");
 			}
 
 		}
@@ -244,12 +244,12 @@ public class ControllerPlugin extends AbstractServerPlugin {
 				method.addAnnotation(String.format(
 						"@GetResource(displayName = \"%s-%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
 						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath())));
-				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.GetResource");
+				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.GetResource");
 			}
 			else {
 				method.addAnnotation(String.format("@GetResource(displayName = \"%s-%s\", path = \"%s\")",
 						modelDescription, method.getOperation(), method.getRestPath()));
-				controllerJavaClass.addImportedType("net.entframework.kernel.scanner.api.annotation.GetResource");
+				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.GetResource");
 			}
 
 		}

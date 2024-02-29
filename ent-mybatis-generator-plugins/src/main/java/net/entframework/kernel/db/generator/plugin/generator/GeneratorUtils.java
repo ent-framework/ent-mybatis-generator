@@ -114,12 +114,21 @@ public class GeneratorUtils {
 		return (StringUtils.isNotEmpty(logicColumn) && StringUtils.equals(column.getActualColumnName(), logicColumn));
 	}
 
+	public static boolean isTenantColumn(IntrospectedColumn column) {
+		String tenantColumn = column.getIntrospectedTable().getTableConfiguration().getTenantColumn();
+		return (StringUtils.isNotEmpty(tenantColumn) && StringUtils.equals(column.getActualColumnName(), tenantColumn));
+	}
+
 	public static Optional<Field> getLogicDeleteField(TopLevelClass topLevelClass) {
 		return topLevelClass.getFields().stream().filter(GeneratorUtils::isLogicDeleteField).findFirst();
 	}
 
 	public static Optional<IntrospectedColumn> getLogicDeleteColumn(IntrospectedTable introspectedTable) {
 		return introspectedTable.getAllColumns().stream().filter(GeneratorUtils::isLogicDeleteColumn).findFirst();
+	}
+
+	public static Optional<IntrospectedColumn> getTenantColumn(IntrospectedTable introspectedTable) {
+		return introspectedTable.getAllColumns().stream().filter(GeneratorUtils::isTenantColumn).findFirst();
 	}
 
 	public static Optional<IntrospectedColumn> getVersionColumn(IntrospectedTable introspectedTable) {

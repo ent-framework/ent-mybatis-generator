@@ -21,17 +21,29 @@ import org.mybatis.generator.api.dom.java.JavaVisibility;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.config.PropertyRegistry;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /***
  * Vo生成
  */
 public class VoPlugin extends AbstractServerPlugin {
 
+	private final List<String> globalIgnoreFields = new ArrayList<>();
+
 	@Override
 	public boolean validate(List<String> warnings) {
 
 		boolean validate = super.validate(warnings);
+
+		String  dtoIgnoreFields = this.getProperty("voIgnoreFields");
+		if (StringUtils.isNotEmpty(dtoIgnoreFields)) {
+			for (String s : StringUtils.split(dtoIgnoreFields)) {
+				globalIgnoreFields.add(StringUtils.trim(s));
+			}
+		}
 
 		if (StringUtils.isAnyEmpty(this.voTargetPackage, this.voSuffix, this.mapstructTargetPackage,
 				this.mapstructSuffix)) {
@@ -110,7 +122,15 @@ public class VoPlugin extends AbstractServerPlugin {
 		voClass.addAnnotation(String.format("@Schema(description = \"%s\")", topLevelClass.getDescription()));
 		voClass.addImportedType("io.swagger.v3.oas.annotations.media.Schema");
 
-		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, true);
+		Set<String> ignoreFields = new HashSet<>(globalIgnoreFields);
+		String voIgnoreFields = introspectedTable.getTableConfiguration().getProperty("voIgnoreFields");
+		if (StringUtils.isNotEmpty(voIgnoreFields)) {
+			for (String s : StringUtils.split(voIgnoreFields, ",")) {
+				ignoreFields.add(StringUtils.trim(s));
+			}
+		}
+
+		FieldAndImports fieldAndImports = pojoFieldsGenerator.generateVo(topLevelClass, introspectedTable, ignoreFields);
 
 		fieldAndImports.getFields().forEach(voClass::addField);
 		fieldAndImports.getImports().forEach(voClass::addImportedType);
