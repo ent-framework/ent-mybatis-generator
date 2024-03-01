@@ -100,8 +100,8 @@ public class ModelField {
 		if (this.column.isNumberColumn()) {
 			return "number";
 		}
-		if (this.column.isBLOBColumn()) {
-			return "blob";
+		if (this.column.isClobColumn()) {
+			return "clob";
 		}
 		if ("DATE".equals(this.column.getJdbcTypeName()) || this.column.isJDBCDateColumn()) {
 			return "date";
@@ -136,6 +136,9 @@ public class ModelField {
 		}
 		if (StringUtils.equals("relation", this.fieldType)) {
 			return "ApiSelect";
+		}
+		if (StringUtils.equals("clob", this.fieldType)) {
+			return "InputTextArea";
 		}
 		return "Input";
 	}

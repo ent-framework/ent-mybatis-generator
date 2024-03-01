@@ -85,6 +85,9 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 				listIgnoreFields.add(mf.getRelation().getSourceField().getName());
 			}
 		});
+
+		data.put("clobFields", WebUtils.getClobFields(modelFields));
+
 		data.put("listFields", WebUtils.getListFields(copy(modelFields), listIgnoreFields, introspectedTable));
 		data.put("searchFields", WebUtils.getSearchFields(copy(modelFields), introspectedTable));
 		//

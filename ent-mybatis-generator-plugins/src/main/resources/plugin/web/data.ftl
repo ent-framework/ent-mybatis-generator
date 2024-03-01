@@ -94,7 +94,7 @@ export const formSchema: FormSchema[] = [
     field: '${field.name}',
 </#if>
     label: '${field.description}',
-    labelWidth: '120px',
+    labelWidth: '100px',
     component: '${field.inputType}',
 <#if field.hidden>
     show: false,
@@ -108,6 +108,10 @@ export const formSchema: FormSchema[] = [
 <#if field.fieldType == 'enum'>
     componentProps: {
       options: ${field.javaType.shortName}Types,
+    },
+<#elseif field.fieldType == 'clob'>
+    componentProps: {
+      rows: 10,
     },
 <#elseif field.fieldType == 'relation'>
     componentProps: {

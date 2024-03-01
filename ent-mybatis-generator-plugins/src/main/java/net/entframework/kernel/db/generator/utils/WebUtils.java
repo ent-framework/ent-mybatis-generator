@@ -221,4 +221,13 @@ public class WebUtils {
 		return GeneratorUtils.getRelatedFields(fields, JoinTarget.JoinType.MANY_TO_ONE);
 	}
 
+	public static List<ModelField> getClobFields(List<ModelField> modelFields) {
+		List<ModelField> results = new ArrayList<>();
+		modelFields.forEach(modelField -> {
+			if (StringUtils.equals("clob", modelField.getFieldType())) {
+				results.add(modelField);
+			}
+		});
+		return results;
+	}
 }

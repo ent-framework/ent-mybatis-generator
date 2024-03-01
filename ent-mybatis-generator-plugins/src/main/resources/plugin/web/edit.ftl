@@ -1,7 +1,7 @@
 <template>
   <EntDrawer
     v-bind="$attrs"
-    width="640px"
+    width="500px"
     show-footer
     :title="getTitle"
     @register="registerDrawer"
@@ -13,6 +13,9 @@
 <script lang="ts">
   import { computed, defineComponent, ref, unref } from 'vue';
   import { EntForm, useForm } from 'fe-ent-core/es/components/form';
+<#if (clobFields?size>0)>
+  import { unescape } from 'lodash';
+</#if>
   import { formSchema } from './data';
   import { EntDrawer, useDrawerInner } from 'fe-ent-core/es/components/drawer';
   import { useMessage } from 'fe-ent-core/es/hooks/web/use-message';
@@ -39,7 +42,21 @@
         try {
           if (unref(mode) === 'u' || unref(mode) === 'r') {
             setDrawerProps({ confirmLoading: true });
+<#if (clobFields?size>0)>
+            const detail = await ${modelName}Load(
+              { ${pk.name}: data.record.${pk.name} },
+              {
+                transformResponse: (data) => {
+<#list clobFields as field>
+                  data.${field.name} = unescape(data.${field.name});
+</#list>
+                  return data;
+                },
+              },
+            );
+<#else >
             const detail = await ${modelName}Load({ ${pk.name}: data.record.${pk.name} });
+</#if>            
             ${pk.name}.value = detail.${pk.name};
             await setFieldsValue({
               ...detail,

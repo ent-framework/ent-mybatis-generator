@@ -3,7 +3,7 @@
     v-bind="$attrs"
     show-footer
     title="查看${modelDescription}"
-    width="640px"
+    width="500px"
     @register="registerDrawer"
     @ok="handleSubmit"
   >
@@ -21,6 +21,9 @@
   import { EntDescription } from 'fe-ent-core/es/components/description';
   import { EntDrawer, useDrawerInner } from 'fe-ent-core/es/components/drawer';
   import { ${modelName}Load } from '${projectRootAlias}${apiPath}/${camelModelName}';
+<#if (clobFields?size>0)>
+  import { unescape } from 'lodash';
+</#if>
   import { detailSchema } from './data';
   import type { ${modelName} } from '${projectRootAlias}${modelPath}/${camelModelName}';
 
@@ -36,7 +39,21 @@
         //detailData.value = data.record;
         try {
           setDrawerProps({ confirmLoading: true });
+<#if (clobFields?size>0)>
+          detailData.value = await ${modelName}Load(
+            { ${pk.name}: data.record.${pk.name} },
+            {
+              transformResponse: (data) => {
+<#list clobFields as field>
+                data.${field.name} = unescape(data.${field.name});
+</#list>
+                return data;
+              },
+            },
+          );
+<#else >
           detailData.value = await ${modelName}Load({ ${pk.name}: data.record.${pk.name} });
+</#if>
         } finally {
           setDrawerProps({ confirmLoading: false });
         }
