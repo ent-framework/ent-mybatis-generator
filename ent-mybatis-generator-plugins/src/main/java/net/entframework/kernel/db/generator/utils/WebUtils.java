@@ -8,7 +8,10 @@ import net.entframework.kernel.db.generator.typescript.runtime.ModelField;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
-import org.mybatis.generator.api.dom.java.*;
+import org.mybatis.generator.api.dom.java.CompilationUnit;
+import org.mybatis.generator.api.dom.java.Field;
+import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
+import org.mybatis.generator.api.dom.java.JavaVisibility;
 import org.mybatis.generator.config.Context;
 import org.mybatis.generator.config.JoinTarget;
 import org.mybatis.generator.config.UIConfig;
@@ -123,6 +126,9 @@ public class WebUtils {
 					field.setHidden(true);
 				}
 			}
+			if (field.isPrimaryKey()) {
+				field.setHidden(true);
+			}
 			results.add(field);
 
 		}
@@ -189,9 +195,26 @@ public class WebUtils {
 			definedFields.addAll(uiConfig.getInputFields().getFields());
 			ignoredFields.addAll(uiConfig.getInputFields().getIgnored());
 		}
-		return filterFields(
-				fields.stream().filter(field -> !(field.isLogicDeleteField() || field.isVersionField())).toList(),
-				definedFields, ignoredFields);
+
+		List<ModelField> results = new ArrayList<>();
+
+		for (ModelField field : fields) {
+			if (!definedFields.isEmpty()) {
+				if (!definedFields.contains(field.getName())) {
+					continue;
+				}
+			}
+			if (ignoredFields.contains(field.getName())) {
+				continue;
+			}
+
+			if (field.isVersionField() || field.isTenantField()) {
+				field.setHidden(true);
+			}
+
+			results.add(field);
+		}
+		return results;
 	}
 
 	public static List<Field> getRelationFields(List<Field> fields) {

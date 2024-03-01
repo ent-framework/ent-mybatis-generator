@@ -28,12 +28,15 @@ public class Parameter {
 
 	private final boolean isVarargs;
 
+	private boolean isRequired;
+
 	private final List<String> annotations = new ArrayList<>();
 
 	public Parameter(FullyQualifiedJavaType type, String name, boolean isVarargs) {
 		this.name = name;
 		this.type = type;
 		this.isVarargs = isVarargs;
+		this.isRequired = true;
 	}
 
 	public Parameter(FullyQualifiedJavaType type, String name) {
@@ -73,6 +76,14 @@ public class Parameter {
 
 	public boolean isVarargs() {
 		return isVarargs;
+	}
+
+	public boolean isRequired() {
+		return this.isRequired;
+	}
+
+	public void setRequired(boolean required) {
+		this.isRequired = required;
 	}
 
 }

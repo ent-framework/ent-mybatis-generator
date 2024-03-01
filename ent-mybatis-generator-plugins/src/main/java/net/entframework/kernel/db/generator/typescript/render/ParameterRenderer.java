@@ -22,18 +22,17 @@ import org.mybatis.generator.internal.util.CustomCollectors;
 public class ParameterRenderer {
 
 	public String render(Parameter parameter, CompilationUnit compilationUnit) {
-		// return renderAnnotations(parameter)
-		// + parameter.getName() + "?: "
-		// + JavaDomUtils.calculateTypeName(compilationUnit, parameter.getType())
-		// + " " //$NON-NLS-1$
-		// + (parameter.isVarargs() ? "... " : ""); //$NON-NLS-1$ //$NON-NLS-2$
-		return parameter.getName() + "?: "
-				+ RenderingUtilities.calculateTypescriptTypeName(compilationUnit, parameter.getType());
+		StringBuilder sb = new StringBuilder(parameter.getName());
+		if (!parameter.isRequired()) {
+			sb.append("?");
+		}
+		sb.append(": ");
+		sb.append(RenderingUtilities.calculateTypescriptTypeName(compilationUnit, parameter.getType()));
+		return sb.toString();
 	}
 
-	// should return empty string if no annotations
 	private String renderAnnotations(Parameter parameter) {
-		return parameter.getAnnotations().stream().collect(CustomCollectors.joining(" ", "", " ")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return parameter.getAnnotations().stream().collect(CustomCollectors.joining(" ", "", " "));
 	}
 
 }

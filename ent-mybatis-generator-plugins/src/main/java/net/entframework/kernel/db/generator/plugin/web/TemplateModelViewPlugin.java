@@ -16,10 +16,7 @@ import org.mybatis.generator.api.dom.java.Field;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /***
@@ -64,24 +61,45 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
 		List<Field> fields = topLevelClass.getFields();
 		List<ModelField> modelFields = convert(fields, introspectedTable, pkColumn);
-
-		// 生成描述Detail Schema配置
-		data.put("detailFields", WebUtils.getDetailFields(copy(modelFields)));
-		data.put("listFields", WebUtils.getListFields(copy(modelFields), getListIgnoreFields(), introspectedTable));
-		data.put("searchFields", WebUtils.getSearchFields(copy(modelFields), introspectedTable));
-		data.put("inputFields", WebUtils.getInputFields(copy(modelFields), getInputIgnoreFields(), introspectedTable));
-
 		// 获取枚举字段
 		List<ModelField> enumFields = modelFields.stream()
 			.filter(mf -> mf.isEnumField() && !mf.isLogicDeleteField())
 			.collect(Collectors.toSet())
 			.stream()
 			.toList();
+		// 关系字段
 		List<ModelField> relationFields = modelFields.stream()
 			.filter(ModelField::isRelationField)
 			.collect(Collectors.toSet())
 			.stream()
 			.toList();
+		// 生成描述Detail Schema配置
+		data.put("detailFields", WebUtils.getDetailFields(copy(modelFields)));
+
+		Set<String> listIgnoreFields = getListIgnoreFields();
+		relationFields.forEach(mf -> {
+			if (mf.isManyToMany()) {
+				listIgnoreFields.add(mf.getName());
+			}
+			else if (mf.isOneToMany() || mf.isManyToOne()) {
+				listIgnoreFields.add(mf.getRelation().getSourceField().getName());
+			}
+		});
+		data.put("listFields", WebUtils.getListFields(copy(modelFields), listIgnoreFields, introspectedTable));
+		data.put("searchFields", WebUtils.getSearchFields(copy(modelFields), introspectedTable));
+		//
+		Set<String> inputIgnoreFields = getInputIgnoreFields();
+		relationFields.forEach(mf -> {
+			if (mf.isManyToMany()) {
+				inputIgnoreFields.add(mf.getName());
+			}
+			else if (mf.isOneToMany() || mf.isManyToOne()) {
+				inputIgnoreFields.add(mf.getRelation().getSourceField().getName());
+			}
+		});
+		inputIgnoreFields.add(pkColumn.getJavaProperty());
+		data.put("inputFields", WebUtils.getInputFields(copy(modelFields), inputIgnoreFields, introspectedTable));
+
 		data.put("enumFields", enumFields);
 		data.put("relationFields", relationFields);
 		data.put("pk",

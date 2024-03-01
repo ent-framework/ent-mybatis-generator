@@ -43,6 +43,11 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 			JoinTarget target = detail.getRight();
 			IntrospectedTable rightTable = GeneratorUtils.getIntrospectedTable(context, target.getRightTable());
 			IntrospectedTable leftTable = GeneratorUtils.getIntrospectedTable(context, joinEntry.getLeftTable());
+			IntrospectedColumn leftTableColumn = GeneratorUtils.getIntrospectedColumnByColumn(leftTable,
+					detail.getLeft());
+			IntrospectedColumn rightTableColumn = GeneratorUtils.getIntrospectedColumnByColumn(rightTable,
+					target.getJoinColumn());
+			Field leftField = GeneratorUtils.getFieldByName(topLevelClass, leftTableColumn.getJavaProperty());
 
 			FullyQualifiedJavaType recordType = new FullyQualifiedJavaType(rightTable.getBaseRecordType());
 			recordType = WebUtils.convertToTypescriptType(this.context, recordType);
@@ -57,8 +62,7 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 			introspectedColumn.setIntrospectedTable(rightTable);
 			introspectedColumn.setFullyQualifiedJavaType(filedType);
 			introspectedColumn.setActualColumnName(target.getJoinColumn());
-			IntrospectedColumn rightTableColumn = GeneratorUtils.getIntrospectedColumnByColumn(rightTable,
-					target.getJoinColumn());
+
 			Field field = getJavaBeansFieldWithGeneratedAnnotation(introspectedColumn, context, rightTable,
 					topLevelClass);
 			field.setAttribute(Constants.FIELD_RELATION_COLUMN, rightTableColumn);
@@ -70,23 +74,18 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 				topLevelClass.addImportedType(recordType);
 				if (target.getType() == JoinTarget.JoinType.ONE_TO_MANY) {
 					topLevelClass.addImportedType(FullyQualifiedJavaType.getNewListInstance());
-					IntrospectedColumn leftKeyColumn = GeneratorUtils.getIntrospectedColumnByColumn(leftTable,
-							detail.getKey());
 					field.setDescription(GeneratorUtils.getFileDescription(rightTable));
 					builder.joinType(JoinTarget.JoinType.ONE_TO_MANY)
 						.bindField(field)
-						.sourceField(GeneratorUtils.getFieldByName(topLevelClass, leftKeyColumn.getJavaProperty()))
+						.sourceField(leftField)
 						.targetTable(rightTable)
 						.targetColumn(rightTableColumn);
 
 				}
 
 				if (target.getType() == JoinTarget.JoinType.MANY_TO_ONE) {
-					String columnName = detail.getKey();
-					IntrospectedColumn leftColumn = GeneratorUtils.getIntrospectedColumnByColumn(leftTable, columnName);
-					Field relatedField = GeneratorUtils.getFieldByName(topLevelClass, leftColumn.getJavaProperty());
 					field.setDescription(GeneratorUtils.getFileDescription(rightTable));
-					builder.sourceField(relatedField)
+					builder.sourceField(leftField)
 						.joinType(JoinTarget.JoinType.MANY_TO_ONE)
 						.bindField(field)
 						.targetTable(rightTable)

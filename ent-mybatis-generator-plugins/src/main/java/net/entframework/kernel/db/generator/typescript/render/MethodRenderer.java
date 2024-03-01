@@ -44,7 +44,7 @@ public class MethodRenderer {
 			lines.addAll(bodyLineRenderer.render(method.getBodyLines()));
 		}
 		if (method.getBodyLines().size() > 1) {
-			lines.add("}"); //$NON-NLS-1$
+			lines.add("}");
 		}
 
 		return lines;
@@ -59,21 +59,11 @@ public class MethodRenderer {
 		sb.append(method.getName());
 		sb.append(" = ");
 
-		// sb.append(renderTypeParameters(method, compilationUnit));
-
-		// if (!method.isConstructor()) {
-		// sb.append(method.getReturnType()
-		// .map(t -> JavaDomUtils.calculateTypeName(compilationUnit, t))
-		// .orElse("void")); //$NON-NLS-1$
-		//
-		// sb.append(' ');
-		// }
-
 		sb.append(renderParameters(method, compilationUnit));
 
 		sb.append(" =>");
 		if (method.getBodyLines().size() > 1) {
-			sb.append(" {"); //$NON-NLS-1$
+			sb.append(" {");
 		}
 		return sb.toString();
 
@@ -89,27 +79,31 @@ public class MethodRenderer {
 		return "";
 	}
 
-	// should return an empty string if no type parameters
+	/**
+	 * should return an empty string if no type parameters
+	 */
 	private String renderTypeParameters(Method method, CompilationUnit compilationUnit) {
 		return method.getTypeParameters()
 			.stream()
 			.map(tp -> typeParameterRenderer.render(tp, compilationUnit))
-			.collect(CustomCollectors.joining(", ", "<", "> ")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.collect(CustomCollectors.joining(", ", "<", "> "));
 	}
 
 	private String renderParameters(Method method, CompilationUnit compilationUnit) {
 		return method.getParameters()
 			.stream()
 			.map(p -> parameterRenderer.render(p, compilationUnit))
-			.collect(Collectors.joining(", ", "(", ")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.collect(Collectors.joining(", ", "(", ")"));
 	}
 
-	// should return an empty string if no exceptions
+	/**
+	 * should return an empty string if no exceptions
+	 */
 	private String renderExceptions(Method method, CompilationUnit compilationUnit) {
 		return method.getExceptions()
 			.stream()
 			.map(jt -> JavaDomUtils.calculateTypeName(compilationUnit, jt))
-			.collect(CustomCollectors.joining(", ", " throws ", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.collect(CustomCollectors.joining(", ", " throws ", ""));
 	}
 
 }

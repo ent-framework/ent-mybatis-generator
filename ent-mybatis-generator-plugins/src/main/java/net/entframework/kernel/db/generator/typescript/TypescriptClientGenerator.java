@@ -47,8 +47,6 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 		progressCallback.startTask(getString("Progress.17", introspectedTable.getFullyQualifiedTable().toString()));
 		preCalculate();
 
-		Interface interfaze = createBasicInterface();
-
 		List<CompilationUnit> answer = new ArrayList<>();
 
 		answer.add(generateRestApiClass());
@@ -63,16 +61,6 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 		if (StringUtils.isBlank(projectRootAlias)) {
 			projectRootAlias = "";
 		}
-		// apiDefaultPrefix = this.getProperty("apiDefaultPrefix", properties,
-		// this.context.getProperties());
-		// if (StringUtils.isBlank(apiDefaultPrefix)) {
-		// apiDefaultPrefix = "";
-		// }
-		// apiEnvName = this.getProperty("apiEnvName", properties,
-		// this.context.getProperties());
-		// if (StringUtils.isBlank(apiEnvName)) {
-		// apiEnvName = "";
-		// }
 		apiDefaultPrefix = this.context.getJavaClientGeneratorConfiguration().getProperty("apiDefaultPrefix");
 		apiEnvName = this.context.getJavaClientGeneratorConfiguration().getProperty("apiEnvName");
 	}
@@ -85,18 +73,6 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 			return second.getProperty(key);
 		}
 		return "";
-	}
-
-	protected Interface createBasicInterface() {
-		FullyQualifiedTable table = introspectedTable.getFullyQualifiedTable();
-		String camelCaseName = JavaBeansUtil.convertCamelCase(table.getDomainObjectName(), "-");
-		String typescriptModelPackage = this.context.getJavaClientGeneratorConfiguration().getTargetPackage();
-		FullyQualifiedTypescriptType type = new FullyQualifiedTypescriptType("",
-				typescriptModelPackage + "." + camelCaseName + "." + table.getDomainObjectName(), true);
-		Interface interfaze = new Interface(type);
-		interfaze.setVisibility(JavaVisibility.PUBLIC);
-		context.getCommentGenerator().addJavaFileComment(interfaze);
-		return interfaze;
 	}
 
 	private TypescriptTopLevelClass generateRestApiClass() {
@@ -112,10 +88,6 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 		typescriptTopLevelClass.setWriteMode(WriteMode.OVER_WRITE);
 
 		typescriptTopLevelClass.setVisibility(JavaVisibility.PUBLIC);
-
-		// GeneratorUtils.addComment(typescriptTopLevelClass,
-		// topLevelClass.getDescription() + "
-		// 服务请求类");
 
 		String typescriptModelPackage = this.context.getJavaModelGeneratorConfiguration().getTargetPackage();
 
@@ -164,27 +136,31 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 			Parameter parameter = method.getParameters().get(0);
 			if (StringUtils.equals("POST", method.getHttpMethod())) {
 				if (StringUtility.stringHasValue(apiDefaultPrefix)) {
-					method.addBodyLine(String.format("defHttp.post<%s>({ url: `${%s}%s`, data: %s });", returnTypeName,
-							apiDefaultPrefix, method.getRestPath(), parameter.getName()));
+					method.addBodyLine(String.format("defHttp.post<%s>({ url: `${%s}%s`, data: %s }, options);",
+							returnTypeName, apiDefaultPrefix, method.getRestPath(), parameter.getName()));
 				}
 				else {
-					method.addBodyLine(String.format("defHttp.post<%s>({ url: '%s', data: %s });", returnTypeName,
-							method.getRestPath(), parameter.getName()));
+					method.addBodyLine(String.format("defHttp.post<%s>({ url: '%s', data: %s }, options);",
+							returnTypeName, method.getRestPath(), parameter.getName()));
 				}
 
 			}
 			if (StringUtils.equals("GET", method.getHttpMethod())) {
 				if (StringUtility.stringHasValue(apiDefaultPrefix)) {
-					method.addBodyLine(String.format("defHttp.get<%s>({ url: `${%s}%s`, params: %s });", returnTypeName,
-							apiDefaultPrefix, method.getRestPath(), parameter.getName()));
+					method.addBodyLine(String.format("defHttp.get<%s>({ url: `${%s}%s`, params: %s }, options);",
+							returnTypeName, apiDefaultPrefix, method.getRestPath(), parameter.getName()));
 				}
 				else {
-					method.addBodyLine(String.format("defHttp.get<%s>({ url: '%s', params: %s });", returnTypeName,
-							method.getRestPath(), parameter.getName()));
+					method.addBodyLine(String.format("defHttp.get<%s>({ url: '%s', params: %s }, options);",
+							returnTypeName, method.getRestPath(), parameter.getName()));
 				}
 
 			}
 			method.setName(modelObjectName + StringUtils.capitalize(methodName));
+			// options?: RequestOptions
+			Parameter axiosOptions = new Parameter(new FullyQualifiedTypescriptType("RequestOptions"), "options");
+			axiosOptions.setRequired(false);
+			method.addParameter(axiosOptions);
 		}
 
 		methodAndImports.getMethods().forEach(typescriptTopLevelClass::addMethod);
@@ -192,7 +168,8 @@ public class TypescriptClientGenerator extends AbstractJavaClientGenerator {
 		typescriptTopLevelClass.setAttribute(Constants.WEB_PROJECT_ROOT_ALIAS, this.projectRootAlias);
 		typescriptTopLevelClass
 			.addImportedType(new FullyQualifiedTypescriptType("", "fe-ent-core.es.utils.defHttp", false));
-
+		typescriptTopLevelClass
+			.addImportedType(new FullyQualifiedTypescriptType("", "fe-ent-core.es.logics.RequestOptions", true));
 		return typescriptTopLevelClass;
 	}
 

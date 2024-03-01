@@ -188,8 +188,12 @@ public class ModelField {
 		return isRelationType(JoinTarget.JoinType.MANY_TO_ONE);
 	}
 
-	public boolean isRelationMany() {
+	public boolean isOneToMany() {
 		return isRelationType(JoinTarget.JoinType.ONE_TO_MANY);
+	}
+
+	public boolean isManyToMany() {
+		return isRelationType(JoinTarget.JoinType.MANY_TO_MANY);
 	}
 
 	private boolean isRelationType(JoinTarget.JoinType joinType) {

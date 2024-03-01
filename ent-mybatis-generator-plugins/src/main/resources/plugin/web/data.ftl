@@ -12,7 +12,11 @@ export const columns: BasicColumn[] = [
 <#list listFields as field>
   {
     title: '${field.description}',
+<#if field.fieldType == 'relation'>
+    dataIndex: '${field.name}.${field.relation.displayField}',
+<#else>
     dataIndex: '${field.name}',
+</#if>
 <#if field.hidden>
     defaultHidden: true,
 </#if>
@@ -84,9 +88,17 @@ export const detailSchema: DescItem[] = [
 export const formSchema: FormSchema[] = [
 <#list inputFields as field>
   {
+<#if field.fieldType == 'relation'>
+    field: '${field.relation.sourceField.name}',
+<#else>
     field: '${field.name}',
+</#if>
     label: '${field.description}',
+    labelWidth: '120px',
     component: '${field.inputType}',
+<#if field.hidden>
+    show: false,
+</#if>
 <#if field.required>
     required: ${field.required?c},
 </#if>
