@@ -7,9 +7,11 @@ plugins {
     id 'signing'
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
+if (!project.hasProperty('deployToAliyun')) {
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
 }
 
 //java.sourceCompatibility = JavaVersion.VERSION_1_8

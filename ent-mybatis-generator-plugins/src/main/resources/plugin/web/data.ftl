@@ -71,6 +71,10 @@ export const detailSchema: DescItem[] = [
   {
     label: '${field.description}',
     field: '${field.name}',
+    labelMinWidth: 100,
+    labelStyle: {
+      'text-align': 'end',
+    },
     render: (val) => {
       const enumType = ${field.javaType.shortName}Types.find((v) => v.value === val);
       return enumType ? enumType.label : val;
@@ -80,6 +84,10 @@ export const detailSchema: DescItem[] = [
   {
     label: '${field.description}',
     field: '${field.name}',
+    labelMinWidth: 100,
+    labelStyle: {
+      'text-align': 'end',
+    },
   },
 </#if>
 </#list>

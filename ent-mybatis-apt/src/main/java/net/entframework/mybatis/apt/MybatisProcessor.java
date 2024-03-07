@@ -45,12 +45,13 @@ public class MybatisProcessor extends AbstractProcessor {
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
 		if (roundEnv.processingOver() || annotations.isEmpty()) {
+			processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Mybatis Entity Support break 1");
 			return ALLOW_OTHER_PROCESSORS_TO_CLAIM_ANNOTATIONS;
 		}
 
 		if (roundEnv.getRootElements() == null || roundEnv.getRootElements().isEmpty()) {
+			processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Mybatis Entity Support break 2");
 			return ALLOW_OTHER_PROCESSORS_TO_CLAIM_ANNOTATIONS;
 		}
 
@@ -86,13 +87,13 @@ public class MybatisProcessor extends AbstractProcessor {
 
 	private void writeSupportFile(Filer filer, TypeElement type, List<AnnotationMeta> fields) {
 		// 被扫描的类的包路径
+		String typeName = type.getSimpleName().toString();
+		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "generate support file for:" +  typeName);
 		PackageElement packageElement = elementUtils.getPackageOf(type);
 		String packageName = packageElement.getQualifiedName().toString();
 
 		TypeSpec.Builder clazzBuilder = TypeSpec.classBuilder(type.getSimpleName() + "_")
 			.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-
-		String typeName = type.getSimpleName().toString();
 		String uncapitalizeName = Utils.uncapitalize(typeName);
 
 		clazzBuilder.addField(FieldSpec.builder(ClassName.get("", typeName), uncapitalizeName)
@@ -165,6 +166,7 @@ public class MybatisProcessor extends AbstractProcessor {
 			writer.flush();
 		}
 		catch (IOException e) {
+			processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "generate support file error:" +  e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -177,6 +179,8 @@ public class MybatisProcessor extends AbstractProcessor {
 	 */
 	private void writeCriteriaFile(Filer filer, TypeElement type, List<AnnotationMeta> fields) {
 		// 被扫描的类的包路径
+		String typeName = type.getSimpleName().toString();
+		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "generate criteria file for:" +  typeName);
 		PackageElement packageElement = elementUtils.getPackageOf(type);
 		String packageName = packageElement.getQualifiedName().toString();
 		String criteriaPackageName = getParentPackageName(packageName) + ".criteria";
@@ -186,7 +190,6 @@ public class MybatisProcessor extends AbstractProcessor {
 		clazzBuilder.addAnnotation(ClassName.get("lombok", "Data"));
 		clazzBuilder.superinterfaces.add(ClassName.get("net.entframework.kernel.db.mybatis.criteria", "Criteria"));
 
-		String typeName = type.getSimpleName().toString();
 		String uncapitalizeName = Utils.uncapitalize(typeName);
 
 		List<String> fieldsList = new ArrayList<>();
@@ -289,6 +292,7 @@ public class MybatisProcessor extends AbstractProcessor {
 			writer.flush();
 		}
 		catch (IOException e) {
+			processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "generate criteria file error:" +  e.getMessage());
 			e.printStackTrace();
 		}
 	}
