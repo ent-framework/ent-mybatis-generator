@@ -22,7 +22,7 @@
         >
           <ent-button type="primary" danger :disabled="checkedKeys.length === 0">删除</ent-button>
         </Popconfirm>
-        <ent-button type="primary" @click="handleCreate">新增${modelDescription}</ent-button>
+        <ent-button type="primary" @click="handleCreate">新增${model.description}</ent-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -30,18 +30,18 @@
             :actions="[
               {
                 icon: 'clarity:info-standard-line',
-                tooltip: '查看${modelDescription}详情',
+                tooltip: '查看${model.description}详情',
                 onClick: handleView.bind(null, record),
               },
               {
                 icon: 'clarity:note-edit-line',
-                tooltip: '编辑${modelDescription}资料',
+                tooltip: '编辑${model.description}资料',
                 onClick: handleEdit.bind(null, record),
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
-                tooltip: '删除此${modelDescription}',
+                tooltip: '删除此${model.description}',
                 popConfirm: {
                   title: '是否确认删除',
                   confirm: handleDelete.bind(null, record),
@@ -52,28 +52,28 @@
         </template>
       </template>
     </EntTable>
-    <${modelName}EditDrawer @register="registerEditDrawer" @success="handleEditSuccess" />
-    <${modelName}DetailDrawer @register="registerDetailDrawer" />
+    <${model.name}EditDrawer @register="registerEditDrawer" @success="handleEditSuccess" />
+    <${model.name}DetailDrawer @register="registerDetailDrawer" />
   </div>
 </template>
 <script lang="ts">
   import { defineComponent, reactive, ref } from 'vue';
   import { EntTable, EntTableAction, useTable } from 'fe-ent-core/es/components/table';
-  import { ${modelName}BatchDelete, ${modelName}Delete, ${modelName}Page } from '${projectRootAlias}${apiPath}/${camelModelName}';
+  import { ${model.name}BatchDelete, ${model.name}Delete, ${model.name}Page } from '${projectRootAlias}${apiPath}/${model.camelName}';
   import { useDrawer } from 'fe-ent-core/es/components/drawer';
   import { Alert, Popconfirm } from 'ant-design-vue';
   import { useMessage } from 'fe-ent-core/es/hooks/web/use-message';
-  import ${modelName}DetailDrawer from './detail.vue';
-  import ${modelName}EditDrawer from './edit.vue';
+  import ${model.name}DetailDrawer from './detail.vue';
+  import ${model.name}EditDrawer from './edit.vue';
   import { columns, searchFormSchema } from './data';
   import type { Recordable } from 'fe-ent-core/es/types';
 
   export default defineComponent({
-    name: '${modelName}Management',
+    name: '${model.name}Management',
     components: {
       EntTable,
-      ${modelName}DetailDrawer,
-      ${modelName}EditDrawer,
+      ${model.name}DetailDrawer,
+      ${model.name}EditDrawer,
       EntTableAction,
       Alert,
       Popconfirm,
@@ -85,8 +85,8 @@
       const checkedKeys = ref<Array<string | number>>([]);
       const searchInfo = reactive<Recordable>({});
       const [registerTable, { getSelectRows, reload }] = useTable({
-        title: '${modelDescription}列表',
-        api: ${modelName}Page,
+        title: '${model.description}列表',
+        api: ${model.name}Page,
         rowKey: '${pk.name}',
         columns,
         formConfig: {
@@ -136,7 +136,7 @@
       }
 
       function handleDelete(record: Recordable) {
-        ${modelName}Delete(record).then(() => {
+        ${model.name}Delete(record).then(() => {
           createMessage.success(`删除成功`);
           reload();
         });
@@ -160,7 +160,7 @@
 
       function handleBatchDelete() {
         const records = getSelectRows();
-        ${modelName}BatchDelete(records).then(() => {
+        ${model.name}BatchDelete(records).then(() => {
           createMessage.success(`删除成功`);
           checkedKeys.value = [];
           reload();

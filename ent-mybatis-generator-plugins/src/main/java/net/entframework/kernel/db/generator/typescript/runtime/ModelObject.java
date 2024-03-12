@@ -13,6 +13,12 @@ public class ModelObject {
 
 	private String description;
 
-	private String camelModelName;
+	private String camelName;
+
+	private String path;
+
+	private String modelPackage;
+
+	private boolean tenant;
 
 }

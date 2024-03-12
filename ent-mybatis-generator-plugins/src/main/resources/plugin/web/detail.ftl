@@ -2,7 +2,7 @@
   <EntDrawer
     v-bind="$attrs"
     show-footer
-    title="查看${modelDescription}"
+    title="查看${model.description}"
     width="500px"
     @register="registerDrawer"
     @ok="handleSubmit"
@@ -20,19 +20,19 @@
   import { defineComponent, ref } from 'vue';
   import { EntDescription } from 'fe-ent-core/es/components/description';
   import { EntDrawer, useDrawerInner } from 'fe-ent-core/es/components/drawer';
-  import { ${modelName}Load } from '${projectRootAlias}${apiPath}/${camelModelName}';
+  import { ${model.name}Load } from '${projectRootAlias}${apiPath}/${model.camelName}';
 <#if (clobFields?size>0)>
   import { unescape } from 'lodash';
 </#if>
   import { detailSchema } from './data';
-  import type { ${modelName} } from '${projectRootAlias}${modelPath}/${camelModelName}';
+  import type { ${model.name} } from '${projectRootAlias}${model.path}/${model.camelName}';
 
   export default defineComponent({
-    name: '${modelName}DetailDrawer',
+    name: '${model.name}DetailDrawer',
     components: { EntDrawer, EntDescription },
     emits: ['success', 'register'],
     setup(props, { emit }) {
-      const detailData = ref<${modelName}>();
+      const detailData = ref<${model.name}>();
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
         setDrawerProps({ confirmLoading: false });
@@ -40,7 +40,7 @@
         try {
           setDrawerProps({ confirmLoading: true });
 <#if (clobFields?size>0)>
-          detailData.value = await ${modelName}Load(
+          detailData.value = await ${model.name}Load(
             { ${pk.name}: data.record.${pk.name} },
             {
               transformResponse: (data) => {
@@ -52,7 +52,7 @@
             },
           );
 <#else >
-          detailData.value = await ${modelName}Load({ ${pk.name}: data.record.${pk.name} });
+          detailData.value = await ${model.name}Load({ ${pk.name}: data.record.${pk.name} });
 </#if>
         } finally {
           setDrawerProps({ confirmLoading: false });

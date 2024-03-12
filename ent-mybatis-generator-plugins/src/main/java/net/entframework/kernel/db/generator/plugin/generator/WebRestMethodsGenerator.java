@@ -48,6 +48,8 @@ public class WebRestMethodsGenerator {
 		addQueryListMethod();
 		// 分页查询
 		addPageListMethod();
+		// 高级分页查询
+		addAdanvcePageListMethod();
 		// 根据主键ID 删除
 		addDeleteByPrimaryKeyMethod();
 		// 批量删除
@@ -96,36 +98,9 @@ public class WebRestMethodsGenerator {
 		builder.withMethod(method);
 	}
 
-	public void addBatchCreateMethod() {
-		RestMethod method = new RestMethod("insertMultiple", "POST", recordType);
-		method.setUrl("/batch-create");
-		method.setOperation("批量新增");
-		method.setVisibility(JavaVisibility.PUBLIC);
-
-		method.setReturnType(voJavaType);
-		builder.withImport(voJavaType);
-
-		FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
-		responseBodyWrapperListType.addTypeArgument(voJavaType);
-
-		method.setReturnType(responseBodyWrapperListType);
-
-		FullyQualifiedJavaType paramListType = FullyQualifiedJavaType.getNewListInstance();
-		paramListType.addTypeArgument(voJavaType);
-		builder.withImport(paramListType);
-		Parameter parameter = new Parameter(paramListType, "voList");
-		if (addAnnotation) {
-			parameter.addAnnotation("@RequestBody");
-			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
-		}
-		method.addParameter(parameter);
-
-		builder.withMethod(method);
-	}
-
 	public void addUpdateMethod() {
 		RestMethod method = new RestMethod("update", "POST", recordType);
-		method.setOperation("更新-by PK");
+		method.setOperation("更新");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		method.setReturnType(voJavaType);
 		Parameter parameter = new Parameter(voJavaType, "vo");
@@ -141,7 +116,7 @@ public class WebRestMethodsGenerator {
 	public void addDeleteByPrimaryKeyMethod() {
 		RestMethod method = new RestMethod("delete", "POST", recordType);
 		method.setUrl("/delete");
-		method.setOperation("删除-by PK");
+		method.setOperation("删除");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
 		method.setReturnType(responseJavaType);
@@ -157,7 +132,7 @@ public class WebRestMethodsGenerator {
 
 	public void addBatchDeleteMethod() {
 		RestMethod method = new RestMethod("batchDelete", "POST", recordType);
-		method.setOperation("批量删除-by PK");
+		method.setOperation("批量删除");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
 
@@ -176,7 +151,7 @@ public class WebRestMethodsGenerator {
 	}
 
 	public void addQueryListMethod() {
-		RestMethod method = new RestMethod("list", "GET", recordType);
+		RestMethod method = new RestMethod("list", "POST", recordType);
 		method.setOperation("列表");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
@@ -191,8 +166,24 @@ public class WebRestMethodsGenerator {
 	}
 
 	public void addPageListMethod() {
-		RestMethod method = new RestMethod("page", "GET", recordType);
+		RestMethod method = new RestMethod("page", "POST", recordType);
 		method.setOperation("分页查询");
+		method.setVisibility(JavaVisibility.PUBLIC);
+		FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
+				"net.entframework.kernel.db.api.pojo.page.PageResult");
+		builder.withImport(pageResultType);
+		pageResultType.addTypeArgument(voJavaType);
+		method.setReturnType(pageResultType);
+
+		Parameter parameter = new Parameter(voJavaType, "vo");
+		method.addParameter(parameter);
+
+		builder.withMethod(method);
+	}
+
+	public void addAdanvcePageListMethod() {
+		RestMethod method = new RestMethod("criteria", "POST", recordType);
+		method.setOperation("高级分页查询");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
 				"net.entframework.kernel.db.api.pojo.page.PageResult");
@@ -209,7 +200,7 @@ public class WebRestMethodsGenerator {
 	public void addSelectByPrimaryKeyMethod() {
 		RestMethod method = new RestMethod("load", "GET", recordType);
 		method.setUrl("/detail");
-		method.setOperation("获取记录-by PK");
+		method.setOperation("查询明细");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		method.setReturnType(voJavaType);
 		Parameter parameter = new Parameter(voJavaType, "vo");

@@ -2,10 +2,7 @@ package net.entframework.kernel.db.generator.plugin.web;
 
 import net.entframework.kernel.db.generator.Constants;
 import net.entframework.kernel.db.generator.plugin.generator.GeneratorUtils;
-import net.entframework.kernel.db.generator.typescript.runtime.FullyQualifiedTypescriptType;
-import net.entframework.kernel.db.generator.typescript.runtime.ModelField;
-import net.entframework.kernel.db.generator.typescript.runtime.TemplateGeneratedFile;
-import net.entframework.kernel.db.generator.typescript.runtime.TypescriptTopLevelClass;
+import net.entframework.kernel.db.generator.typescript.runtime.*;
 import net.entframework.kernel.db.generator.utils.WebUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.GeneratedFile;
@@ -45,16 +42,21 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		}
 		TypescriptTopLevelClass tsApiClass = new TypescriptTopLevelClass(tsBaseModelJavaType);
 
+		ModelObject.Builder builder = ModelObject.builder();
+		builder.name(modelObjectName)
+				.camelName(JavaBeansUtil.convertCamelCase(modelObjectName, "-"))
+				.description(StringUtils.isEmpty(topLevelClass.getDescription())
+						? introspectedTable.getFullyQualifiedTable().getDomainObjectName() : topLevelClass.getDescription())
+				.type(modelObjectName);
+		ModelObject modelObject = builder.build();
+
 		tsApiClass.setWriteMode(this.writeMode == null ? WriteMode.SKIP_ON_EXIST : this.writeMode);
 
 		Map<String, Object> data = new HashMap<>();
 		data.put("projectRootAlias", this.projectRootAlias);
-		data.put("modelPackage", this.typescriptModelPackage.replaceAll("\\.", "/"));
 
-		data.put("modelName", modelObjectName);
-		data.put("modelDescription", topLevelClass.getDescription());
-		data.put("camelModelName", camelCaseName);
-		data.put("modelPath", this.modelPath);
+		modelObject.setPath(this.modelPath);
+		modelObject.setModelPackage(this.typescriptModelPackage.replaceAll("\\.", "/"));
 
 		data.putAll(getAdditionalPropertyMap());
 
@@ -75,6 +77,8 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 			.toList();
 		// 生成描述Detail Schema配置
 		data.put("detailFields", WebUtils.getDetailFields(copy(modelFields)));
+
+		modelObject.setTenant(modelFields.stream().anyMatch(ModelField::isTenantField));
 
 		Set<String> listIgnoreFields = getListIgnoreFields();
 		relationFields.forEach(mf -> {
@@ -104,6 +108,7 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		data.put("inputFields", WebUtils.getInputFields(copy(modelFields), inputIgnoreFields, introspectedTable));
 
 		data.put("enumFields", enumFields);
+		data.put("enumFieldImport", enumFields);
 		data.put("relationFields", relationFields);
 		data.put("pk",
 				new ModelField(GeneratorUtils.getFieldByName(topLevelClass, pkColumn.getJavaProperty()), pkColumn));
@@ -111,7 +116,7 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		String apiPath = StringUtils.replace(this.apiPackage, ".", "/");
 		data.put("apiPath", apiPath);
 		data.put("viewPath", StringUtils.replace(this.viewPackage, ".", "/"));
-
+		data.put("model", modelObject);
 		return new TemplateGeneratedFile(tsApiClass, context.getJavaModelGeneratorConfiguration().getTargetProject(),
 				data, this.templatePath, this.fileName, this.fileExt);
 	}

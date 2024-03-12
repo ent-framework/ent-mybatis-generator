@@ -12,12 +12,11 @@ const routes: AppRouteRecordRaw = {
   children: [
  <#list models as model>
     {
-      path: '${model.camelModelName}',
+      path: '${model.camelName}',
       name: '${model.name}Management',
-      component: () => import('${projectRootAlias}${viewPath}/${model.camelModelName}/index.vue'),
+      component: () => import('${projectRootAlias}${viewPath}/${model.camelName}/index.vue'),
       meta: {
         title: '${model.description}',
-        icon: 'simple-icons:about-dot-me',
       },
     },
 </#list>

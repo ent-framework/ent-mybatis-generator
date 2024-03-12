@@ -1,3 +1,6 @@
+<#if model.tenant>
+import { usePermission } from 'fe-ent-core/es/hooks';
+</#if>
 import type { BasicColumn } from 'fe-ent-core/es/components/table/interface';
 import type { FormSchema } from 'fe-ent-core/es/components/form/interface';
 import type { DescItem } from 'fe-ent-core/es/components/description/interface';
@@ -5,7 +8,9 @@ import type { DescItem } from 'fe-ent-core/es/components/description/interface';
 import { ${field.javaType.shortName}Types } from '${field.javaType.packagePath}';
 </#list>
 <#list relationFields as field>
+<#if field.manyToOne>
 import { ${field.javaType.shortName}List } from '${projectRootAlias}${apiPath}/${field.javaType.fileName}';
+</#if>
 </#list>
 
 export const columns: BasicColumn[] = [
@@ -54,6 +59,12 @@ export const searchFormSchema: FormSchema[] = [
       'show-time': true,
     },
     colProps: { span: 8 },
+<#elseif field.tenantField>
+    colProps: { span: 6 },
+    ifShow: () => {
+      const { hasPermission } = usePermission();
+      return hasPermission('ROLE_ADMINISTRATORS') || hasPermission('institutions:list');
+    },
 <#else >
     component: 'Input',
     colProps: { span: 6 },

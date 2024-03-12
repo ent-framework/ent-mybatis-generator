@@ -23,6 +23,8 @@ public class Relation {
 	 */
 	private Field sourceField;
 
+	private IntrospectedColumn sourceColumn;
+
 	/**
 	 * 关联的目标表
 	 */

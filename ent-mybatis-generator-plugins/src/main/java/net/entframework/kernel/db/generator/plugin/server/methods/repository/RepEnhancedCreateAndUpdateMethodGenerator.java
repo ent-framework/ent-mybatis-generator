@@ -35,11 +35,6 @@ public class RepEnhancedCreateAndUpdateMethodGenerator extends AbstractMethodGen
 		createMethod.setReturnType(recordType);
 		createMethod.addParameter(new Parameter(recordType, "row")); //$NON-NLS-1$
 
-		Method insertSelective = new Method("insertSelective"); //$NON-NLS-1$
-		insertSelective.setAbstract(isAbstract);
-		insertSelective.setReturnType(recordType);
-		insertSelective.addParameter(new Parameter(recordType, "row")); //$NON-NLS-1$
-
 		Method updateMethod = new Method("updateByPrimaryKey"); //$NON-NLS-1$
 		updateMethod.setAbstract(isAbstract);
 		updateMethod.setReturnType(recordType);
@@ -75,9 +70,6 @@ public class RepEnhancedCreateAndUpdateMethodGenerator extends AbstractMethodGen
 		if (!isAbstract) {
 			createMethod.addAnnotation("@Override");
 			createMethod.setVisibility(JavaVisibility.PUBLIC);
-
-			insertSelective.addAnnotation("@Override");
-			insertSelective.setVisibility(JavaVisibility.PUBLIC);
 
 			updateMethod.addAnnotation("@Override");
 			updateMethod.setVisibility(JavaVisibility.PUBLIC);
@@ -150,7 +142,6 @@ public class RepEnhancedCreateAndUpdateMethodGenerator extends AbstractMethodGen
 				setDefaultValueMethod.addBodyLine("return row;");
 
 				createMethod.addBodyLine("return super.insert(setDefaultValue(row));");
-				insertSelective.addBodyLine("return super.insertSelective(setDefaultValue(row));");
 				updateMethod.addBodyLine("return super.updateByPrimaryKey(setDefaultValue(row));");
 
 				batchCreateMethod.addBodyLine("if (records == null || records.isEmpty()) {");
@@ -164,7 +155,6 @@ public class RepEnhancedCreateAndUpdateMethodGenerator extends AbstractMethodGen
 
 				return MethodAndImports.withMethod(setDefaultValueMethod)
 					.withMethod(createMethod)
-					.withMethod(insertSelective)
 					.withMethod(batchCreateMethod)
 					.withMethod(updateMethod)
 					.withImports(imports)

@@ -66,6 +66,12 @@ public class ModelField {
 	}
 
 	public boolean isRequired() {
+		if (this.isRelationField()) {
+			if (this.isManyToOne()) {
+				return !this.getRelation().getSourceColumn().isNullable();
+			}
+			return false;
+		}
 		return !column.isNullable();
 	}
 
@@ -140,7 +146,14 @@ public class ModelField {
 		if (StringUtils.equals("clob", this.fieldType)) {
 			return "InputTextArea";
 		}
+		if (StringUtils.equals("string", this.fieldType) && this.column.getLength() >= 400) {
+			return "InputTextArea";
+		}
 		return "Input";
+	}
+
+	public int getTextLength() {
+		return this.column.getLength();
 	}
 
 	public String getInputType() {

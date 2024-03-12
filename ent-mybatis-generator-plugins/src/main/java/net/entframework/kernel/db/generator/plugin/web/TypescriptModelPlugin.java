@@ -4,6 +4,7 @@ import net.entframework.kernel.db.generator.Constants;
 import net.entframework.kernel.db.generator.config.Relation;
 import net.entframework.kernel.db.generator.plugin.generator.GeneratorUtils;
 import net.entframework.kernel.db.generator.utils.WebUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.mybatis.generator.api.*;
 import org.mybatis.generator.api.dom.java.*;
@@ -78,14 +79,20 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 					builder.joinType(JoinTarget.JoinType.ONE_TO_MANY)
 						.bindField(field)
 						.sourceField(leftField)
+						.sourceColumn(leftTableColumn)
 						.targetTable(rightTable)
 						.targetColumn(rightTableColumn);
-
 				}
 
 				if (target.getType() == JoinTarget.JoinType.MANY_TO_ONE) {
-					field.setDescription(GeneratorUtils.getFileDescription(rightTable));
+					if (StringUtils.isEmpty(leftTableColumn.getRemarks())) {
+						field.setDescription(GeneratorUtils.getFileDescription(rightTable));
+					} else {
+						field.setDescription(leftTableColumn.getRemarks());
+					}
+
 					builder.sourceField(leftField)
+							.sourceColumn(leftTableColumn)
 						.joinType(JoinTarget.JoinType.MANY_TO_ONE)
 						.bindField(field)
 						.targetTable(rightTable)

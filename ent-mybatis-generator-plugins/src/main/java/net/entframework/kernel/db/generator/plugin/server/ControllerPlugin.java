@@ -138,7 +138,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
 				addGetMapping(baseControllerJavaClass, method, modelDescription);
 			}
 			method.addAnnotation(
-					String.format("@Operation(summary = \"%s-%s\")", modelDescription, method.getOperation()));
+					String.format("@Operation(summary = \"%s%s\")", modelDescription, method.getOperation()));
 
 			if (StringUtils.isAnyEmpty(this.responseBodyWrapper, this.responseBodySuccessStaticMethod)) {
 				method.addBodyLine("return result;");
@@ -213,7 +213,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
 		if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
 			if (this.generatePermCode) {
 				method.addAnnotation(String.format(
-						"@PostResource(displayName = \"%s-%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
+						"@PostResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
 						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath())));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.PostResource");
 			}
@@ -242,7 +242,7 @@ public class ControllerPlugin extends AbstractServerPlugin {
 		if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
 			if (this.generatePermCode) {
 				method.addAnnotation(String.format(
-						"@GetResource(displayName = \"%s-%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
+						"@GetResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
 						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath())));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.GetResource");
 			}

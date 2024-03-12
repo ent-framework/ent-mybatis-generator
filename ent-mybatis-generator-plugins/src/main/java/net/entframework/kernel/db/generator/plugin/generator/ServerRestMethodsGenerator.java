@@ -139,7 +139,7 @@ public class ServerRestMethodsGenerator {
 
 	public void addUpdateMethod() {
 		RestMethod method = new RestMethod("update", "POST", recordType);
-		method.setOperation("更新-by PK");
+		method.setOperation("更新");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		method.setReturnType(voJavaType);
 		Parameter parameter = new Parameter(voJavaType, "vo");
@@ -160,7 +160,7 @@ public class ServerRestMethodsGenerator {
 	public void addDeleteByPrimaryKeyMethod() {
 		RestMethod method = new RestMethod("delete", "POST", recordType);
 		method.setUrl("/delete");
-		method.setOperation("删除-by PK");
+		method.setOperation("删除");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
 		method.setReturnType(responseJavaType);
@@ -181,7 +181,7 @@ public class ServerRestMethodsGenerator {
 
 	public void addBatchDeleteMethod() {
 		RestMethod method = new RestMethod("batchDelete", "POST", recordType);
-		method.setOperation("批量删除-by PK");
+		method.setOperation("批量删除");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
 
@@ -204,7 +204,7 @@ public class ServerRestMethodsGenerator {
 	}
 
 	public void addQueryListMethod() {
-		RestMethod method = new RestMethod("list", "GET", recordType);
+		RestMethod method = new RestMethod("list", "POST", recordType);
 		method.setOperation("列表");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
@@ -213,14 +213,18 @@ public class ServerRestMethodsGenerator {
 		method.setReturnType(responseBodyWrapperListType);
 		builder.withImport(responseBodyWrapperListType);
 		Parameter parameter = new Parameter(voJavaType, "vo");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
+		}
 		method.addParameter(parameter);
-
+		method.addParameter(getBaseQueryParam());
 		method.addParameter(getRequestParam());
 
 		method.addBodyLine(String.format("%s query = converterService.convert(vo, %s.class);",
 				recordType.getShortName(), recordType.getShortName()));
 		method.addBodyLine(String.format(
-				"List<%s> result = converterService.convert(%s.select(query, BaseQuery.from(request)), %s.class);",
+				"List<%s> result = converterService.convert(%s.select(query, baseQuery), %s.class);",
 				voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
 
 		builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
@@ -235,7 +239,7 @@ public class ServerRestMethodsGenerator {
 	}
 
 	public void addPageListMethod() {
-		RestMethod method = new RestMethod("page", "GET", recordType);
+		RestMethod method = new RestMethod("page", "POST", recordType);
 		method.setOperation("分页查询");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
@@ -245,12 +249,17 @@ public class ServerRestMethodsGenerator {
 		method.setReturnType(pageResultType);
 
 		Parameter parameter = new Parameter(voJavaType, "vo");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
+		}
 		method.addParameter(parameter);
+		method.addParameter(getBaseQueryParam());
 		method.addParameter(getRequestParam());
 
 		method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);",
 				recordType.getShortName(), recordType.getShortName()));
-		method.addBodyLine(String.format("PageResult<%s> page = %s.page(record, BaseQuery.from(request));",
+		method.addBodyLine(String.format("PageResult<%s> page = %s.page(record, baseQuery);",
 				recordType.getShortName(), serviceFieldName));
 		method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);",
 				voJavaType.getShortName(), voJavaType.getShortName()));
@@ -260,6 +269,17 @@ public class ServerRestMethodsGenerator {
 		builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
 		builder.withImport("net.entframework.kernel.db.api.factory.PageResultFactory");
 		builder.withMethod(method);
+	}
+
+	private Parameter getBaseQueryParam() {
+		FullyQualifiedJavaType javaType = new FullyQualifiedJavaType("net.entframework.kernel.core.vo.BaseQuery");
+		Parameter parameter = new Parameter(javaType, "baseQuery");
+		if (addAnnotation) {
+			parameter.addAnnotation("@RequestBody");
+			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
+		}
+		builder.withImport(javaType);
+		return parameter;
 	}
 
 	private String getParentPackageName(String packageName) {
@@ -289,9 +309,10 @@ public class ServerRestMethodsGenerator {
 			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
 		}
 		method.addParameter(parameter);
+		method.addParameter(getBaseQueryParam());
 		method.addParameter(getRequestParam());
 
-		method.addBodyLine(String.format("PageResult<%s> page = %s.page(criteria, BaseQuery.from(request));",
+		method.addBodyLine(String.format("PageResult<%s> page = %s.page(criteria, baseQuery);",
 				recordType.getShortName(), serviceFieldName));
 		method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);",
 				voJavaType.getShortName(), voJavaType.getShortName()));

@@ -19,10 +19,10 @@
   import { formSchema } from './data';
   import { EntDrawer, useDrawerInner } from 'fe-ent-core/es/components/drawer';
   import { useMessage } from 'fe-ent-core/es/hooks/web/use-message';
-  import { ${modelName}Insert, ${modelName}Load, ${modelName}Update } from '${projectRootAlias}${apiPath}/${camelModelName}';
+  import { ${model.name}Insert, ${model.name}Load, ${model.name}Update } from '${projectRootAlias}${apiPath}/${model.camelName}';
 
   export default defineComponent({
-    name: '${modelName}EditDrawer',
+    name: '${model.name}EditDrawer',
     components: { EntDrawer, EntForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
@@ -55,7 +55,7 @@
               },
             );
 <#else >
-            const detail = await ${modelName}Load({ ${pk.name}: data.record.${pk.name} });
+            const detail = await ${model.name}Load({ ${pk.name}: data.record.${pk.name} });
 </#if>            
             ${pk.name}.value = detail.${pk.name};
             await setFieldsValue({
@@ -76,11 +76,11 @@
         const v = unref(mode);
         switch (v) {
           case 'c':
-            return '新增${modelDescription}';
+            return '新增${model.description}';
           case 'u':
-            return '编辑${modelDescription}';
+            return '编辑${model.description}';
           case 'r':
-            return '查看${modelDescription}';
+            return '查看${model.description}';
         }
         return '';
       });
@@ -90,7 +90,7 @@
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
           if (unref(mode) == 'u') {
-            ${modelName}Update({ ...values, ${pk.name}: ${pk.name}.value })
+            ${model.name}Update({ ...values, ${pk.name}: ${pk.name}.value })
               .then(() => {
                 createMessage.success(`保存成功`);
                 closeDrawer();
@@ -98,7 +98,7 @@
               })
               .catch();
           } else if (unref(mode) == 'c') {
-            ${modelName}Insert({ ...values, ${pk.name}: null })
+            ${model.name}Insert({ ...values, ${pk.name}: null })
               .then(() => {
                 createMessage.success(`保存成功`);
                 closeDrawer();

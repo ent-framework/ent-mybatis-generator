@@ -13,13 +13,13 @@
 <script lang="ts">
   import { defineComponent, ref, computed, unref } from 'vue';
   import { EntForm, useForm } from 'fe-ent-core/es/components/form';
-  import { formSchema } from './${camelModelName}.data';
+  import { formSchema } from './${model.camelModelName}.data';
   import { EntDrawer, useDrawerInner } from 'fe-ent-core/es/components/drawer';
   import { useMessage } from 'fe-ent-core/es/hooks/web/use-message';
-  import { ${modelName}Create, ${modelName}Update } from '${projectRootAlias}${apiPath}/${camelModelName}';
+  import { ${model.name}Create, ${model.name}Update } from '${projectRootAlias}${apiPath}/${model.camelModelName}';
 
   export default defineComponent({
-    name: '${modelName}EditModal',
+    name: '${model.name}EditModal',
     components: { EntDrawer, EntForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
@@ -54,11 +54,11 @@
         const v = unref(mode);
         switch (v) {
           case 'c':
-            return '新增${modelDescription}';
+            return '新增${model.modelDescription}';
           case 'u':
-            return '编辑${modelDescription}';
+            return '编辑${model.modelDescription}';
           case 'r':
-            return '查看${modelDescription}';
+            return '查看${model.modelDescription}';
         }
         return '';
       });
@@ -68,7 +68,7 @@
           const values = await validate();
           setDrawerProps({ confirmLoading: true });
           if (unref(mode) == 'u') {
-            ${modelName}Update({ ...values, ${pk.name}: ${pk.name}.value })
+            ${model.name}Update({ ...values, ${pk.name}: ${pk.name}.value })
               .then(() => {
                 createMessage.success(`保存成功`);
                 closeDrawer();
@@ -76,7 +76,7 @@
               })
               .catch();
           } else if (unref(mode) == 'c') {
-            ${modelName}Create({ ...values, ${pk.name}: null })
+            ${model.name}Create({ ...values, ${pk.name}: null })
               .then(() => {
                 createMessage.success(`保存成功`);
                 closeDrawer();
