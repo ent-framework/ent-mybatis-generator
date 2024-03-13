@@ -85,6 +85,7 @@ public class ServerRestMethodsGenerator {
 		method.setOperation("新增");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		method.setReturnType(voJavaType);
+		method.setDataAction("CREATE");
 		builder.withImport(voJavaType);
 
 		Parameter parameter = new Parameter(voJavaType, "vo");
@@ -105,43 +106,12 @@ public class ServerRestMethodsGenerator {
 		builder.withMethod(method);
 	}
 
-	public void addBatchCreateMethod() {
-		RestMethod method = new RestMethod("insertMultiple", "POST", recordType);
-		method.setUrl("/batch-create");
-		method.setOperation("批量新增");
-		method.setVisibility(JavaVisibility.PUBLIC);
-
-		method.setReturnType(voJavaType);
-		builder.withImport(voJavaType);
-
-		FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
-		responseBodyWrapperListType.addTypeArgument(voJavaType);
-
-		method.setReturnType(responseBodyWrapperListType);
-
-		FullyQualifiedJavaType paramListType = FullyQualifiedJavaType.getNewListInstance();
-		paramListType.addTypeArgument(voJavaType);
-		builder.withImport(paramListType);
-		Parameter parameter = new Parameter(paramListType, "voList");
-		if (addAnnotation) {
-			parameter.addAnnotation("@RequestBody");
-			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
-		}
-		method.addBodyLine(String.format("List<%s> records = converterService.convert(voList, %s.class);",
-				recordType.getShortName(), recordType.getShortName()));
-		method.addBodyLine(
-				String.format("List<%s> result = converterService.convert(%s.insertMultiple(records), %s.class);",
-						voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
-		method.addParameter(parameter);
-
-		builder.withMethod(method);
-	}
-
 	public void addUpdateMethod() {
 		RestMethod method = new RestMethod("update", "POST", recordType);
 		method.setOperation("更新");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		method.setReturnType(voJavaType);
+		method.setDataAction("UPDATE");
 		Parameter parameter = new Parameter(voJavaType, "vo");
 		if (addAnnotation) {
 			parameter.addAnnotation("@RequestBody");
@@ -161,6 +131,7 @@ public class ServerRestMethodsGenerator {
 		RestMethod method = new RestMethod("delete", "POST", recordType);
 		method.setUrl("/delete");
 		method.setOperation("删除");
+		method.setDataAction("DELETE");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
 		method.setReturnType(responseJavaType);
@@ -182,6 +153,7 @@ public class ServerRestMethodsGenerator {
 	public void addBatchDeleteMethod() {
 		RestMethod method = new RestMethod("batchDelete", "POST", recordType);
 		method.setOperation("批量删除");
+		method.setDataAction("DELETE");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		FullyQualifiedJavaType responseJavaType = new FullyQualifiedJavaType("Integer");
 
@@ -207,6 +179,7 @@ public class ServerRestMethodsGenerator {
 		RestMethod method = new RestMethod("list", "POST", recordType);
 		method.setOperation("列表");
 		method.setVisibility(JavaVisibility.PUBLIC);
+		method.setDataAction("READ");
 		FullyQualifiedJavaType responseBodyWrapperListType = FullyQualifiedJavaType.getNewListInstance();
 		responseBodyWrapperListType.addTypeArgument(voJavaType);
 
@@ -242,6 +215,7 @@ public class ServerRestMethodsGenerator {
 		RestMethod method = new RestMethod("page", "POST", recordType);
 		method.setOperation("分页查询");
 		method.setVisibility(JavaVisibility.PUBLIC);
+		method.setDataAction("READ");
 		FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
 				"net.entframework.kernel.db.api.pojo.page.PageResult");
 		builder.withImport(pageResultType);
@@ -294,6 +268,7 @@ public class ServerRestMethodsGenerator {
 		RestMethod method = new RestMethod("criteria", "POST", recordType);
 		method.setOperation("高级分页查询");
 		method.setVisibility(JavaVisibility.PUBLIC);
+		method.setDataAction("READ");
 		FullyQualifiedJavaType pageResultType = new FullyQualifiedJavaType(
 				"net.entframework.kernel.db.api.pojo.page.PageResult");
 		builder.withImport(pageResultType);
@@ -328,6 +303,7 @@ public class ServerRestMethodsGenerator {
 		RestMethod method = new RestMethod("load", "GET", recordType);
 		method.setUrl("/detail");
 		method.setOperation("获取记录-by PK");
+		method.setDataAction("READ");
 		method.setVisibility(JavaVisibility.PUBLIC);
 		method.setReturnType(voJavaType);
 		Parameter parameter = new Parameter(voJavaType, "vo");

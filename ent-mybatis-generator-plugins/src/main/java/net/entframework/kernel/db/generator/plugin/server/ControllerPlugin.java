@@ -132,10 +132,10 @@ public class ControllerPlugin extends AbstractServerPlugin {
 
 		methodAndImports.getMethods().forEach(method -> {
 			if (StringUtils.equals("POST", method.getHttpMethod())) {
-				addPostMapping(baseControllerJavaClass, method, modelDescription);
+				addPostMapping(baseControllerJavaClass, method, modelDescription, recordType);
 			}
 			if (StringUtils.equals("GET", method.getHttpMethod())) {
-				addGetMapping(baseControllerJavaClass, method, modelDescription);
+				addGetMapping(baseControllerJavaClass, method, modelDescription, recordType);
 			}
 			method.addAnnotation(
 					String.format("@Operation(summary = \"%s%s\")", modelDescription, method.getOperation()));
@@ -209,19 +209,20 @@ public class ControllerPlugin extends AbstractServerPlugin {
 		return true;
 	}
 
-	private void addPostMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription) {
+	private void addPostMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription, FullyQualifiedJavaType baseRecordType) {
 		if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
 			if (this.generatePermCode) {
 				method.addAnnotation(String.format(
-						"@PostResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
-						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath())));
+						"@PostResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)", modelDescription,
+						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath()), baseRecordType.getShortName(), method.getDataAction()));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.PostResource");
 			}
 			else {
-				method.addAnnotation(String.format("@PostResource(displayName = \"%s-%s\", path = \"%s\")",
-						modelDescription, method.getOperation(), method.getRestPath()));
+				method.addAnnotation(String.format("@PostResource(displayName = \"%s-%s\", path = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)",
+						modelDescription, method.getOperation(), method.getRestPath(), baseRecordType.getShortName(), method.getDataAction()));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.PostResource");
 			}
+			controllerJavaClass.addImportedType("net.entframework.kernel.core.enums.DataAction");
 
 		}
 		else {
@@ -238,20 +239,20 @@ public class ControllerPlugin extends AbstractServerPlugin {
 		return StringUtils.replace(path, "/", ":");
 	}
 
-	private void addGetMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription) {
+	private void addGetMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription, FullyQualifiedJavaType baseRecordType) {
 		if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
 			if (this.generatePermCode) {
 				method.addAnnotation(String.format(
-						"@GetResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\")", modelDescription,
-						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath())));
+						"@GetResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)", modelDescription,
+						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath()), baseRecordType.getShortName(), method.getDataAction()));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.GetResource");
 			}
 			else {
-				method.addAnnotation(String.format("@GetResource(displayName = \"%s-%s\", path = \"%s\")",
-						modelDescription, method.getOperation(), method.getRestPath()));
+				method.addAnnotation(String.format("@GetResource(displayName = \"%s%s\", path = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)",
+						modelDescription, method.getOperation(), method.getRestPath(), baseRecordType.getShortName(), method.getDataAction()));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.GetResource");
 			}
-
+			controllerJavaClass.addImportedType("net.entframework.kernel.core.enums.DataAction");
 		}
 		else {
 			method.addAnnotation(String.format("@GetMapping(\"/%s\")", method.getRestPath()));

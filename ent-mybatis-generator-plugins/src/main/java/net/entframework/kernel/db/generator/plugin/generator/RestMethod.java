@@ -13,6 +13,8 @@ public class RestMethod extends Method {
 
 	private String operation;
 
+	private String dataAction;
+
 	private FullyQualifiedJavaType recordType;
 
 	public RestMethod(String name) {
@@ -62,4 +64,11 @@ public class RestMethod extends Method {
 		return "/" + JavaBeansUtil.convertCamelCase(modelObjectName, "-") + url;
 	}
 
+	public String getDataAction() {
+		return dataAction;
+	}
+
+	public void setDataAction(String dataAction) {
+		this.dataAction = dataAction;
+	}
 }
