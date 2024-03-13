@@ -43,7 +43,7 @@
           if (unref(mode) === 'u' || unref(mode) === 'r') {
             setDrawerProps({ confirmLoading: true });
 <#if (clobFields?size>0)>
-            const detail = await ${modelName}Load(
+            const detail = await ${model.name}Load(
               { ${pk.name}: data.record.${pk.name} },
               {
                 transformResponse: (data) => {

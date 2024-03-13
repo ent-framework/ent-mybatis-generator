@@ -238,11 +238,12 @@
 <!ELEMENT listFields EMPTY>
 <!ATTLIST listFields
         fields CDATA #IMPLIED
-        ignored CDATA #IMPLIED>
+        ignored CDATA #IMPLIED
+        enumSwitches CDATA #IMPLIED>
 <!ELEMENT inputFields EMPTY>
 <!ATTLIST inputFields
         fields CDATA #IMPLIED
-        ignored CDATA #IMPLIED>                
+        ignored CDATA #IMPLIED>
  <!--
   The columnOverride element is used to change certain attributes of the column
   from their default values.

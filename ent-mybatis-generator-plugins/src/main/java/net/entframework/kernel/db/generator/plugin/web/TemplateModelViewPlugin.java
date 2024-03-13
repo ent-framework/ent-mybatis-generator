@@ -91,8 +91,14 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		});
 
 		data.put("clobFields", WebUtils.getClobFields(modelFields));
-
-		data.put("listFields", WebUtils.getListFields(copy(modelFields), listIgnoreFields, introspectedTable));
+		List<ModelField> listFields = WebUtils.getListFields(copy(modelFields), listIgnoreFields, introspectedTable);
+		if (listFields.stream().anyMatch(ModelField::isEnumLabel)) {
+			modelObject.setEnumLabel(true);
+		}
+		if (listFields.stream().anyMatch(ModelField::isEnumSwitch)) {
+			modelObject.setEnumSwitch(true);
+		}
+		data.put("listFields", listFields);
 		data.put("searchFields", WebUtils.getSearchFields(copy(modelFields), introspectedTable));
 		//
 		Set<String> inputIgnoreFields = getInputIgnoreFields();

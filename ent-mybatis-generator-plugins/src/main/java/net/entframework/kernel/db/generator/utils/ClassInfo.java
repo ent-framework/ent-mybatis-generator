@@ -57,6 +57,7 @@ public class ClassInfo {
 	private boolean genericMode = false;
 
 	private boolean isEnum = false;
+	private Class<?> clz;
 
 	private List<Field> enuConstants = new ArrayList<>();
 
@@ -84,7 +85,8 @@ public class ClassInfo {
 			// ignore
 		}
 		if (clazz != null) {
-			if (clazz.isEnum() && supperEnum != null && supperEnum.isAssignableFrom(clazz)) {
+			classInfo.clz = clazz;
+			if (clazz.isEnum()) {
 				classInfo.isEnum = true;
 				parseEnum(classInfo, clazz);
 			}
@@ -144,22 +146,39 @@ public class ClassInfo {
 		TopLevelEnumeration topLevelEnumeration = new TopLevelEnumeration(enumType);
 		if (this.enuConstants != null) {
 			EnumInfo enumInfo = new EnumInfo();
-			for (Field field : this.enuConstants) {
-				try {
-					Object enumValue = field.get(null);
-					if (enumValue != null) {
-						Method nameField = enumValue.getClass().getMethod("name");
-						Method labelField = enumValue.getClass().getMethod("getLabel");
-						Method valueField = enumValue.getClass().getMethod("getValue");
-						enumInfo.addItem((String) nameField.invoke(enumValue), (String) labelField.invoke(enumValue),
-								valueField.invoke(enumValue));
+			if (supperEnum != null && supperEnum.isAssignableFrom(this.clz)) {
+				for (Field field : this.enuConstants) {
+					try {
+						Object enumValue = field.get(null);
+						if (enumValue != null) {
+							Method nameField = enumValue.getClass().getMethod("name");
+							Method labelField = enumValue.getClass().getMethod("getLabel");
+							Method valueField = enumValue.getClass().getMethod("getValue");
+							enumInfo.addItem((String) nameField.invoke(enumValue), (String) labelField.invoke(enumValue),
+									valueField.invoke(enumValue));
+						}
+					}
+					catch (Exception ex) {
+
+					}
+
+				}
+			} else {
+				for (Field field : this.enuConstants) {
+					try {
+						Object enumValue = field.get(null);
+						if (enumValue != null) {
+							Method nameField = enumValue.getClass().getMethod("name");
+							String name = (String) nameField.invoke(enumValue);
+							enumInfo.addItem(name, name, name);
+						}
+					}
+					catch (Exception ex) {
+						System.out.println(ex.getMessage());
 					}
 				}
-				catch (Exception ex) {
-
-				}
-
 			}
+
 			topLevelEnumeration.setAttribute(Constants.TABLE_ENUM_FIELD_ATTR_SOURCE, enumInfo);
 			for (Field field : this.memberFields) {
 				FullyQualifiedJavaType fqjt = new FullyQualifiedJavaType(field.getType().getName());
@@ -168,8 +187,24 @@ public class ClassInfo {
 				topLevelEnumeration.addField(javaField);
 				topLevelEnumeration.addImportedType(fqjt);
 			}
+			// Enum没有字段定义，使用默认的label-value形式
+			if (this.memberFields.isEmpty()) {
+				FullyQualifiedJavaType stringInstance = FullyQualifiedJavaType.getStringInstance();
+				org.mybatis.generator.api.dom.java.Field valueField = new org.mybatis.generator.api.dom.java.Field(
+						"value", stringInstance);
+				topLevelEnumeration.addField(valueField);
+
+				org.mybatis.generator.api.dom.java.Field labelField = new org.mybatis.generator.api.dom.java.Field(
+						"label", stringInstance);
+				topLevelEnumeration.addField(labelField);
+
+			}
 		}
 		return topLevelEnumeration;
+	}
+
+	public FullyQualifiedJavaType getJavaType() {
+		return javaType;
 	}
 
 	public static void main(String[] args) {

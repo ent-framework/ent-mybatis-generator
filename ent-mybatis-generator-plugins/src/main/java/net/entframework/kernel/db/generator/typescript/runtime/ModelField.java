@@ -212,6 +212,22 @@ public class ModelField {
 		return isRelationType(JoinTarget.JoinType.MANY_TO_MANY);
 	}
 
+	public boolean isEnumLabel() {
+		return field.getAttribute(Constants.FIELD_ENUM_LABEL_ATTR) != null;
+	}
+
+	public String getEnumLabelType() {
+		return (String) field.getAttribute(Constants.FIELD_ENUM_LABEL_ATTR);
+	}
+
+	public boolean isEnumSwitch() {
+		return field.getAttribute(Constants.FIELD_ENUM_SWITCH_ATTR) != null;
+	}
+
+	public String getEnumSwitchType() {
+		return (String) field.getAttribute(Constants.FIELD_ENUM_SWITCH_ATTR);
+	}
+
 	private boolean isRelationType(JoinTarget.JoinType joinType) {
 		Relation relation = (Relation) field.getAttribute(Constants.FIELD_RELATION);
 		return relation != null && relation.getJoinType() != null && relation.getJoinType() == joinType;

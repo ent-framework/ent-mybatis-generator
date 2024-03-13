@@ -38,11 +38,7 @@ public class InnerEnumRenderer {
 		lines.add("}"); //$NON-NLS-1$
 
 		lines.add(renderFirstTypeLine(innerEnum, compilationUnit));
-		// lines.addAll(renderEnumConstants(innerEnum));
 		lines.addAll(RenderingUtilities.renderFields(innerEnum.getFields(), compilationUnit));
-		// lines.addAll(RenderingUtilities.renderInitializationBlocks(innerEnum.getInitializationBlocks()));
-		// lines.addAll(RenderingUtilities.renderClassOrEnumMethods(innerEnum.getMethods(),
-		// compilationUnit));
 		lines.addAll(RenderingUtilities.renderInnerClasses(innerEnum.getInnerClasses(), compilationUnit));
 		lines.addAll(RenderingUtilities.renderInnerInterfaces(innerEnum.getInnerInterfaces(), compilationUnit));
 		lines.addAll(RenderingUtilities.renderInnerEnums(innerEnum.getInnerEnums(), compilationUnit));

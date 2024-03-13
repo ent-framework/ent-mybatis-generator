@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.*;
 import org.mybatis.generator.api.dom.java.*;
 import org.mybatis.generator.codegen.AbstractJavaGenerator;
+import org.mybatis.generator.config.ListField;
+import org.mybatis.generator.config.UIConfig;
 import org.mybatis.generator.internal.ObjectFactory;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 
@@ -63,6 +65,15 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 
 		List<IntrospectedColumn> introspectedColumns = introspectedTable.getAllColumns();
 
+		List<String> enumSwitches = new ArrayList<>();
+		UIConfig uiConfig = introspectedTable.getTableConfiguration().getUiConfig();
+		if (uiConfig != null && uiConfig.getListFields() != null) {
+			ListField listFields = uiConfig.getListFields();
+			if (!listFields.getEnumSwitches().isEmpty()) {
+				enumSwitches.addAll(listFields.getEnumSwitches());
+			}
+		}
+
 		for (IntrospectedColumn introspectedColumn : introspectedColumns) {
 
 			Field field = WebUtils.getTypescriptField(introspectedColumn, context, introspectedTable, topLevelClass);
@@ -78,6 +89,22 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 			ClassInfo classInfo = ClassInfo
 				.getInstance(introspectedColumn.getFullyQualifiedJavaType().getFullyQualifiedName());
 			if (classInfo != null && classInfo.isEnum()) {
+				if ("net.entframework.kernel.core.enums.StatusEnum".equals(classInfo.getJavaType().getFullyQualifiedName())
+				) {
+					if (enumSwitches.contains(field.getName())) {
+						field.setAttribute(Constants.FIELD_ENUM_SWITCH_ATTR, "Status");
+					} else {
+						field.setAttribute(Constants.FIELD_ENUM_LABEL_ATTR, "Status");
+					}
+				}
+				if ("net.entframework.kernel.core.enums.YesOrNotEnum".equals(classInfo.getJavaType().getFullyQualifiedName())
+				) {
+					if (enumSwitches.contains(field.getName())) {
+						field.setAttribute(Constants.FIELD_ENUM_SWITCH_ATTR, "YesOrNot");
+					} else {
+						field.setAttribute(Constants.FIELD_ENUM_LABEL_ATTR, "YesOrNot");
+					}
+				}
 				String enumPackage = typescriptModelPackage + ".enum";
 				TopLevelEnumeration topLevelEnumeration = classInfo.toTopLevelEnumeration(enumPackage,
 						introspectedColumn.getFullyQualifiedJavaType().getShortName(), projectRootAlias);
@@ -121,6 +148,7 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 
 			answer.add(topLevelClass);
 		}
+
 		return answer;
 	}
 

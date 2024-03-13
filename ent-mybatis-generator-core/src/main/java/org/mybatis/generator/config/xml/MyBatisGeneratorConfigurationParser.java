@@ -949,7 +949,7 @@ public class MyBatisGeneratorConfigurationParser {
 				uiConfig.setCriteria(parseLimitDisplayField(childNode));
 			}
 			else if ("listFields".equals(childNode.getNodeName())) {
-				uiConfig.setListFields(parseLimitDisplayField(childNode));
+				uiConfig.setListFields(parseListDisplayField(childNode));
 			}
 			else if ("inputFields".equals(childNode.getNodeName())) {
 				uiConfig.setInputFields(parseLimitDisplayField(childNode));
@@ -976,6 +976,24 @@ public class MyBatisGeneratorConfigurationParser {
 		}
 		if (StringUtility.stringHasValue(ignored)) {
 			limitDisplayField.getIgnored().addAll(Arrays.asList(StringUtils.split(ignored, ",")));
+		}
+		return limitDisplayField;
+	}
+
+	private ListField parseListDisplayField(Node childNode) {
+		ListField limitDisplayField = new ListField();
+		Properties attributes = parseAttributes(childNode);
+		String fields = attributes.getProperty("fields");
+		String ignored = attributes.getProperty("ignored");
+		String enumSwitches = attributes.getProperty("enumSwitches");
+		if (StringUtility.stringHasValue(fields)) {
+			limitDisplayField.getFields().addAll(Arrays.asList(StringUtils.split(fields, ",")));
+		}
+		if (StringUtility.stringHasValue(ignored)) {
+			limitDisplayField.getIgnored().addAll(Arrays.asList(StringUtils.split(ignored, ",")));
+		}
+		if (StringUtility.stringHasValue(enumSwitches)) {
+			limitDisplayField.getEnumSwitches().addAll(Arrays.asList(StringUtils.split(enumSwitches, ",")));
 		}
 		return limitDisplayField;
 	}

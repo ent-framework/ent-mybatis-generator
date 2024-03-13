@@ -21,4 +21,7 @@ public class ModelObject {
 
 	private boolean tenant;
 
+	private boolean enumLabel;
+
+	private boolean enumSwitch;
 }

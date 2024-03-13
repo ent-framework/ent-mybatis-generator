@@ -15,6 +15,7 @@ dependencies {
     implementation 'org.freemarker:freemarker'
     compileOnly 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5.2'
     annotationProcessor 'org.projectlombok:lombok'
+    testImplementation('net.entframework:ent-a-core:7.2.20-SNAPSHOT')
 }
 
 publishing {

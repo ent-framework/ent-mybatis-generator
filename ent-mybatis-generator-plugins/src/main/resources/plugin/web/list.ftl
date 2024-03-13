@@ -20,9 +20,9 @@
           cancel-text="No"
           @confirm="handleBatchDelete"
         >
-          <ent-button type="primary" danger :disabled="checkedKeys.length === 0">删除</ent-button>
+          <ent-button v-if="hasPermission('${model.camelName}:delete')" type="primary" danger :disabled="checkedKeys.length === 0">删除</ent-button>
         </Popconfirm>
-        <ent-button type="primary" @click="handleCreate">新增${model.description}</ent-button>
+        <ent-button v-if="hasPermission('${model.camelName}:create')" type="primary" @click="handleCreate">新增${model.description}</ent-button>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -32,16 +32,25 @@
                 icon: 'clarity:info-standard-line',
                 tooltip: '查看${model.description}详情',
                 onClick: handleView.bind(null, record),
+                ifShow: () => {
+                  return hasPermission('${model.camelName}:detail');
+                },
               },
               {
                 icon: 'clarity:note-edit-line',
                 tooltip: '编辑${model.description}资料',
                 onClick: handleEdit.bind(null, record),
+                ifShow: () => {
+                  return hasPermission('${model.camelName}:update');
+                },
               },
               {
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: '删除此${model.description}',
+                ifShow: () => {
+                  return hasPermission('${model.camelName}:delete');
+                },
                 popConfirm: {
                   title: '是否确认删除',
                   confirm: handleDelete.bind(null, record),
@@ -62,7 +71,7 @@
   import { ${model.name}BatchDelete, ${model.name}Delete, ${model.name}Page } from '${projectRootAlias}${apiPath}/${model.camelName}';
   import { useDrawer } from 'fe-ent-core/es/components/drawer';
   import { Alert, Popconfirm } from 'ant-design-vue';
-  import { useMessage } from 'fe-ent-core/es/hooks/web/use-message';
+  import { useMessage, usePermission } from 'fe-ent-core/es/hooks';
   import ${model.name}DetailDrawer from './detail.vue';
   import ${model.name}EditDrawer from './edit.vue';
   import { columns, searchFormSchema } from './data';
@@ -80,6 +89,7 @@
     },
     setup() {
       const { createMessage } = useMessage();
+      const { hasPermission } = usePermission();
       const [registerEditDrawer, { openDrawer: openEditDrawer }] = useDrawer();
       const [registerDetailDrawer, { openDrawer: openDetailDrawer }] = useDrawer();
       const checkedKeys = ref<Array<string | number>>([]);
@@ -171,6 +181,7 @@
         registerTable,
         registerEditDrawer,
         registerDetailDrawer,
+        hasPermission,
         handleCreate,
         handleEdit,
         handleDelete,

@@ -242,10 +242,6 @@ public class GeneratorUtils {
 		return "String".equals(field.getType().getShortName());
 	}
 
-	public static boolean isInnerEnum(Field field) {
-		return field.getAttribute(Constants.TABLE_ENUM_FIELD_ATTR) != null;
-	}
-
 	public static FullyQualifiedJavaType getModelJavaType(Context context, String modelObjectName) {
 		return new FullyQualifiedJavaType(
 				context.getJavaModelGeneratorConfiguration().getTargetPackage() + "." + modelObjectName);

@@ -25,7 +25,7 @@ public class UIConfig {
 	/**
 	 * 列表展示字段
 	 */
-	private LimitDisplayField listFields;
+	private ListField listFields;
 
 	/**
 	 * 输入字段
@@ -64,11 +64,11 @@ public class UIConfig {
 		this.criteria = criteria;
 	}
 
-	public LimitDisplayField getListFields() {
+	public ListField getListFields() {
 		return listFields;
 	}
 
-	public void setListFields(LimitDisplayField listFields) {
+	public void setListFields(ListField listFields) {
 		this.listFields = listFields;
 	}
 
