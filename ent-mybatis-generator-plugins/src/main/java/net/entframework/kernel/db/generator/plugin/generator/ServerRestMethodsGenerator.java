@@ -191,17 +191,13 @@ public class ServerRestMethodsGenerator {
 			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
 		}
 		method.addParameter(parameter);
-		method.addParameter(getBaseQueryParam());
 		method.addParameter(getRequestParam());
 
 		method.addBodyLine(String.format("%s query = converterService.convert(vo, %s.class);",
 				recordType.getShortName(), recordType.getShortName()));
 		method.addBodyLine(String.format(
-				"List<%s> result = converterService.convert(%s.select(query, baseQuery), %s.class);",
+				"List<%s> result = converterService.convert(%s.select(query, vo.getBaseQuery()), %s.class);",
 				voJavaType.getShortName(), serviceFieldName, voJavaType.getShortName()));
-
-		builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
-
 		builder.withMethod(method);
 	}
 
@@ -228,32 +224,19 @@ public class ServerRestMethodsGenerator {
 			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
 		}
 		method.addParameter(parameter);
-		method.addParameter(getBaseQueryParam());
 		method.addParameter(getRequestParam());
 
 		method.addBodyLine(String.format("%s record = converterService.convert(vo, %s.class);",
 				recordType.getShortName(), recordType.getShortName()));
-		method.addBodyLine(String.format("PageResult<%s> page = %s.page(record, baseQuery);",
+		method.addBodyLine(String.format("PageResult<%s> page = %s.page(record, vo.getBaseQuery());",
 				recordType.getShortName(), serviceFieldName));
 		method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);",
 				voJavaType.getShortName(), voJavaType.getShortName()));
 		method.addBodyLine(String.format(
 				"PageResult<%s> result =  PageResultFactory.createPageResult(records, (long)page.getTotalRows(), page.getPageSize(), page.getPageNo());",
 				voJavaType.getShortName()));
-		builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
 		builder.withImport("net.entframework.kernel.db.api.factory.PageResultFactory");
 		builder.withMethod(method);
-	}
-
-	private Parameter getBaseQueryParam() {
-		FullyQualifiedJavaType javaType = new FullyQualifiedJavaType("net.entframework.kernel.core.vo.BaseQuery");
-		Parameter parameter = new Parameter(javaType, "baseQuery");
-		if (addAnnotation) {
-			parameter.addAnnotation("@RequestBody");
-			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
-		}
-		builder.withImport(javaType);
-		return parameter;
 	}
 
 	private String getParentPackageName(String packageName) {
@@ -284,17 +267,15 @@ public class ServerRestMethodsGenerator {
 			builder.withImport("org.springframework.web.bind.annotation.RequestBody");
 		}
 		method.addParameter(parameter);
-		method.addParameter(getBaseQueryParam());
 		method.addParameter(getRequestParam());
 
-		method.addBodyLine(String.format("PageResult<%s> page = %s.page(criteria, baseQuery);",
+		method.addBodyLine(String.format("PageResult<%s> page = %s.page(criteria, criteria.getBaseQuery());",
 				recordType.getShortName(), serviceFieldName));
 		method.addBodyLine(String.format("List<%s> records = converterService.convert(page.getItems(), %s.class);",
 				voJavaType.getShortName(), voJavaType.getShortName()));
 		method.addBodyLine(String.format(
 				"PageResult<%s> result =  PageResultFactory.createPageResult(records, (long)page.getTotalRows(), page.getPageSize(), page.getPageNo());",
 				voJavaType.getShortName()));
-		builder.withImport("net.entframework.kernel.core.vo.BaseQuery");
 		builder.withImport("net.entframework.kernel.db.api.factory.PageResultFactory");
 		builder.withMethod(method);
 	}

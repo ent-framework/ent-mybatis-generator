@@ -192,6 +192,18 @@ public class MybatisProcessor extends AbstractProcessor {
 
 		String uncapitalizeName = Utils.uncapitalize(typeName);
 
+		//增加BaseQuery字段
+		ClassName baseQueryType = ClassName.get("net.entframework.kernel.core.vo", "BaseQuery");
+		FieldSpec.Builder baseQuerBuilder = FieldSpec.builder(baseQueryType, "baseQuery").addModifiers(Modifier.PRIVATE);
+		baseQuerBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("com.fasterxml.jackson.annotation", "JsonProperty"))
+				.addMember("value", "\"_query\"").build());
+		baseQuerBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("com.fasterxml.jackson.annotation", "JsonInclude"))
+				.addMember("value", "$T.$L", ClassName.get("com.fasterxml.jackson.annotation", "JsonInclude", "Include"),
+						ClassName.get("", "NON_NULL")).build());
+		FieldSpec fieldSpec = baseQuerBuilder.build();
+		clazzBuilder.addField(fieldSpec);
+
+
 		List<String> fieldsList = new ArrayList<>();
 
 		fields.forEach(element -> {
