@@ -156,13 +156,16 @@ public class MyBatisExtPlugin extends AbstractDynamicSQLPlugin {
 			topLevelClass.addAnnotation("@MappedSuperclass");
 			topLevelClass.addImportedType("jakarta.persistence.MappedSuperclass");
 		}
+
+		topLevelClass.addAnnotation(String.format("@Description(\"%s\")", fileDescription));
+		topLevelClass.addImportedType("net.entframework.kernel.core.annotation.Description");
+
 		topLevelClass.addAnnotation("@Entity");
 		topLevelClass.addImportedType("jakarta.persistence.Entity");
 		topLevelClass.addAnnotation(
 				String.format("@Table(name = \"%s\")", introspectedTable.getFullyQualifiedTableNameAtRuntime()));
 
 		topLevelClass.addImportedType("jakarta.persistence.Table");
-
 		return true;
 	}
 

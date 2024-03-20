@@ -109,16 +109,15 @@ public class WebUtils {
 					|| field.isBlob())
 			.toList()) {
 
+			if (field.isOneToMany() || field.isManyToMany()) {
+				continue;
+			}
+
 			if (field.isBlob()) {
 				continue;
 			}
 			if (ignoredFields.contains(field.getName())) {
-				if (!definedFields.isEmpty()) {
-					continue;
-				}
-				else {
-					field.setHidden(true);
-				}
+				continue;
 			}
 
 			if (!definedFields.isEmpty()) {
@@ -199,6 +198,9 @@ public class WebUtils {
 		List<ModelField> results = new ArrayList<>();
 
 		for (ModelField field : fields) {
+			if (field.isOneToMany() || field.isManyToMany()) {
+				continue;
+			}
 			if (!definedFields.isEmpty()) {
 				if (!definedFields.contains(field.getName())) {
 					continue;
@@ -208,7 +210,7 @@ public class WebUtils {
 				continue;
 			}
 
-			if (field.isVersionField() || field.isTenantField()) {
+			if (field.isVersionField()) {
 				field.setHidden(true);
 			}
 

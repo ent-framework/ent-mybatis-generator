@@ -122,6 +122,10 @@ public class ModelField {
 	}
 
 	private String calcInputType() {
+		if (this.isRelationField() || this.isTenantField()) {
+			return "ApiSelect";
+		}
+
 		if (StringUtils.equals("number", this.fieldType)) {
 			return "InputNumber";
 		}

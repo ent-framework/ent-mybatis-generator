@@ -63,6 +63,12 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		IntrospectedColumn pkColumn = GeneratorUtils.getPrimaryKey(introspectedTable);
 		List<Field> fields = topLevelClass.getFields();
 		List<ModelField> modelFields = convert(fields, introspectedTable, pkColumn);
+
+
+		modelFields.stream().filter(ModelField::isVersionField).findFirst().ifPresent(mf->{
+			modelObject.setVersionField(mf.getName());
+		});
+
 		// 获取枚举字段
 		List<ModelField> enumFields = modelFields.stream()
 			.filter(mf -> mf.isEnumField() && !mf.isLogicDeleteField())
@@ -78,7 +84,6 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		// 生成描述Detail Schema配置
 		data.put("detailFields", WebUtils.getDetailFields(copy(modelFields)));
 
-		modelObject.setTenant(modelFields.stream().anyMatch(ModelField::isTenantField));
 
 		Set<String> listIgnoreFields = getListIgnoreFields();
 		relationFields.forEach(mf -> {
@@ -92,14 +97,25 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 
 		data.put("clobFields", WebUtils.getClobFields(modelFields));
 		List<ModelField> listFields = WebUtils.getListFields(copy(modelFields), listIgnoreFields, introspectedTable);
+
+		if (!modelObject.isTenant()) {
+			modelObject.setTenant(listFields.stream().anyMatch(ModelField::isTenantField));
+		}
+
 		if (listFields.stream().anyMatch(ModelField::isEnumLabel)) {
 			modelObject.setEnumLabel(true);
 		}
 		if (listFields.stream().anyMatch(ModelField::isEnumSwitch)) {
 			modelObject.setEnumSwitch(true);
 		}
+		List<ModelField> searchFields = WebUtils.getSearchFields(copy(modelFields), introspectedTable);
+
+		if (!modelObject.isTenant()) {
+			modelObject.setTenant(searchFields.stream().anyMatch(ModelField::isTenantField));
+		}
+
 		data.put("listFields", listFields);
-		data.put("searchFields", WebUtils.getSearchFields(copy(modelFields), introspectedTable));
+		data.put("searchFields",searchFields);
 		//
 		Set<String> inputIgnoreFields = getInputIgnoreFields();
 		relationFields.forEach(mf -> {
@@ -111,8 +127,12 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 			}
 		});
 		inputIgnoreFields.add(pkColumn.getJavaProperty());
-		data.put("inputFields", WebUtils.getInputFields(copy(modelFields), inputIgnoreFields, introspectedTable));
+		List<ModelField> inputFields = WebUtils.getInputFields(copy(modelFields), inputIgnoreFields, introspectedTable);
+		data.put("inputFields", inputFields);
 
+		if (!modelObject.isTenant()) {
+			modelObject.setTenant(inputFields.stream().anyMatch(ModelField::isTenantField));
+		}
 		data.put("enumFields", enumFields);
 		data.put("enumFieldImport", enumFields);
 		data.put("relationFields", relationFields);

@@ -1,18 +1,12 @@
-<#if model.tenant>
-import { usePermission } from 'fe-ent-core/es/hooks';
+<#if (model.tenant || model.enumSwitch)>
+import { usePermission } from 'fe-ent-core/es/hooks/web/use-permission';
 </#if>
 <#if (model.enumLabel || model.enumSwitch)>
 import { h } from 'vue';
-</#if>
-<#if (model.enumLabel && model.enumSwitch)>
 import { Switch, Tag } from 'ant-design-vue';
-<#elseif model.enumLabel>
-import { Tag } from 'ant-design-vue';
-<#elseif model.enumSwitch>
-import { Switch } from 'ant-design-vue';
 </#if>
 <#if model.enumSwitch>
-import { useMessage } from 'fe-ent-core/es/hooks';
+import { useMessage } from 'fe-ent-core/es/hooks/web/use-message';
 import { ${model.name}Update } from '${projectRootAlias}${apiPath}/${model.camelName}';
 </#if>
 import type { BasicColumn } from 'fe-ent-core/es/components/table/interface';
@@ -64,6 +58,15 @@ export const columns: BasicColumn[] = [
     },
   <#elseif (field.enumSwitch && field.enumSwitchType == 'Status')>
     customRender: ({ record }) => {
+      const { hasPermission } = usePermission();
+      const canEdit = hasPermission('${model.camelName}:update');
+      if (!canEdit) {
+        const status = record.${field.name};
+        const enable = Math.trunc(status) === 1;
+        const color = enable ? 'green' : 'red';
+        const text = enable ? '启用' : '停用';
+        return h(Tag, { color }, () => text);
+      }
       if (!Reflect.has(record, 'pendingStatus')) {
         record.pendingStatus = false;
       }
@@ -77,7 +80,12 @@ export const columns: BasicColumn[] = [
           const newStatus = checked ? 1 : 2;
           const { createMessage } = useMessage();
           ${model.name}Update({ ...record, ${field.name}: newStatus })
-            .then(() => {
+            .then((result) => {
+ <#if model.versionField ??>
+              if (result.${model.versionField}) {
+                record.${model.versionField} = result.${model.versionField};
+              }
+ </#if>
               record.${field.name} = newStatus;
               createMessage.success(`已成功修改${field.description}`);
             })
@@ -92,6 +100,15 @@ export const columns: BasicColumn[] = [
     },
   <#elseif (field.enumSwitch && field.enumSwitchType == 'YesOrNot')>
     customRender: ({ record }) => {
+      const { hasPermission } = usePermission();
+      const canEdit = hasPermission('${model.camelName}:update');
+      if (!canEdit) {
+        const status = record.${field.name};
+        const enable = status === 'Y';
+        const color = enable ? 'green' : 'red';
+        const text = enable ? '是' : '否';
+        return h(Tag, { color }, () => text);
+      }
       if (!Reflect.has(record, 'pendingStatus')) {
         record.pendingStatus = false;
       }
@@ -171,7 +188,7 @@ export const searchFormSchema: FormSchema[] = [
     colProps: { span: 6 },
     ifShow: () => {
       const { hasPermission } = usePermission();
-      return hasPermission('ROLE_ADMINISTRATOR') || hasPermission('tenant:list');
+      return hasPermission('ROLE_ADMINISTRATOR') || hasPermission('tenant:query');
     },
     component: 'ApiSelect',
     componentProps: {
@@ -262,7 +279,22 @@ export const formSchema: FormSchema[] = [
       // not request until to select
       immediate: true,
     },
-</#if>    
+<#elseif field.tenantField>
+    ifShow: () => {
+      const { hasPermission } = usePermission();
+      return hasPermission('ROLE_ADMINISTRATOR') || hasPermission('tenant:assign');
+    },
+    componentProps: {
+      api: TenantList,
+      resultField: 'items',
+      // use name as label
+      labelField: 'name',
+      // use id as value
+      valueField: 'id',
+      // not request until to select
+      immediate: true,
+    },
+</#if>
   },
 </#list>
 ];

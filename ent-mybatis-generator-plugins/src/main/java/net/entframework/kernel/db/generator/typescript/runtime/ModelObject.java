@@ -24,4 +24,9 @@ public class ModelObject {
 	private boolean enumLabel;
 
 	private boolean enumSwitch;
+
+	/**
+	 * 是否有乐观锁version字段
+	 */
+	private String versionField;
 }
