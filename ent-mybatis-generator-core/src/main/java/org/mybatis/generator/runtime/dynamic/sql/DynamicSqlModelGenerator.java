@@ -23,6 +23,7 @@ import static org.mybatis.generator.internal.util.messages.Messages.getString;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.*;
 import org.mybatis.generator.api.dom.java.CompilationUnit;
 import org.mybatis.generator.api.dom.java.Field;
@@ -97,9 +98,21 @@ public class DynamicSqlModelGenerator extends AbstractJavaGenerator {
 
 		String rootClass = getRootClass();
 		RootClassInfo rootClassInfo = RootClassInfo.getInstance(rootClass, warnings);
+		//永远不会为null
 		if (rootClassInfo == null) {
 			throw new RuntimeException("Can't get root class");
 		}
+		String modelInterface = getModelInterface();
+		if (StringUtils.isNotEmpty(modelInterface)) {
+			RootClassInfo modelInterfaceClassInfo = RootClassInfo.getInstance(modelInterface, warnings);
+			if (modelInterfaceClassInfo == null) {
+				throw new RuntimeException("Can't get model interface");
+			}
+			FullyQualifiedJavaType modelInterfaceType = new FullyQualifiedJavaType(modelInterface);
+			topLevelClass.addSuperInterface(modelInterfaceType);
+			topLevelClass.addImportedType(modelInterfaceType);
+		}
+
 		for (IntrospectedColumn introspectedColumn : introspectedColumns) {
 			if (rootClassInfo.containsProperty(introspectedColumn)) {
 				continue;

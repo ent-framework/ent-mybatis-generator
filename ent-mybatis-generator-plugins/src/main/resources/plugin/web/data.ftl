@@ -3,7 +3,7 @@ import { usePermission } from 'fe-ent-core/es/hooks/web/use-permission';
 </#if>
 <#if (model.enumLabel || model.enumSwitch)>
 import { h } from 'vue';
-import { Switch, Tag } from 'ant-design-vue';
+import { NSwitch, NTag } from 'naive-ui';
 </#if>
 <#if model.enumSwitch>
 import { useMessage } from 'fe-ent-core/es/hooks/web/use-message';
@@ -13,10 +13,10 @@ import type { BasicColumn } from 'fe-ent-core/es/components/table/interface';
 import type { FormSchema } from 'fe-ent-core/es/components/form/interface';
 import type { DescItem } from 'fe-ent-core/es/components/description/interface';
 <#if model.tenant>
-import { TenantList } from '${projectRootAlias}/api/tenant';
+import { TenantList } from '${projectRootAlias}api/tenant';
 </#if>
-<#list enumFields as field>
-import { ${field.javaType.shortName}Types } from '${field.javaType.packagePath}';
+<#list enumFieldImport as fi>
+import { ${fi.shortName}Types } from '${fi.packagePath}';
 </#list>
 <#list relationFields as field>
 <#if field.manyToOne>
@@ -27,65 +27,61 @@ import { ${field.javaType.shortName}List } from '${projectRootAlias}${apiPath}/$
 export const columns: BasicColumn[] = [
 <#list listFields as field>
   {
-    title: '${field.description}',
 <#if field.fieldType == 'relation'>
-    dataIndex: '${field.name}.${field.relation.displayField}',
-<#else>
-    dataIndex: '${field.name}',
-</#if>
-<#if field.hidden>
-    defaultHidden: true,
-</#if>
-<#if (field.relationField && field.manyToOne)>
+    key: '${field.name}.${field.relation.displayField}',
+  <#if (field.relationField && field.manyToOne)>
     width: 110,
+  </#if>
 <#elseif field.fieldType == 'enum'>
+    key: '${field.name}',
     width: 120,
+    className: 'ent-table-edit-cell',
   <#if (field.enumLabel && field.enumLabelType == 'Status')>
-    customRender: ({ record }) => {
+    render: (record) => {
       const status = record.${field.name};
       const enable = Math.trunc(status) === 1;
-      const color = enable ? 'green' : 'red';
+      const type = enable ? 'success' : 'warning';
       const text = enable ? '启用' : '停用';
-      return h(Tag, { color }, () => text);
+      return h(NTag, { type }, () => text);
     },
   <#elseif (field.enumLabel && field.enumLabelType == 'YesOrNot')>
-    customRender: ({ record }) => {
+    render: (record) => {
       const status = record.${field.name};
       const enable = status === 'Y';
-      const color = enable ? 'green' : 'red';
+      const type = enable ? 'success' : 'warning';
       const text = enable ? '是' : '否';
-      return h(Tag, { color }, () => text);
+      return h(NTag, { type }, () => text);
     },
   <#elseif (field.enumSwitch && field.enumSwitchType == 'Status')>
-    customRender: ({ record }) => {
+    render: (record) => {
       const { hasPermission } = usePermission();
       const canEdit = hasPermission('${model.camelName}:update');
       if (!canEdit) {
         const status = record.${field.name};
         const enable = Math.trunc(status) === 1;
-        const color = enable ? 'green' : 'red';
+        const type = enable ? 'success' : 'warning';
         const text = enable ? '启用' : '停用';
-        return h(Tag, { color }, () => text);
+        return h(NTag, { type }, () => text);
       }
       if (!Reflect.has(record, 'pendingStatus')) {
         record.pendingStatus = false;
       }
-      return h(Switch, {
-        checked: record.${field.name} === 1,
-        checkedChildren: '启用',
-        unCheckedChildren: '禁用',
+      return h(NSwitch, {
+        checkedValue: 1,
+        unCheckedValue: 2,
+        value: record.${field.name},
         loading: record.pendingStatus,
-        onChange(checked: boolean) {
+        onUpdateValue(checked: boolean) {
           record.pendingStatus = true;
           const newStatus = checked ? 1 : 2;
           const { createMessage } = useMessage();
           ${model.name}Update({ ...record, ${field.name}: newStatus })
             .then((result) => {
- <#if model.versionField ??>
+          <#if model.versionField ??>
               if (result.${model.versionField}) {
                 record.${model.versionField} = result.${model.versionField};
               }
- </#if>
+          </#if>
               record.${field.name} = newStatus;
               createMessage.success(`已成功修改${field.description}`);
             })
@@ -95,29 +91,30 @@ export const columns: BasicColumn[] = [
             .finally(() => {
               record.pendingStatus = false;
             });
-        },
+        }
       });
     },
   <#elseif (field.enumSwitch && field.enumSwitchType == 'YesOrNot')>
-    customRender: ({ record }) => {
+    render: (record) => {
       const { hasPermission } = usePermission();
       const canEdit = hasPermission('${model.camelName}:update');
       if (!canEdit) {
         const status = record.${field.name};
         const enable = status === 'Y';
-        const color = enable ? 'green' : 'red';
+        const type = enable ? 'success' : 'warning';
         const text = enable ? '是' : '否';
-        return h(Tag, { color }, () => text);
+        return h(NTag, { type }, () => text);
       }
       if (!Reflect.has(record, 'pendingStatus')) {
         record.pendingStatus = false;
       }
-      return h(Switch, {
+      return h(NSwitch, {
         checked: record.${field.name} === 'Y',
-        checkedChildren: '是',
-        unCheckedChildren: '否',
+        checkedValue: 'Y',
+        unCheckedValue: 'N',
+        value: record.${field.name},
         loading: record.pendingStatus,
-        onChange(checked: boolean) {
+        onUpdateValue(checked: boolean) {
           record.pendingStatus = true;
           const newStatus = checked ? 'Y' : 'N';
           const { createMessage } = useMessage();
@@ -132,18 +129,26 @@ export const columns: BasicColumn[] = [
             .finally(() => {
               record.pendingStatus = false;
             });
-        },
+        }
       });
     },
   <#else>
-    customRender: ({ value }) => {
-      const enumType = ${field.javaType.shortName}Types.find((v) => v.value === value);
-      return enumType ? enumType.label : value;
+    render: (record) => {
+      const enumType = ${field.javaType.shortName}Types.find((v) => v.value === record.${field.name});
+      return enumType ? enumType.label : record.${field.name};
     },
   </#if>
 <#else>
+    key: '${field.name}',
 </#if>
-  },
+<#if (field.fieldType == 'number' || field.fieldType == 'date-time')>
+    sorter: true,
+</#if>
+<#if field.hidden>
+    defaultHidden: true,
+</#if>
+    title: '${field.description}'
+  }<#if (field?has_next)>,</#if>
 </#list>
 ];
 <#if (searchFields?size>0)>
@@ -159,20 +164,17 @@ export const searchFormSchema: FormSchema[] = [
 <#if field.fieldType == 'enum'>
     component: '${field.inputType}',
     componentProps: {
-      options: ${field.javaType.shortName}Types,
+      options: ${field.javaType.shortName}Types
     },
-    colProps: { span: 6 },
+    gridItemProps: { span: 6 }
 <#elseif field.fieldType == 'date'>
     component: 'RangePicker',
-    colProps: { span: 8 },
+    gridItemProps: { span: 8 }
 <#elseif field.fieldType == 'date-time'>
-    component: 'RangePicker',
-    componentProps: {
-      'show-time': true,
-    },
-    colProps: { span: 8 },
+    component: 'DateTimeRangePicker',
+    gridItemProps: { span: 8 }
 <#elseif field.fieldType == 'relation'>
-    colProps: { span: 6 },
+    gridItemProps: { span: 6 },
     component: 'ApiSelect',
     componentProps: {
       api: ${field.relation.bindField.type.shortName}List,
@@ -182,10 +184,10 @@ export const searchFormSchema: FormSchema[] = [
       // use id as value
       valueField: '${field.relation.targetColumn.javaProperty}',
       // not request until to select
-      immediate: true,
-    },
+      immediate: true
+    }
 <#elseif field.tenantField>
-    colProps: { span: 6 },
+    gridItemProps: { span: 6 },
     ifShow: () => {
       const { hasPermission } = usePermission();
       return hasPermission('ROLE_ADMINISTRATOR') || hasPermission('tenant:query');
@@ -199,13 +201,13 @@ export const searchFormSchema: FormSchema[] = [
       // use id as value
       valueField: 'id',
       // not request until to select
-      immediate: true,
-    },
+      immediate: true
+    }
 <#else >
     component: 'Input',
-    colProps: { span: 6 },
+    gridItemProps: { span: 6 }
 </#if>
-  },
+  }<#if (field?has_next)>,</#if>
 </#list>
 ];
 <#else>
@@ -218,24 +220,16 @@ export const detailSchema: DescItem[] = [
   {
     label: '${field.description}',
     field: '${field.name}',
-    labelMinWidth: 100,
-    labelStyle: {
-      'text-align': 'end',
-    },
     render: (val) => {
       const enumType = ${field.javaType.shortName}Types.find((v) => v.value === val);
       return enumType ? enumType.label : val;
-    },
-  },
+    }
+  }<#if (field?has_next)>,</#if>
 <#else>
   {
     label: '${field.description}',
-    field: '${field.name}',
-    labelMinWidth: 100,
-    labelStyle: {
-      'text-align': 'end',
-    },
-  },
+    field: '${field.name}'
+  }<#if (field?has_next)>,</#if>
 </#if>
 </#list>
 ];
@@ -257,18 +251,39 @@ export const formSchema: FormSchema[] = [
 <#if field.required>
     required: ${field.required?c},
 </#if>
-    colProps: {
-      span: 24,
-    },
+<#-- 针对字段类型特殊处理 -->
 <#if field.fieldType == 'enum'>
-    componentProps: {
-      options: ${field.javaType.shortName}Types,
+    gridItemProps: {
+      span: 24
     },
+    componentProps: {
+      options: ${field.javaType.shortName}Types
+    }
 <#elseif field.fieldType == 'clob'>
-    componentProps: {
-      rows: 10,
+    gridItemProps: {
+      span: 24
     },
+    componentProps: {
+      rows: 10
+    }
+<#elseif field.fieldType == 'date'>
+    gridItemProps: {
+      span: 24
+    },
+    componentProps: {
+      rows: 10
+    }
+<#elseif field.fieldType == 'date-time'>
+    gridItemProps: {
+      span: 24
+    },
+    componentProps: {
+      rows: 10
+    }
 <#elseif field.fieldType == 'relation'>
+    gridItemProps: {
+      span: 24
+    },
     componentProps: {
       api: ${field.relation.bindField.type.shortName}List,
       resultField: 'items',
@@ -277,9 +292,12 @@ export const formSchema: FormSchema[] = [
       // use id as value
       valueField: '${field.relation.targetColumn.javaProperty}',
       // not request until to select
-      immediate: true,
-    },
+      immediate: true
+    }
 <#elseif field.tenantField>
+    gridItemProps: {
+      span: 24
+    },
     ifShow: () => {
       const { hasPermission } = usePermission();
       return hasPermission('ROLE_ADMINISTRATOR') || hasPermission('tenant:assign');
@@ -292,9 +310,13 @@ export const formSchema: FormSchema[] = [
       // use id as value
       valueField: 'id',
       // not request until to select
-      immediate: true,
-    },
+      immediate: true
+    }
+<#else>
+    gridItemProps: {
+      span: 24
+    }
 </#if>
-  },
+  }<#if (field?has_next)>,</#if>
 </#list>
 ];

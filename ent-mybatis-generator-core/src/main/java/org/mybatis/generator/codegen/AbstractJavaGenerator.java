@@ -62,6 +62,16 @@ public abstract class AbstractJavaGenerator extends AbstractGenerator {
 		return rootClass;
 	}
 
+	public String getModelInterface() {
+		String modelInterface = introspectedTable.getTableConfigurationProperty(PropertyRegistry.ANY_MODEL_INTERFACE);
+		if (modelInterface == null) {
+			Properties properties = context.getJavaModelGeneratorConfiguration().getProperties();
+			modelInterface = properties.getProperty(PropertyRegistry.ANY_MODEL_INTERFACE);
+		}
+
+		return modelInterface;
+	}
+
 	protected void addDefaultConstructor(TopLevelClass topLevelClass) {
 		topLevelClass.addMethod(getDefaultConstructor(topLevelClass));
 	}

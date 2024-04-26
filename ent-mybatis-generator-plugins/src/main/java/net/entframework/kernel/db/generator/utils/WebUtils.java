@@ -116,7 +116,10 @@ public class WebUtils {
 			if (field.isBlob()) {
 				continue;
 			}
+
 			if (ignoredFields.contains(field.getName())) {
+				field.setHidden(true);
+				results.add(field);
 				continue;
 			}
 

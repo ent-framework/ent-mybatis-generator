@@ -3,12 +3,13 @@
     v-bind="$attrs"
     show-footer
     title="查看${model.description}"
-    width="500px"
+    width="450px"
     @register="registerDrawer"
     @ok="handleSubmit"
   >
     <EntDescription
-      size="middle"
+      label-placement="left"
+      size="medium"
       :bordered="false"
       :column="1"
       :data="detailData"
@@ -48,8 +49,8 @@
                 data.${field.name} = unescape(data.${field.name});
 </#list>
                 return data;
-              },
-            },
+              }
+            }
           );
 <#else >
           detailData.value = await ${model.name}Load({ ${pk.name}: data.record.${pk.name} });
@@ -72,7 +73,7 @@
         registerDrawer,
         handleSubmit,
         detailSchema,
-        detailData,
+        detailData
       };
     },
   });

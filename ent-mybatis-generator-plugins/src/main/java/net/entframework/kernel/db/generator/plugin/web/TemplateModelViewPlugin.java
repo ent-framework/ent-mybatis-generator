@@ -10,6 +10,7 @@ import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.WriteMode;
 import org.mybatis.generator.api.dom.java.Field;
+import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.internal.util.JavaBeansUtil;
 
@@ -133,8 +134,9 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		if (!modelObject.isTenant()) {
 			modelObject.setTenant(inputFields.stream().anyMatch(ModelField::isTenantField));
 		}
+		Set<FullyQualifiedJavaType> enumFieldImport = enumFields.stream().map(ModelField::getJavaType).collect(Collectors.toSet());
 		data.put("enumFields", enumFields);
-		data.put("enumFieldImport", enumFields);
+		data.put("enumFieldImport", enumFieldImport);
 		data.put("relationFields", relationFields);
 		data.put("pk",
 				new ModelField(GeneratorUtils.getFieldByName(topLevelClass, pkColumn.getJavaProperty()), pkColumn));

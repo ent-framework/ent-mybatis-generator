@@ -7,7 +7,7 @@ const routes: AppRouteRecordRaw = {
   meta: {
     icon: 'simple-icons:about-dot-me',
     title: '${basicRouterTitle!''}',
-    orderNo: 20,
+    orderNo: 20
   },
   children: [
  <#list models as model>
@@ -16,11 +16,11 @@ const routes: AppRouteRecordRaw = {
       name: '${model.name}Management',
       component: () => import('${projectRootAlias}${viewPath}/${model.camelName}/index.vue'),
       meta: {
-        title: '${model.description}',
-      },
-    },
+        title: '${model.description}'
+      }
+    }<#if (model?has_next)>,</#if>
 </#list>
-  ],
+  ]
 };
 
 export default routes;

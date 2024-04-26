@@ -2,63 +2,18 @@
   <div>
     <EntTable
       :search-info="searchInfo"
+      :scroll-x="1600"
       :row-selection="{ type: 'checkbox', selectedRowKeys: checkedKeys, onChange: onSelectChange }"
       @register="registerTable"
     >
-      <template #headerTop>
-        <Alert v-if="checkedKeys.length > 0" type="info" show-icon>
-          <template #message>
-            <span>已选中{{ checkedKeys.length }}条记录(可跨页)</span>
-            <ent-button type="link" @click="checkedKeys = []" size="small">清空</ent-button>
-          </template>
-        </Alert>
-      </template>
       <template #toolbar>
-        <Popconfirm
-          title="确认删除所选记录?"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="handleBatchDelete"
-        >
-          <ent-button v-if="hasPermission('${model.camelName}:delete')" type="primary" danger :disabled="checkedKeys.length === 0">删除</ent-button>
-        </Popconfirm>
+        <NPopconfirm v-if="hasPermission('${model.camelName}:batch-delete')" @positive-click="handleBatchDelete">
+          <template #trigger>
+            <ent-button type="primary" danger :disabled="checkedKeys.length === 0">删除</ent-button>
+          </template>
+          确认删除所选记录?
+        </NPopconfirm>
         <ent-button v-if="hasPermission('${model.camelName}:create')" type="primary" @click="handleCreate">新增${model.description}</ent-button>
-      </template>
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.key === 'action'">
-          <EntTableAction
-            :actions="[
-              {
-                icon: 'clarity:info-standard-line',
-                tooltip: '查看${model.description}详情',
-                onClick: handleView.bind(null, record),
-                ifShow: () => {
-                  return hasPermission('${model.camelName}:detail');
-                },
-              },
-              {
-                icon: 'clarity:note-edit-line',
-                tooltip: '编辑${model.description}资料',
-                onClick: handleEdit.bind(null, record),
-                ifShow: () => {
-                  return hasPermission('${model.camelName}:update');
-                },
-              },
-              {
-                icon: 'ant-design:delete-outlined',
-                color: 'error',
-                tooltip: '删除此${model.description}',
-                ifShow: () => {
-                  return hasPermission('${model.camelName}:delete');
-                },
-                popConfirm: {
-                  title: '是否确认删除',
-                  confirm: handleDelete.bind(null, record),
-                },
-              },
-            ]"
-          />
-        </template>
       </template>
     </EntTable>
     <${model.name}EditDrawer @register="registerEditDrawer" @success="handleEditSuccess" />
@@ -66,11 +21,11 @@
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, reactive, ref } from 'vue';
+  import { defineComponent, h, reactive, ref } from 'vue';
   import { EntTable, EntTableAction, useTable } from 'fe-ent-core/es/components/table';
   import { ${model.name}BatchDelete, ${model.name}Delete, ${model.name}Page } from '${projectRootAlias}${apiPath}/${model.camelName}';
   import { useDrawer } from 'fe-ent-core/es/components/drawer';
-  import { Alert, Popconfirm } from 'ant-design-vue';
+  import { NPopconfirm } from 'naive-ui';
   import { useMessage, usePermission } from 'fe-ent-core/es/hooks';
   import ${model.name}DetailDrawer from './detail.vue';
   import ${model.name}EditDrawer from './edit.vue';
@@ -83,9 +38,7 @@
       EntTable,
       ${model.name}DetailDrawer,
       ${model.name}EditDrawer,
-      EntTableAction,
-      Alert,
-      Popconfirm,
+      NPopconfirm
     },
     setup() {
       const { createMessage } = useMessage();
@@ -97,51 +50,95 @@
       const [registerTable, { getSelectRows, reload }] = useTable({
         title: '${model.description}列表',
         api: ${model.name}Page,
-        rowKey: '${pk.name}',
+        rowKey: (record) => record.${pk.name},
         columns,
         formConfig: {
           labelWidth: 120,
           schemas: searchFormSchema,
-          autoSubmitOnEnter: true,
+          autoSubmitOnEnter: true
         },
         useSearchForm: <#if (searchFields?size>0)>true<#else>false</#if>,
         showTableSetting: true,
         bordered: true,
+        pagination: {
+          page: 1,
+          pageSize: 10
+        },
         handleSearchInfoFn(info) {
           return info;
         },
-<#if (searchFields?size>0)>
         beforeFetch(params) {
+          const { pagination, searchForm = {}, sorter } = params;
+          const query: Recordable = {};
+<#if (searchFields?size>0)>
           <#list searchFields as field>
           <#if (field.fieldType == 'date-time' || field.fieldType == 'date')>
-          if (params.${field.name}) {
-            params.searchTimeField = '${field.name}';
-            params.searchBeginTime = params.${field.name}[0];
-            params.searchEndTime = params.${field.name}[1];
-            params.${field.name} = undefined;
+          if (searchForm.${field.name}) {
+            query.searchTimeField = '${field.name}';
+            query.searchBeginTime = searchForm.${field.name}[0];
+            query.searchEndTime = searchForm.${field.name}[1];
+            searchForm.${field.name} = undefined;
           }
           </#if>
           </#list>
-          return params;
-        },
 </#if>
-        actionColumn: {
-          width: 120,
-          title: '操作',
-          dataIndex: 'action',
+          return {
+            ...searchForm,
+            _query: { ...pagination, ...query, ...sorter }
+          };
         },
+        actionColumn: {
+          width: 150,
+          title: '操作',
+          key: 'action',
+          render: (record) => {
+            return h(
+              EntTableAction,
+              {
+                actions: [
+                  {
+                    icon: 'ant-design:unordered-list-outlined',
+                    tooltip: '查看${model.description}详情',
+                    onClick: handleView.bind(null, record),
+                    ifShow: () => {
+                      return hasPermission('${model.camelName}:detail');
+                    }
+                  },
+                  {
+                    icon: 'ant-design:edit-outlined',
+                    tooltip: '编辑${model.description}资料',
+                    onClick: handleEdit.bind(null, record),
+                    ifShow: () => {
+                      return hasPermission('${model.camelName}:update');
+                    }
+                  },
+                  {
+                    icon: 'ant-design:delete-outlined',
+                    tooltip: '删除此${model.description}',
+                    confirm: '是否确认删除?',
+                    onClick: handleDelete.bind(null, record),
+                    ifShow: () => {
+                      return hasPermission('${model.camelName}:delete');
+                    }
+                  }
+                ]
+              },
+              { default: () => '' }
+            );
+          }
+        }
       });
 
       function handleCreate() {
         openEditDrawer(true, {
-          edit_mode: 'c',
+          edit_mode: 'c'
         });
       }
 
       function handleEdit(record: Recordable) {
         openEditDrawer(true, {
           record,
-          edit_mode: 'u',
+          edit_mode: 'u'
         });
       }
 
@@ -160,7 +157,7 @@
       function handleView(record: Recordable) {
         openDetailDrawer(true, {
           record,
-          edit_mode: 'r',
+          edit_mode: 'r'
         });
       }
 
@@ -183,15 +180,12 @@
         registerDetailDrawer,
         hasPermission,
         handleCreate,
-        handleEdit,
-        handleDelete,
         handleEditSuccess,
-        handleView,
         searchInfo,
         checkedKeys,
         onSelectChange,
-        handleBatchDelete,
+        handleBatchDelete
       };
-    },
+    }
   });
 </script>

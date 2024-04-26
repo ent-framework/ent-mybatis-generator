@@ -136,7 +136,7 @@ public class ModelField {
 			return "TimePicker";
 		}
 		if (StringUtils.equals("date-time", this.fieldType)) {
-			return "DatePicker";
+			return "DateTimePicker";
 		}
 		if (StringUtils.equals("boolean", this.fieldType)) {
 			return "Switch";

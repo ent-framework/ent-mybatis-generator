@@ -1,7 +1,7 @@
 <template>
   <EntDrawer
     v-bind="$attrs"
-    width="500px"
+    width="450px"
     show-footer
     :title="getTitle"
     @register="registerDrawer"
@@ -29,15 +29,16 @@
       const mode = ref('c');
       const { createMessage } = useMessage();
       const ${pk.name} = ref<any>(null);
-      const [registerForm, { resetFields, setFieldsValue, validate, setProps }] = useForm({
-        labelWidth: 90,
-        schemas: formSchema,
-        showActionButtonGroup: false,
-      });
+      const [registerForm, { resetFields, setFieldsValue, validate, setProps, getFieldsValue }] =
+        useForm({
+          labelWidth: 90,
+          schemas: formSchema,
+          showActionButtonGroup: false
+        });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
         await resetFields();
-        setDrawerProps({ confirmLoading: false, destroyOnClose: true });
+        setDrawerProps({ confirmLoading: false, displayDirective: 'if' });
         mode.value = data?.edit_mode;
         try {
           if (unref(mode) === 'u' || unref(mode) === 'r') {
@@ -51,15 +52,15 @@
                   data.${field.name} = unescape(data.${field.name});
 </#list>
                   return data;
-                },
-              },
+                }
+              }
             );
 <#else >
             const detail = await ${model.name}Load({ ${pk.name}: data.record.${pk.name} });
 </#if>            
             ${pk.name}.value = detail.${pk.name};
             await setFieldsValue({
-              ...detail,
+              ...detail
             });
             if (unref(mode) === 'r') {
               await setProps({ disabled: true });
@@ -87,7 +88,8 @@
 
       async function handleSubmit() {
         try {
-          const values = await validate();
+          await validate();
+          const values = getFieldsValue();
           setDrawerProps({ confirmLoading: true });
           if (unref(mode) == 'u') {
             ${model.name}Update({ ...values, ${pk.name}: ${pk.name}.value })
@@ -98,7 +100,7 @@
               })
               .catch();
           } else if (unref(mode) == 'c') {
-            ${model.name}Insert({ ...values, ${pk.name}: null })
+            ${model.name}Insert({ ...values, ${pk.name}: undefined })
               .then(() => {
                 createMessage.success(`保存成功`);
                 closeDrawer();
@@ -115,8 +117,8 @@
         registerDrawer,
         registerForm,
         getTitle,
-        handleSubmit,
+        handleSubmit
       };
-    },
+    }
   });
 </script>
