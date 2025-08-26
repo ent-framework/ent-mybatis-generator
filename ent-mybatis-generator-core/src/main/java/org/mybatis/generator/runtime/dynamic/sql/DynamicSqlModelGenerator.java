@@ -98,7 +98,7 @@ public class DynamicSqlModelGenerator extends AbstractJavaGenerator {
 
 		String rootClass = getRootClass();
 		RootClassInfo rootClassInfo = RootClassInfo.getInstance(rootClass, warnings);
-		//永远不会为null
+		// 永远不会为null
 		if (rootClassInfo == null) {
 			throw new RuntimeException("Can't get root class");
 		}

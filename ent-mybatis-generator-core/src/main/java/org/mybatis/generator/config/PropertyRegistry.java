@@ -34,6 +34,7 @@ public class PropertyRegistry {
 	 * recognized by table and java model generator.
 	 */
 	public static final String ANY_ROOT_CLASS = "rootClass"; //$NON-NLS-1$
+
 	public static final String ANY_MODEL_INTERFACE = "modelInterface"; //$NON-NLS-1$
 
 	public static final String ANY_IMMUTABLE = "immutable"; //$NON-NLS-1$

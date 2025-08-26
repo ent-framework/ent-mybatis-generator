@@ -8,8 +8,10 @@ buildscript {
     dependencies {
         classpath "com.github.ben-manes:gradle-versions-plugin:0.50.0"
         classpath "io.spring.javaformat:spring-javaformat-gradle-plugin:0.0.40"
+        classpath "org.jreleaser:org.jreleaser.gradle.plugin:1.19.0"
     }
 }
+
 plugins {
     id 'base'
     id 'java-library'

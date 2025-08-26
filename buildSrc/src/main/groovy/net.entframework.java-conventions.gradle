@@ -5,16 +5,66 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
+    id "org.jreleaser"
 }
 
-if (!project.hasProperty('deployToAliyun')) {
-    java {
-        withJavadocJar()
-        withSourcesJar()
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+//task sourcesJar(type: Jar) {
+//    from sourceSets.main.allSource
+//    // your custom logic here
+//    archiveClassifier.set('sources')
+//}
+//
+//task javadocJar(type: Jar) {
+//    from javadoc
+//    // your custom logic here
+//    archiveClassifier.set('javadoc')
+//}
+//
+//artifacts {
+//    archives sourcesJar
+//    archives javadocJar
+//}
+
+tasks.withType(Jar) { task ->
+    task.doLast {
+        ant.checksum algorithm: 'md5', file: it.archivePath
+        ant.checksum algorithm: 'sha1', file: it.archivePath
     }
 }
-
 //java.sourceCompatibility = JavaVersion.VERSION_1_8
+
+jreleaser {
+    project {
+        copyright = 'entframework.net'
+        description = 'Mybatis Generator Tool using entframework'
+    }
+    signing {
+        active = 'ALWAYS'
+        armored = true
+        mode = 'FILE'
+        publicKey = "${rootProject.projectDir}/public.key"
+        secretKey = "${rootProject.projectDir}/private.key"
+    }
+    deploy {
+        maven {
+            mavenCentral {
+                sonatype {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    username = ossrhUsername
+                    password = ossrhPassword
+                    stagingRepository('build/pre-deploy')
+                }
+            }
+        }
+    }
+}
 
 publishing {
     publications {
@@ -55,34 +105,47 @@ publishing {
             }
         }
     }
+//    repositories {
+//        if (project.hasProperty('deployToAliyun')) {
+//            def host = project.version.endsWith( '-SNAPSHOT' )?  mavenSnapshotRepository : mavenReleaseRepository
+//            maven {
+//                allowInsecureProtocol = !host.startsWith('https')
+//                //指定要上传的maven私服仓库
+//                url = host
+//                //认证用户和密码
+//                credentials {
+//                    username = mavenDeployUser
+//                    password = mavenDeployPassword
+//                }
+//            }
+//        } else {
+//            def host = project.version.endsWith( '-SNAPSHOT' )? 'https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots/' : 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
+//            maven {
+//                allowInsecureProtocol = !host.startsWith('https')
+//                //指定要上传的maven私服仓库
+//                url = host
+//                //认证用户和密码
+//                credentials {
+//                    username = ossrhUsername
+//                    password = ossrhPassword
+//                }
+//            }
+//        }
+//    }
     repositories {
-        if (project.hasProperty('deployToAliyun')) {
-            def host = project.version.endsWith( '-SNAPSHOT' )?  mavenSnapshotRepository : mavenReleaseRepository
-            maven {
-                allowInsecureProtocol = !host.startsWith('https')
-                //指定要上传的maven私服仓库
-                url = host
-                //认证用户和密码
-                credentials {
-                    username = mavenDeployUser
-                    password = mavenDeployPassword
-                }
-            }
-        } else {
-            def host = project.version.endsWith( '-SNAPSHOT' )? 'https://s01.oss.sonatype.org/content/repositories/snapshots/' : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-            maven {
-                allowInsecureProtocol = !host.startsWith('https')
-                //指定要上传的maven私服仓库
-                url = host
-                //认证用户和密码
-                credentials {
-                    username = ossrhUsername
-                    password = ossrhPassword
-                }
-            }
+        maven {
+            name = "LocalMavenWithChecksums"
+            url = uri(layout.buildDirectory.dir("staging-deploy"))
+        }
+        maven {
+            name = "PreDeploy"
+            url = uri(layout.buildDirectory.dir("pre-deploy"))
         }
     }
 }
 signing {
+    setRequired {
+        gradle.taskGraph.allTasks.any { it.name.contains("LocalMavenWithChecksums") }
+    }
     sign publishing.publications.mavenJava
 }

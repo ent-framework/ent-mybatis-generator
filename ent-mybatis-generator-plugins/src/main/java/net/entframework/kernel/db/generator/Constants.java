@@ -44,7 +44,9 @@ public final class Constants {
 	public final static String FIELD_LOGIC_DELETE_ATTR = "FIELD_LOGIC_DELETE_ATTR";
 
 	public final static String FIELD_TENANT_ATTR = "FIELD_TENANT_ATTR";
+
 	public final static String FIELD_ENUM_SWITCH_ATTR = "FIELD_ENUM_SWITCH_ATTR";
+
 	public final static String FIELD_ENUM_LABEL_ATTR = "FIELD_ENUM_LABEL_ATTR";
 
 	public final static String FIELD_VERSION_ATTR = "FIELD_VERSION_ATTR";

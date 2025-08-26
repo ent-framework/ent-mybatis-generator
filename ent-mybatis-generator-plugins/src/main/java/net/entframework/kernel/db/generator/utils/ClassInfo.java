@@ -57,6 +57,7 @@ public class ClassInfo {
 	private boolean genericMode = false;
 
 	private boolean isEnum = false;
+
 	private Class<?> clz;
 
 	private List<Field> enuConstants = new ArrayList<>();
@@ -154,8 +155,8 @@ public class ClassInfo {
 							Method nameField = enumValue.getClass().getMethod("name");
 							Method labelField = enumValue.getClass().getMethod("getLabel");
 							Method valueField = enumValue.getClass().getMethod("getValue");
-							enumInfo.addItem((String) nameField.invoke(enumValue), (String) labelField.invoke(enumValue),
-									valueField.invoke(enumValue));
+							enumInfo.addItem((String) nameField.invoke(enumValue),
+									(String) labelField.invoke(enumValue), valueField.invoke(enumValue));
 						}
 					}
 					catch (Exception ex) {
@@ -163,7 +164,8 @@ public class ClassInfo {
 					}
 
 				}
-			} else {
+			}
+			else {
 				for (Field field : this.enuConstants) {
 					try {
 						Object enumValue = field.get(null);

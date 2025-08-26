@@ -45,10 +45,10 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 
 		ModelObject.Builder builder = ModelObject.builder();
 		builder.name(modelObjectName)
-				.camelName(JavaBeansUtil.convertCamelCase(modelObjectName, "-"))
-				.description(StringUtils.isEmpty(topLevelClass.getDescription())
-						? introspectedTable.getFullyQualifiedTable().getDomainObjectName() : topLevelClass.getDescription())
-				.type(modelObjectName);
+			.camelName(JavaBeansUtil.convertCamelCase(modelObjectName, "-"))
+			.description(StringUtils.isEmpty(topLevelClass.getDescription())
+					? introspectedTable.getFullyQualifiedTable().getDomainObjectName() : topLevelClass.getDescription())
+			.type(modelObjectName);
 		ModelObject modelObject = builder.build();
 
 		tsApiClass.setWriteMode(this.writeMode == null ? WriteMode.SKIP_ON_EXIST : this.writeMode);
@@ -65,8 +65,7 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		List<Field> fields = topLevelClass.getFields();
 		List<ModelField> modelFields = convert(fields, introspectedTable, pkColumn);
 
-
-		modelFields.stream().filter(ModelField::isVersionField).findFirst().ifPresent(mf->{
+		modelFields.stream().filter(ModelField::isVersionField).findFirst().ifPresent(mf -> {
 			modelObject.setVersionField(mf.getName());
 		});
 
@@ -84,7 +83,6 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 			.toList();
 		// 生成描述Detail Schema配置
 		data.put("detailFields", WebUtils.getDetailFields(copy(modelFields)));
-
 
 		Set<String> listIgnoreFields = getListIgnoreFields();
 		relationFields.forEach(mf -> {
@@ -116,7 +114,7 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		}
 
 		data.put("listFields", listFields);
-		data.put("searchFields",searchFields);
+		data.put("searchFields", searchFields);
 		//
 		Set<String> inputIgnoreFields = getInputIgnoreFields();
 		relationFields.forEach(mf -> {
@@ -134,7 +132,9 @@ public class TemplateModelViewPlugin extends AbstractTemplatePlugin {
 		if (!modelObject.isTenant()) {
 			modelObject.setTenant(inputFields.stream().anyMatch(ModelField::isTenantField));
 		}
-		Set<FullyQualifiedJavaType> enumFieldImport = enumFields.stream().map(ModelField::getJavaType).collect(Collectors.toSet());
+		Set<FullyQualifiedJavaType> enumFieldImport = enumFields.stream()
+			.map(ModelField::getJavaType)
+			.collect(Collectors.toSet());
 		data.put("enumFields", enumFields);
 		data.put("enumFieldImport", enumFieldImport);
 		data.put("relationFields", relationFields);

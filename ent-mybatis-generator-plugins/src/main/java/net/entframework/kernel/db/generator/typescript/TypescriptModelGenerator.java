@@ -89,19 +89,21 @@ public class TypescriptModelGenerator extends AbstractJavaGenerator {
 			ClassInfo classInfo = ClassInfo
 				.getInstance(introspectedColumn.getFullyQualifiedJavaType().getFullyQualifiedName());
 			if (classInfo != null && classInfo.isEnum()) {
-				if ("net.entframework.kernel.core.enums.StatusEnum".equals(classInfo.getJavaType().getFullyQualifiedName())
-				) {
+				if ("net.entframework.kernel.core.enums.StatusEnum"
+					.equals(classInfo.getJavaType().getFullyQualifiedName())) {
 					if (enumSwitches.contains(field.getName())) {
 						field.setAttribute(Constants.FIELD_ENUM_SWITCH_ATTR, "Status");
-					} else {
+					}
+					else {
 						field.setAttribute(Constants.FIELD_ENUM_LABEL_ATTR, "Status");
 					}
 				}
-				if ("net.entframework.kernel.core.enums.YesOrNotEnum".equals(classInfo.getJavaType().getFullyQualifiedName())
-				) {
+				if ("net.entframework.kernel.core.enums.YesOrNotEnum"
+					.equals(classInfo.getJavaType().getFullyQualifiedName())) {
 					if (enumSwitches.contains(field.getName())) {
 						field.setAttribute(Constants.FIELD_ENUM_SWITCH_ATTR, "YesOrNot");
-					} else {
+					}
+					else {
 						field.setAttribute(Constants.FIELD_ENUM_LABEL_ATTR, "YesOrNot");
 					}
 				}

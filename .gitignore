@@ -7,3 +7,7 @@ build
 !/**/src/**/bin
 !/**/src/**/build
 .idea
+
+public.key
+private.key
+pubkey.asc

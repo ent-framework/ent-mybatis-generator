@@ -87,12 +87,13 @@ public class TypescriptModelPlugin extends AbstractWebPlugin {
 				if (target.getType() == JoinTarget.JoinType.MANY_TO_ONE) {
 					if (StringUtils.isEmpty(leftTableColumn.getRemarks())) {
 						field.setDescription(GeneratorUtils.getFileDescription(rightTable));
-					} else {
+					}
+					else {
 						field.setDescription(leftTableColumn.getRemarks());
 					}
 
 					builder.sourceField(leftField)
-							.sourceColumn(leftTableColumn)
+						.sourceColumn(leftTableColumn)
 						.joinType(JoinTarget.JoinType.MANY_TO_ONE)
 						.bindField(field)
 						.targetTable(rightTable)

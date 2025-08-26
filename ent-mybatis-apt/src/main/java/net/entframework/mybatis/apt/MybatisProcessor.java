@@ -88,7 +88,7 @@ public class MybatisProcessor extends AbstractProcessor {
 	private void writeSupportFile(Filer filer, TypeElement type, List<AnnotationMeta> fields) {
 		// 被扫描的类的包路径
 		String typeName = type.getSimpleName().toString();
-		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "generate support file for:" +  typeName);
+		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "generate support file for:" + typeName);
 		PackageElement packageElement = elementUtils.getPackageOf(type);
 		String packageName = packageElement.getQualifiedName().toString();
 
@@ -166,7 +166,8 @@ public class MybatisProcessor extends AbstractProcessor {
 			writer.flush();
 		}
 		catch (IOException e) {
-			processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "generate support file error:" +  e.getMessage());
+			processingEnv.getMessager()
+				.printMessage(Diagnostic.Kind.ERROR, "generate support file error:" + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -180,7 +181,7 @@ public class MybatisProcessor extends AbstractProcessor {
 	private void writeCriteriaFile(Filer filer, TypeElement type, List<AnnotationMeta> fields) {
 		// 被扫描的类的包路径
 		String typeName = type.getSimpleName().toString();
-		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "generate criteria file for:" +  typeName);
+		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "generate criteria file for:" + typeName);
 		PackageElement packageElement = elementUtils.getPackageOf(type);
 		String packageName = packageElement.getQualifiedName().toString();
 		String criteriaPackageName = getParentPackageName(packageName) + ".criteria";
@@ -192,17 +193,21 @@ public class MybatisProcessor extends AbstractProcessor {
 
 		String uncapitalizeName = Utils.uncapitalize(typeName);
 
-		//增加BaseQuery字段
+		// 增加BaseQuery字段
 		ClassName baseQueryType = ClassName.get("net.entframework.kernel.core.vo", "BaseQuery");
-		FieldSpec.Builder baseQuerBuilder = FieldSpec.builder(baseQueryType, "baseQuery").addModifiers(Modifier.PRIVATE);
-		baseQuerBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("com.fasterxml.jackson.annotation", "JsonProperty"))
-				.addMember("value", "\"_query\"").build());
-		baseQuerBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("com.fasterxml.jackson.annotation", "JsonInclude"))
-				.addMember("value", "$T.$L", ClassName.get("com.fasterxml.jackson.annotation", "JsonInclude", "Include"),
-						ClassName.get("", "NON_NULL")).build());
+		FieldSpec.Builder baseQuerBuilder = FieldSpec.builder(baseQueryType, "baseQuery")
+			.addModifiers(Modifier.PRIVATE);
+		baseQuerBuilder
+			.addAnnotation(AnnotationSpec.builder(ClassName.get("com.fasterxml.jackson.annotation", "JsonProperty"))
+				.addMember("value", "\"_query\"")
+				.build());
+		baseQuerBuilder.addAnnotation(AnnotationSpec
+			.builder(ClassName.get("com.fasterxml.jackson.annotation", "JsonInclude"))
+			.addMember("value", "$T.$L", ClassName.get("com.fasterxml.jackson.annotation", "JsonInclude", "Include"),
+					ClassName.get("", "NON_NULL"))
+			.build());
 		FieldSpec fieldSpec = baseQuerBuilder.build();
 		clazzBuilder.addField(fieldSpec);
-
 
 		List<String> fieldsList = new ArrayList<>();
 
@@ -211,7 +216,6 @@ public class MybatisProcessor extends AbstractProcessor {
 			fieldsList.add(fieldName);
 			ClassName columnType = ClassName.get("", Utils.capitalize(fieldName) + "Criterion");
 			FieldSpec.Builder fieldBuilder = FieldSpec.builder(columnType, fieldName).addModifiers(Modifier.PRIVATE);
-			// fieldBuilder.initializer("$N.$N", uncapitalizeName, fieldName);
 			clazzBuilder.addField(fieldBuilder.build());
 		});
 
@@ -223,7 +227,8 @@ public class MybatisProcessor extends AbstractProcessor {
 		MethodSpec.Builder buildBuilder = MethodSpec.methodBuilder("buildQuery")
 			.addModifiers(Modifier.PUBLIC)
 			.returns(parameterizedQueryExpressionDSL)
-			.addStatement("return $T.buildQuery($N)", criteriaBuilder, Utils.join(fieldsList, ","));
+			.addStatement("return $T.buildQuery($N)", criteriaBuilder,
+					packageName + "." + typeName + ".class," + Utils.join(fieldsList, ","));
 		clazzBuilder.addMethod(buildBuilder.build());
 
 		fields.forEach(element -> {
@@ -304,7 +309,8 @@ public class MybatisProcessor extends AbstractProcessor {
 			writer.flush();
 		}
 		catch (IOException e) {
-			processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "generate criteria file error:" +  e.getMessage());
+			processingEnv.getMessager()
+				.printMessage(Diagnostic.Kind.ERROR, "generate criteria file error:" + e.getMessage());
 			e.printStackTrace();
 		}
 	}

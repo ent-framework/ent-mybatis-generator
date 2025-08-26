@@ -71,4 +71,5 @@ public class RestMethod extends Method {
 	public void setDataAction(String dataAction) {
 		this.dataAction = dataAction;
 	}
+
 }

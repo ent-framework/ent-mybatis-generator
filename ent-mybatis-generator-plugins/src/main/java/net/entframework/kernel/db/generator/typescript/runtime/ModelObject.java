@@ -29,4 +29,5 @@ public class ModelObject {
 	 * 是否有乐观锁version字段
 	 */
 	private String versionField;
+
 }

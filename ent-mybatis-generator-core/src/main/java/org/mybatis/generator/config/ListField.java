@@ -14,4 +14,5 @@ public class ListField extends LimitDisplayField {
 	public void setEnumSwitches(List<String> enumSwitches) {
 		this.enumSwitches = enumSwitches;
 	}
+
 }

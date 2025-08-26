@@ -209,17 +209,21 @@ public class ControllerPlugin extends AbstractServerPlugin {
 		return true;
 	}
 
-	private void addPostMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription, FullyQualifiedJavaType baseRecordType) {
+	private void addPostMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription,
+			FullyQualifiedJavaType baseRecordType) {
 		if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
 			if (this.generatePermCode) {
 				method.addAnnotation(String.format(
-						"@PostResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)", modelDescription,
-						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath()), baseRecordType.getShortName(), method.getDataAction()));
+						"@PostResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)",
+						modelDescription, method.getOperation(), method.getRestPath(),
+						generatePermCode(method.getRestPath()), baseRecordType.getShortName(), method.getDataAction()));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.PostResource");
 			}
 			else {
-				method.addAnnotation(String.format("@PostResource(displayName = \"%s-%s\", path = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)",
-						modelDescription, method.getOperation(), method.getRestPath(), baseRecordType.getShortName(), method.getDataAction()));
+				method.addAnnotation(String.format(
+						"@PostResource(displayName = \"%s-%s\", path = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)",
+						modelDescription, method.getOperation(), method.getRestPath(), baseRecordType.getShortName(),
+						method.getDataAction()));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.PostResource");
 			}
 			controllerJavaClass.addImportedType("net.entframework.kernel.core.enums.DataAction");
@@ -239,17 +243,21 @@ public class ControllerPlugin extends AbstractServerPlugin {
 		return StringUtils.replace(path, "/", ":");
 	}
 
-	private void addGetMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription, FullyQualifiedJavaType baseRecordType) {
+	private void addGetMapping(TopLevelClass controllerJavaClass, RestMethod method, String modelDescription,
+			FullyQualifiedJavaType baseRecordType) {
 		if (this.codingStyle.equals(Constants.GENERATED_CODE_STYLE)) {
 			if (this.generatePermCode) {
 				method.addAnnotation(String.format(
-						"@GetResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)", modelDescription,
-						method.getOperation(), method.getRestPath(), generatePermCode(method.getRestPath()), baseRecordType.getShortName(), method.getDataAction()));
+						"@GetResource(displayName = \"%s%s\", path = \"%s\", permCode = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)",
+						modelDescription, method.getOperation(), method.getRestPath(),
+						generatePermCode(method.getRestPath()), baseRecordType.getShortName(), method.getDataAction()));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.GetResource");
 			}
 			else {
-				method.addAnnotation(String.format("@GetResource(displayName = \"%s%s\", path = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)",
-						modelDescription, method.getOperation(), method.getRestPath(), baseRecordType.getShortName(), method.getDataAction()));
+				method.addAnnotation(String.format(
+						"@GetResource(displayName = \"%s%s\", path = \"%s\", bindingEntity = %s.class, dataAction = DataAction.%s)",
+						modelDescription, method.getOperation(), method.getRestPath(), baseRecordType.getShortName(),
+						method.getDataAction()));
 				controllerJavaClass.addImportedType("net.entframework.kernel.core.annotation.web.GetResource");
 			}
 			controllerJavaClass.addImportedType("net.entframework.kernel.core.enums.DataAction");
